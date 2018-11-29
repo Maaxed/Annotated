@@ -13,8 +13,8 @@ allprojects {
 	
 	
 	version = "1.0"
-	group = "fr.max2.autodata"
-	archivesBaseName = "AutoData"
+	group = "fr.max2.packeta"
+	archivesBaseName = "Packeta"
 	
 	sourceCompatibility = targetCompatibility = "1.8"
 	compileJava {

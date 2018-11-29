@@ -1,8 +1,8 @@
 [
 {
-  "modid": "autodatatest",
-  "name": "Test AutoData Mod",
-  "description": "A mod to test AutoData Handler",
+  "modid": "packetatest",
+  "name": "Test Packeta Mod",
+  "description": "A mod to test the Packeta tool",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",

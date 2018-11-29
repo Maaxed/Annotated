@@ -7,7 +7,6 @@ bin
 .classpath
 .project
 .factorypath
-.apt_generated
 
 # idea
 out

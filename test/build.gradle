@@ -3,8 +3,19 @@ plugins {
 	id "net.ltgt.apt-eclipse" version "0.19"
 }
 
+group = "fr.max2.packeta.test"
+archivesBaseName = "PacketaTest"
+
 dependencies {
 	compile project(':api')
 	compile project(':processor')
 	annotationProcessor project(':processor')
+}
+
+eclipse {
+	jdt {
+		apt {
+			genSrcDir = file('bin/apt_generated')
+		}
+	}
 }
