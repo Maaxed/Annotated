@@ -1,0 +1,10 @@
+plugins {
+	id "net.ltgt.apt" version "0.19"
+	id "net.ltgt.apt-eclipse" version "0.19"
+}
+
+dependencies {
+	compile project(':api')
+	compile project(':processor')
+	annotationProcessor project(':processor')
+}

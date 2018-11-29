@@ -1,0 +1,28 @@
+package ${package};
+
+import io.netty.buffer.ByteBuf;
+${imports}
+public class ${baseClass}Message extends ${baseClass} implements ${interfaces}
+{
+	
+	public ${baseClass}Message()
+	{ }
+	
+	public ${baseClass}Message(${allFields})
+	{
+		${fieldsInit}
+	}
+
+	@Override
+	public void toBytes(ByteBuf buf)
+	{
+		${toBytes}
+	}
+	
+	@Override
+	public void fromBytes(ByteBuf buf)
+	{
+		${fromBytes}
+	}
+	
+}
