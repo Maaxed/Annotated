@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 public class ExceptionUtils
 {
-	public static void tryRun(ExceptionRunnable<? extends IOException> action)
+	public static void tryAndWrapIOExceptions(ExceptionRunnable<? extends IOException> action)
 	{
 		try
 		{
@@ -18,12 +18,12 @@ public class ExceptionUtils
 		}
 	}
 	
-	public static Runnable toTryRun(ExceptionRunnable<? extends IOException> action)
+	public static Runnable wrapIOExceptions(ExceptionRunnable<? extends IOException> action)
 	{
-		return () -> tryRun(action);
+		return () -> tryAndWrapIOExceptions(action);
 	}
 	
-	public static <T> Consumer<T> toTryRun(ExceptionConsumer<T, ? extends IOException> action)
+	public static <T> Consumer<T> wrapIOExceptions(ExceptionConsumer<T, ? extends IOException> action)
 	{
 		return t ->
 		{

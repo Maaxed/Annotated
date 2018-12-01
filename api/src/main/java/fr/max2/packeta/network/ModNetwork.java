@@ -10,36 +10,32 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public class ModNetwork
 {
+	public final SimpleNetworkWrapper modChannel;
 	
-	public static final SimpleNetworkWrapper MOD_CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel("auto_data_handler"/*MyMod.MOD_ID*/);
-	
-	private static final ServerMessageHandler SERVER_MESSAGE_HANDLER = new ServerMessageHandler();
-	private static final ClientMessageHandler CLIENT_MESSAGE_HANDLER = new ClientMessageHandler();
-	
-	public static void registerPackets()
+	public ModNetwork(String modID)
 	{
-		//TODO auto register
-		/*next();
-		registerServer(MessageWritePage.class);
-		next();
-		registerServer(MessageSendMessenger.class);*/
+		modChannel = NetworkRegistry.INSTANCE.newSimpleChannel(modID);
 	}
 	
-	private static int lastIndex = 0;
+	private int lastIndex = 0;
 	
-	public static void next()
+	public <T extends IServerMessage & IClientMessage> void registerBothSides(Class<T> messageClass)
 	{
 		lastIndex++;
+		modChannel.registerMessage(ClientMessageHandler.INSTANCE, messageClass, lastIndex, Side.CLIENT);
+		modChannel.registerMessage(ServerMessageHandler.INSTANCE, messageClass, lastIndex, Side.SERVER);
 	}
 	
-	public static void registerServer(Class<? extends IServerMessage> messageClass)
+	public void registerServer(Class<? extends IServerMessage> messageClass)
 	{
-		MOD_CHANNEL.registerMessage(SERVER_MESSAGE_HANDLER, messageClass, lastIndex, Side.SERVER);
+		lastIndex++;
+		modChannel.registerMessage(ServerMessageHandler.INSTANCE, messageClass, lastIndex, Side.SERVER);
 	}
 	
-	public static void registerClient(Class<? extends IClientMessage> messageClass)
+	public void registerClient(Class<? extends IClientMessage> messageClass)
 	{
-		MOD_CHANNEL.registerMessage(CLIENT_MESSAGE_HANDLER, messageClass, lastIndex, Side.CLIENT);
+		lastIndex++;
+		modChannel.registerMessage(ClientMessageHandler.INSTANCE, messageClass, lastIndex, Side.CLIENT);
 	}
 	
 }

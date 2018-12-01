@@ -32,6 +32,21 @@ public enum EnumSides
 			throw new IllegalStateException("Unknown side '" + this.toString() + "'");
 		}
 	}
+	
+	public String getSimpleName()
+	{
+		switch (this)
+		{
+		case CLIENT:
+			return "Client";
+		case SERVER:
+			return "Server";
+		case BOTH:
+			return "BothSides";
+		default:
+			throw new IllegalStateException("Unknown side '" + this.toString() + "'");
+		}
+	}
 
 	public void addImports(Set<String> imports)
 	{

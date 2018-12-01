@@ -1,0 +1,17 @@
+package ${package};
+
+import fr.max2.packeta.network.ModNetwork;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+${imports}
+public class ${className}
+{
+	public static ModNetwork NETWORK = new ModNetwork("${networkName}");
+	
+	public static SimpleNetworkWrapper initNetwork()
+	{
+		${registerPackets}
+		
+		return NETWORK.modChannel;
+	}
+	
+}
