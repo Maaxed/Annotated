@@ -89,12 +89,7 @@ public class PacketProcessor extends AbstractProcessor
 				List<? extends Element> members = elemUtils.getAllMembers(type);
 				try
 				{
-					JavaFileObject file = this.processingEnv.getFiler().createSourceFile(className + "Message");
-					Writer writer = file.openWriter();
-					
-					writePacket(writer, className.toString(), sides, members);
-					
-					writer.close();
+					this.writePacket(className.toString(), sides, members);
 					
 					packetsToRegister.get(sides).add(type.getQualifiedName() + "Message");
 				}
@@ -110,8 +105,6 @@ public class PacketProcessor extends AbstractProcessor
 			Element networkElement = networkAnnotations.iterator().next();
 			GenerateNetwork networkAnnotation = networkElement.getAnnotation(GenerateNetwork.class);
 			
-			//TODO default name/class
-			
 			String networkClass = networkAnnotation.className();
 			String networkName = networkAnnotation.value();
 			
@@ -121,11 +114,11 @@ public class PacketProcessor extends AbstractProcessor
 				
 				TypeMirror modAnnotationType = elemUtils.getTypeElement(ClassRef.FORGE_MOD_ANNOTATION).asType();
 				
-				networkName = networkElement.getAnnotationMirrors().stream()										// all annotations
+				networkName = networkElement.getAnnotationMirrors().stream()						// all annotations
 					.filter(a -> typeUtils.isSameType(a.getAnnotationType(), modAnnotationType))	// mod annotation
 					.flatMap(a -> a.getElementValues().entrySet().stream())							// mod annotation values
 					.filter(e -> e.getKey().getSimpleName().contentEquals("modid"))					// modid value
-					.map(entry -> entry.getValue().getValue().toString())										// modid string
+					.map(entry -> entry.getValue().getValue().toString())							// modid string
 					.findAny().orElse(networkElement.getSimpleName().toString());
 				
 			}
@@ -150,16 +143,11 @@ public class PacketProcessor extends AbstractProcessor
 			
 			try
 			{
-				JavaFileObject file = this.processingEnv.getFiler().createSourceFile(networkClass);
-				Writer writer = file.openWriter();
-				
-				writeNetwork(writer, networkClass, networkName, packetsToRegister);
-				
-				writer.close();
+				this.writeNetwork(networkClass, networkName, packetsToRegister);
 			}
-			catch (IOException ee)
+			catch (IOException e)
 			{
-				throw new UncheckedIOException(ee);
+				throw new UncheckedIOException(e);
 			}
 		}
 		return true;
@@ -190,7 +178,7 @@ public class PacketProcessor extends AbstractProcessor
 		}
 	}
 	
-	private void writePacket(Writer wr, String className, EnumSides sides, List<? extends Element> members) throws IOException
+	private void writePacket(String className, EnumSides sides, List<? extends Element> members) throws IOException
 	{
 		String ls = System.lineSeparator();
 		
@@ -217,10 +205,10 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("fromBytes", dataHandlers.stream().flatMap(h -> Stream.of(h.loadDataInstructions())).collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports", imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 
-		writeFileFromTemplaTe(wr, "templates/TemplatePacket.jvtp", replacements);
+		this.writeFileFromTemplaTe(className + "Message", "templates/TemplatePacket.jvtp", replacements);
 	}
 	
-	private static void writeNetwork(Writer wr, String networkClass, String networkName, Map<EnumSides, Collection<String>> packetsToRegister) throws IOException
+	private void writeNetwork(String networkClass, String networkName, Map<EnumSides, Collection<String>> packetsToRegister) throws IOException
 	{
 		String ls = System.lineSeparator();
 		
@@ -233,7 +221,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("registerPackets", packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(packetName -> registerPacketInstruction(entry.getKey(), simpleName(packetName)))).collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports"		  , packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream()).map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		
-		writeFileFromTemplaTe(wr, "templates/TemplateNetwork.jvtp", replacements);
+		this.writeFileFromTemplaTe(networkClass, "templates/TemplateNetwork.jvtp", replacements);
 	}
 	
 	private static String registerPacketInstruction(EnumSides sides, String packetClass)
@@ -241,12 +229,25 @@ public class PacketProcessor extends AbstractProcessor
 		return "NETWORK.register" + sides.getSimpleName() + "(" + packetClass + ".class);";
 	}
 	
-	private static void writeFileFromTemplaTe(Writer wr, String templateFile, Map<String, String> replacements) throws IOException
+	private void writeFileFromTemplaTe(String className, String templateFile, Map<String, String> replacements) throws IOException
 	{
-		try (InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile))
+		try
 		{
-			new BufferedReader(new InputStreamReader(fileStream)).lines().map(line -> mapKeys(line, replacements) + System.lineSeparator()).forEach(ExceptionUtils.wrapIOExceptions(wr::write));
+			JavaFileObject file = this.processingEnv.getFiler().createSourceFile(className);
+			Writer writer = file.openWriter();
+			
+			try (InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile))
+			{
+				new BufferedReader(new InputStreamReader(fileStream)).lines().map(line -> mapKeys(line, replacements) + System.lineSeparator()).forEach(ExceptionUtils.wrapIOExceptions(writer::write));
+			}
+			
+			writer.close();
 		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
+		}
+		
 	}
 	
 	private static String mapKeys(String content, Map<String, String> replacements)

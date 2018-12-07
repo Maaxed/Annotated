@@ -12,13 +12,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+
+import fr.max2.packeta.utils.EmptyAnnotationConstruct;
 
 public enum DataType
 {
@@ -26,57 +30,57 @@ public enum DataType
 	BYTE(Byte.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Byte", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Byte", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Byte", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Byte", accesExpr) };
 		}
 	},
 	SHORT(Short.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Short", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Short", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Short", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Short", accesExpr) };
 		}
 	},
 	INT(Integer.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Int", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Int", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Int", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Int", accesExpr) };
 		}
 	},
 	LONG(Long.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Long", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Long", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Long", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Long", accesExpr) };
 		}
 	},
 	
@@ -84,29 +88,29 @@ public enum DataType
 	FLOAT(Float.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Float", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Float", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Float", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Float", accesExpr) };
 		}
 	},
 	DOUBLE(Double.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Double", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Double", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Double", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Double", accesExpr) };
 		}
 	},
 	
@@ -114,29 +118,29 @@ public enum DataType
 	BOOLEAN(Boolean.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Boolean", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Boolean", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Boolean", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Boolean", accesExpr) };
 		}
 	},
 	CHAR(Character.TYPE) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBuffer("Char", "this." + field.getSimpleName()) };
+			return new String[] { writeBuffer("Char", accesExpr) };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBuffer("Char", "this." + field.getSimpleName()) };
+			return new String[] { readBuffer("Char", accesExpr) };
 		}
 	},
 	
@@ -144,19 +148,19 @@ public enum DataType
 	STRING(String.class) {
 
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBufferUtils("UTF8String", "this." + field.getSimpleName()) };
+			return new String[] { writeBufferUtils("UTF8String", accesExpr) };
 		}
 
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBufferUtils("UTF8String", "this." + field.getSimpleName()) };
+			return new String[] { readBufferUtils("UTF8String", accesExpr) };
 		}
 		
 		@Override
-		protected void addImportsToSet(Element field, String[] parameters, Set<String> imports)
+		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
 		{
 			imports.add("net.minecraftforge.fml.common.network.ByteBufUtils");
 		}
@@ -164,42 +168,42 @@ public enum DataType
 	ENUM(Enum.class, false) {
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { "buf.writeInt(this." + field.getSimpleName() + ".ordinal());" };
+			return new String[] { "buf.writeInt(" + accesExpr + ".ordinal());" };
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { "this." + field.getSimpleName() + " = " + ((TypeElement)((DeclaredType)field.asType()).asElement()).getSimpleName() + ".values()[buf.readInt()];" };
+			return new String[] { accesExpr + " = " + ((TypeElement)((DeclaredType)type).asElement()).getSimpleName() + ".values()[buf.readInt()];" };
 		}
 		
 		@Override
-		protected void addImportsToSet(Element field, String[] parameters, Set<String> imports)
+		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
 		{
-			imports.add(field.asType().toString());
+			imports.add(type.toString());
 		}
 	},
 	UUID(UUID.class, false)
 	{
 		
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
 			return new String[] {
-				"buf.writeLong(this." + field.getSimpleName() + ".getMostSignificantBits())",
-				"buf.writeLong(this." + field.getSimpleName() + ".getLeastSignificantBits())"};
+				"buf.writeLong(" + accesExpr + ".getMostSignificantBits())",
+				"buf.writeLong(" + accesExpr + ".getLeastSignificantBits())"};
 		}
 		
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { "this." + field.getSimpleName() + " = new UUID(buf.readLong(), buf.readLong());" };
+			return new String[] { accesExpr + " = new UUID(buf.readLong(), buf.readLong());" };
 		}
 		
 		@Override
-		protected void addImportsToSet(Element field, String[] parameters, Set<String> imports)
+		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
 		{
 			imports.add("java.util.UUID");
 		}
@@ -207,19 +211,19 @@ public enum DataType
 	NBT_COMPOUND("net.minecraft.nbt.NBTTagCompound") {
 
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBufferUtils("Tag", "this." + field.getSimpleName()) };
+			return new String[] { writeBufferUtils("Tag", accesExpr) };
 		}
 
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBufferUtils("Tag", "this." + field.getSimpleName()) };
+			return new String[] { readBufferUtils("Tag", accesExpr) };
 		}
 		
 		@Override
-		public void addImportsToSet(Element field, String[] parameters, Set<String> imports)
+		public void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
 		{
 			imports.add("net.minecraftforge.fml.common.network.ByteBufUtils");
 		}
@@ -227,37 +231,71 @@ public enum DataType
 	STACK("net.minecraft.item.ItemStack") {
 
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { writeBufferUtils("ItemStack", "this." + field.getSimpleName()) };
+			return new String[] { writeBufferUtils("ItemStack", accesExpr) };
 		}
 
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
-			return new String[] { readBufferUtils("ItemStack", "this." + field.getSimpleName()) };
+			return new String[] { readBufferUtils("ItemStack", accesExpr) };
 		}
 		
 		@Override
-		public void addImportsToSet(Element field, String[] parameters, Set<String> imports)
+		public void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
 		{
 			imports.add("net.minecraftforge.fml.common.network.ByteBufUtils");
 		}
 	},
+	ARRAY("array") {
+
+		@Override
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		{
+			ArrayType arrayType = (ArrayType)type;
+			TypeMirror contentType = arrayType.getComponentType();
+			String typeName = contentType instanceof DeclaredType ? ((DeclaredType)contentType).asElement().getSimpleName().toString() : contentType.toString();
+			
+			String s1 = writeBuffer("Int", accesExpr + ".length");
+			String s2 = "for (" + typeName + " element : " + accesExpr + ")";
+			String s3 = "\t";
+			String[] s4 = finder.getDataType("element", contentType, EmptyAnnotationConstruct.INSTANCE).saveDataInstructions();
+			//String s3 = 
+			
+			return null;
+		}
+
+		@Override
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+		@Override
+		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
+		{
+			ArrayType arrayType = (ArrayType)type;
+			TypeMirror contentType = arrayType.getComponentType();
+			imports.add(simpleName(contentType));
+			finder.getDataType("element", contentType, EmptyAnnotationConstruct.INSTANCE).addImportsToSet(imports);
+		}
+	},
 	//TODO INBTSerializable, IByteSerialisable
-	//TODO collections, arrays
+	//TODO collections
 	//TODO Entity + EntityPlayer
 	CUSTOM() {
 
 		@Override
-		protected String[] saveDataInstructions(Element field, String[] parameters)
+		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
 			// TODO custom data handler
 			return null;
 		}
 
 		@Override
-		protected String[] loadDataInstructions(Element field, String[] parameters)
+		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
 		{
 			return null;
 		}
@@ -294,10 +332,11 @@ public enum DataType
 		this.useBackwardCast = false;
 	}
 	
-	protected abstract String[] saveDataInstructions(Element field, String[] parameters);
-	protected abstract String[] loadDataInstructions(Element field, String[] parameters);
+	//TODO merge methods and use Consumers
+	protected abstract String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters);
+	protected abstract String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters);
 	
-	protected void addImportsToSet(Element field, String[] parameters, Set<String> imports)
+	protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
 	{ }
 	
 	private static String writeBuffer(String type, String value)
@@ -322,35 +361,41 @@ public enum DataType
 	
 	public static class DataHandler
 	{
-		private final Element field;
+		private final String accesExpr;
+		private final TypeMirror type;
+		private final AnnotatedConstruct annotations;
 		private final DataType handler;
+		private final Finder finder;
 		private final String[] parameters;
 		
-		public DataHandler(Element field, DataType handler, String... parameters)
+		public DataHandler(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, DataType handler, Finder finder, String... parameters)
 		{
-			this.field = field;
+			this.accesExpr = accesExpr;
+			this.type = type;
+			this.annotations = annotations;
 			this.handler = handler;
+			this.finder = finder;
 			this.parameters = parameters;
 		}
 		
-		public DataHandler(Element field, CustomData data)
+		public DataHandler(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, Finder finder)
 		{
-			this(field, data.type(), data.value());
+			this(accesExpr, type, annotations, data.type(), finder, data.value());
 		}
 		
 		public String[] saveDataInstructions()
 		{
-			return this.handler.saveDataInstructions(this.field, this.parameters);
+			return this.handler.saveDataInstructions(this.accesExpr, this.type, this.annotations, this.finder, this.parameters);
 		}
 		
 		public String[] loadDataInstructions()
 		{
-			return this.handler.loadDataInstructions(this.field, this.parameters);
+			return this.handler.loadDataInstructions(this.accesExpr, this.type, this.annotations, this.finder, this.parameters);
 		}
 		
 		public void addImportsToSet(Set<String> imports)
 		{
-			this.handler.addImportsToSet(this.field, this.parameters, imports);
+			this.handler.addImportsToSet(this.accesExpr, this.type, this.annotations, this.finder, this.parameters, imports);
 		}
 	}
 	
@@ -369,17 +414,21 @@ public enum DataType
 		
 		public DataHandler getDataType(Element field)
 		{
-			CustomData customData = field.getAnnotation(CustomData.class);
+			return this.getDataType("this." + field.getSimpleName(), field.asType(), field);
+		}
+		
+		public DataHandler getDataType(String accesExpr, TypeMirror type, AnnotatedConstruct annotations)
+		{
+			CustomData customData = annotations.getAnnotation(CustomData.class);
 			
-			if (customData != null) return new DataHandler(field, customData);
-
-			TypeMirror type = field.asType();
+			if (customData != null) return new DataHandler(accesExpr, type, annotations, customData, this);
+			
 			for (Entry<TypeMirror, DataType> entry : this.typeMap)
 			{
-				if (this.typeUtils.isAssignable(type, entry.getKey()) && (!entry.getValue().useBackwardCast || this.typeUtils.isAssignable(entry.getKey(), type))) return new DataHandler(field, entry.getValue());
+				if (this.typeUtils.isAssignable(type, entry.getKey()) && (!entry.getValue().useBackwardCast || this.typeUtils.isAssignable(entry.getKey(), type))) return new DataHandler(accesExpr, type, annotations, entry.getValue(), this);
 			}
 			
-			throw new InvalidParameterException("Unknown type " + type + " on field " + field);
+			throw new InvalidParameterException("Unknown type " + type + " on " + accesExpr);
 		}
 	}
 	
@@ -387,12 +436,21 @@ public enum DataType
 	
 	static
 	{
-		TYPE_KINDS = Stream.of(TypeKind.values()).filter(TypeKind::isPrimitive).collect(Collectors.toMap(k -> k.name().toLowerCase(), Function.identity()));
+		TYPE_KINDS = Stream.of(TypeKind.values()).filter(k -> k.isPrimitive() || k == TypeKind.ARRAY).collect(Collectors.toMap(k -> k.name().toLowerCase(), Function.identity()));
 	}
 	
 	public static TypeKind getKind(String type)
 	{
 		return TYPE_KINDS.get(type);
+	}
+	
+	public static String simpleName(TypeMirror type)
+	{
+		if (type instanceof DeclaredType)
+		{
+			return ((DeclaredType)type).asElement().getSimpleName().toString();
+		}
+		return type.toString();
 	}
 	
 }
