@@ -1,11 +1,11 @@
 package fr.max2.packeta.utils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
@@ -26,45 +26,129 @@ public class NamingUtils
 	
 	public static String simpleTypeName(TypeMirror type, boolean simplifyGenerics)
 	{
-		switch (type.getKind())
+		StringBuilder builder = new StringBuilder();
+		new TypeToString(simplifyGenerics, builder).visit(type);
+		return builder.toString();
+	}
+	
+	private static class TypeToString implements DefaultTypeVisitor<Void, Void>
+	{
+		private final boolean simplifyGenerics;
+		private final StringBuilder builder;
+		
+		public TypeToString(boolean simplifyGenerics, StringBuilder builder)
 		{
-		case DECLARED:
-		case ERROR:
-			DeclaredType declaredType = ((DeclaredType)type);
+			this.simplifyGenerics = simplifyGenerics;
+			this.builder = builder;
+		}
+		
+		@Override
+		public Void visitPrimitive(PrimitiveType t, Void p)
+		{
+			builder.append(t.getKind().name().toLowerCase());
 			
-			String decName = declaredType.asElement().getSimpleName().toString();
+			return null;
+		}
+
+		@Override
+		public Void visitArray(ArrayType t, Void p)
+		{
+			t.getComponentType().accept(this, null);
+			builder.append("[]");
 			
-			List<? extends TypeMirror> arguments = declaredType.getTypeArguments();
+			return null;
+		}
+		
+		@Override
+		public Void visitDeclared(DeclaredType t, Void p)
+		{
+			builder.append(t.asElement().getSimpleName());
+			
+			List<? extends TypeMirror> arguments = t.getTypeArguments();
 			
 			if (!arguments.isEmpty())
 			{
-				decName += "<";
-				if (!simplifyGenerics) decName += arguments.stream().map(arg -> simpleTypeName(arg, simplifyGenerics)).collect(Collectors.joining(", "));
-				decName += ">";
+				builder.append('<');
+				if (!this.simplifyGenerics)
+				{
+					boolean first = true;
+					for (TypeMirror arg : arguments)
+					{
+						if (!first)
+						{
+							builder.append(", ");
+						}
+						this.visit(arg);
+						first = false;
+					}
+				}
+				builder.append('>');
 			}
-			return decName;
-		case ARRAY:
-			return simpleTypeName(((ArrayType)type).getComponentType(), simplifyGenerics) + "[]";
 			
-		case UNION:
-			return ((UnionType)type).getAlternatives().stream().map(alt -> simpleTypeName(alt, simplifyGenerics)).collect(Collectors.joining(" | "));
+			return null;
+		}
+		
+		@Override
+		public Void visitWildcard(WildcardType t, Void p)
+		{
+			TypeMirror extendsBound = t.getExtendsBound();
+			TypeMirror superBound = t.getSuperBound();
 			
-		case INTERSECTION:
-			return ((IntersectionType)type).getBounds().stream().map(bound -> simpleTypeName(bound, simplifyGenerics)).collect(Collectors.joining(" & "));
+			builder.append('*');
+			if (extendsBound != null)
+			{
+				builder.append(" extends ");
+				this.visit(extendsBound);
+			}
+			if (superBound != null)
+			{
+				builder.append(" super ");
+				this.visit(superBound);
+			}
 			
-		case WILDCARD:
-			WildcardType wildcardType = (WildcardType)type;
+			return null;
+		}
+		
+		@Override
+		public Void visitUnion(UnionType t, Void p)
+		{
+			boolean first = true;
+			for (TypeMirror alt : t.getAlternatives())
+			{
+				if (!first)
+				{
+					builder.append(" | ");
+				}
+				this.visit(alt);
+				first = false;
+			}
 			
-			TypeMirror extendsBound = wildcardType.getExtendsBound();
-			TypeMirror superBound = wildcardType.getSuperBound();
+			return null;
+		}
+		
+		@Override
+		public Void visitIntersection(IntersectionType t, Void p)
+		{
+			boolean first = true;
+			for (TypeMirror bound : t.getBounds())
+			{
+				if (!first)
+				{
+					builder.append(" & ");
+				}
+				this.visit(bound);
+				first = false;
+			}
 			
-			String wcName = "*";
-			if (extendsBound != null) wcName += " extends " + simpleTypeName(extendsBound, simplifyGenerics);
-			if (superBound != null) wcName += " super " + simpleTypeName(superBound, simplifyGenerics);
-			return wcName;
+			return null;
+		}
+		
+		@Override
+		public Void visitDefault(TypeMirror t, Void p)
+		{
+			builder.append(t.toString());
 			
-		default:
-			return type.toString();
+			return null;
 		}
 	}
 }

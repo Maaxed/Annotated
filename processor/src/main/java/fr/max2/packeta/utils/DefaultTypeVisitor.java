@@ -32,73 +32,73 @@ public interface DefaultTypeVisitor<R, P> extends TypeVisitor<R, P>
 	@Override
 	default R visitPrimitive(PrimitiveType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitNull(NullType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitArray(ArrayType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitDeclared(DeclaredType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitError(ErrorType t, P p)
 	{
-		return visitDeclared(t, p);
+		return this.visitDeclared(t, p);
 	}
 
 	@Override
 	default R visitTypeVariable(TypeVariable t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitWildcard(WildcardType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitExecutable(ExecutableType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitNoType(NoType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitUnknown(TypeMirror t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitUnion(UnionType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 
 	@Override
 	default R visitIntersection(IntersectionType t, P p)
 	{
-		return visitDefault(t, p);
+		return this.visitDefault(t, p);
 	}
 	
 	R visitDefault(TypeMirror t, P p);

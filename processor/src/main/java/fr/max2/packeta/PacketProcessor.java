@@ -48,6 +48,8 @@ import fr.max2.packeta.api.network.GenerateNetwork;
 import fr.max2.packeta.api.network.GeneratePacket;
 import fr.max2.packeta.api.network.DataType.DataHandler;
 import fr.max2.packeta.utils.ClassRef;
+import fr.max2.packeta.utils.DefaultElementVisitor;
+import fr.max2.packeta.utils.DefaultTypeVisitor;
 import fr.max2.packeta.utils.EnumSides;
 import fr.max2.packeta.utils.ExceptionUtils;
 import fr.max2.packeta.utils.NamingUtils;
@@ -136,7 +138,7 @@ public class PacketProcessor extends AbstractProcessor
 					parent = parent.getEnclosingElement();
 				}
 				
-				if (parent.getKind() == ElementKind.PACKAGE)
+				if (parent.getKind() == ElementKind.PACKAGE) //TODO use ElementVisitor
 				{
 					networkClass = ((QualifiedNameable)parent).getQualifiedName() + "." + parent.getSimpleName() + "Network";
 				}
@@ -276,55 +278,112 @@ public class PacketProcessor extends AbstractProcessor
 	
 	private static void addTypeImports(TypeMirror type,  Consumer<String> imports)
 	{
-		switch (type.getKind())
+		TypeImporter.INSTANCE.visit(type, imports);
+	}
+	
+	private static enum TypeImporter implements DefaultTypeVisitor<Void, Consumer<String>>, DefaultElementVisitor<Void, Consumer<String>>
+	{
+		INSTANCE;
+		
+		// TypeVisitor
+		@Override
+		public Void visit(TypeMirror t, Consumer<String> imports)
 		{
-		case DECLARED:
-		case ERROR:
-			DeclaredType declaredType = (DeclaredType)type;
-			Element elemType = declaredType.asElement();
-			
-			if (elemType instanceof QualifiedNameable)
-			{
-				String name = ((QualifiedNameable)elemType).getQualifiedName().toString();
-				if (!name.startsWith("java.lang"))
-				{
-					imports.accept(name);
-				}
-			}
-			
-			
-			for (TypeMirror subType : declaredType.getTypeArguments())
-			{
-				addTypeImports(subType, imports);
-			}
-			
-			break;
-		case ARRAY:
-			addTypeImports(((ArrayType)type).getComponentType(), imports);
-			break;
-		case UNION:
-			for (TypeMirror subType : ((UnionType)type).getAlternatives())
-			{
-				addTypeImports(subType, imports);
-			}
-			break;
-		case INTERSECTION:
-			for (TypeMirror subType : ((IntersectionType)type).getBounds())
-			{
-				addTypeImports(subType, imports);
-			}
-			break;
-		case WILDCARD:
-			WildcardType wildcardType = (WildcardType)type;
-			
-			TypeMirror extendsBound = wildcardType.getExtendsBound();
-			TypeMirror superBound = wildcardType.getSuperBound();
-			
-			if (extendsBound != null) addTypeImports(extendsBound, imports);
-			if (superBound != null) addTypeImports(superBound, imports);
-		default:
-			break;
+			return imports == null ? this.visit(t) : t.accept(this, imports);
 		}
+		
+		@Override
+		public Void visit(TypeMirror t)
+		{
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public Void visitArray(ArrayType t, Consumer<String> imports)
+		{
+			this.visit(t.getComponentType(), imports);
+			return null;
+		}
+		
+		@Override
+		public Void visitDeclared(DeclaredType t, Consumer<String> imports)
+		{
+			this.visit(t.asElement(), imports);
+			
+			for (TypeMirror subType : t.getTypeArguments())
+			{
+				this.visit(subType, imports);
+			}
+			return null;
+		}
+		
+		@Override
+		public Void visitWildcard(WildcardType t, Consumer<String> imports)
+		{
+			TypeMirror extendsBound = t.getExtendsBound();
+			TypeMirror superBound = t.getSuperBound();
+			
+			if (extendsBound != null) this.visit(extendsBound, imports);
+			if (superBound != null) this.visit(superBound, imports);
+			return null;
+		}
+		
+		@Override
+		public Void visitUnion(UnionType t, Consumer<String> imports)
+		{
+			for (TypeMirror subType : t.getAlternatives())
+			{
+				addTypeImports(subType, imports);
+			}
+			return null;
+		}
+		
+		@Override
+		public Void visitIntersection(IntersectionType t, Consumer<String> imports)
+		{
+			for (TypeMirror subType : t.getBounds())
+			{
+				addTypeImports(subType, imports);
+			}
+			return null;
+		}
+		
+		@Override
+		public Void visitDefault(TypeMirror t, Consumer<String> imports)
+		{
+			return null;
+		}
+		
+		//ElementVisitor
+		@Override
+		public Void visit(Element e, Consumer<String> imports)
+		{
+			return imports == null ? this.visit(e) : e.accept(this, imports);
+		}
+		
+		@Override
+		public Void visit(Element e)
+		{
+			throw new UnsupportedOperationException();
+		}
+		
+		@Override
+		public Void visitType(TypeElement e, Consumer<String> imports)
+		{
+			String name = e.getQualifiedName().toString();
+			if (!name.startsWith("java.lang"))
+			{
+				imports.accept(name);
+			}
+			return null;
+		}
+		
+		@Override
+		public Void visitDefault(Element e, Consumer<String> imports)
+		{
+			return null;
+		}
+		
 	}
 	
 }
