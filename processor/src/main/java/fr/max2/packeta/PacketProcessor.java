@@ -43,10 +43,9 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 
-import fr.max2.packeta.api.network.DataType;
 import fr.max2.packeta.api.network.GenerateNetwork;
 import fr.max2.packeta.api.network.GeneratePacket;
-import fr.max2.packeta.api.network.DataType.DataHandler;
+import fr.max2.packeta.network.DataHandlerParameters;
 import fr.max2.packeta.utils.ClassRef;
 import fr.max2.packeta.utils.DefaultElementVisitor;
 import fr.max2.packeta.utils.DefaultTypeVisitor;
@@ -58,13 +57,13 @@ import fr.max2.packeta.utils.NamingUtils;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {
-	private DataType.Finder finder;
+	private DataHandlerParameters.Finder finder;
 	
 	@Override
 	public synchronized void init(ProcessingEnvironment processingEnv)
 	{
 		super.init(processingEnv);
-		this.finder = new DataType.Finder(this.processingEnv);
+		this.finder = new DataHandlerParameters.Finder(this.processingEnv);
 	}
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
@@ -192,7 +191,7 @@ public class PacketProcessor extends AbstractProcessor
 		int packageSeparator = className.lastIndexOf('.');
 		
 		List<VariableElement> fields = ElementFilter.fieldsIn(members).stream().filter(field -> !field.getModifiers().contains(Modifier.STATIC)).collect(Collectors.toList());
-		List<DataHandler> dataHandlers = fields.stream().map(f -> this.finder.getDataType(f)).collect(Collectors.toList());
+		List<DataHandlerParameters> dataHandlers = fields.stream().map(f -> this.finder.getDataType(f)).collect(Collectors.toList());
 		
 		Set<String> imports = new TreeSet<>();//TODO filter with the current package
 		List<String> saveInstructions = new ArrayList<>();
@@ -200,7 +199,7 @@ public class PacketProcessor extends AbstractProcessor
 		
 		sides.addImports(imports);
 		
-		dataHandlers.forEach(handler -> addTypeImports(handler.type, imports::add));
+		fields.forEach(f -> addTypeImports(f.asType(), imports::add));
 		
 		dataHandlers.forEach(handler -> handler.addInstructions(saveInstructions::add, loadInstructions::add, imports::add));
 		
