@@ -2,11 +2,12 @@ package fr.max2.packeta.api.network;
 
 import java.security.InvalidParameterException;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,291 +24,247 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import fr.max2.packeta.utils.EmptyAnnotationConstruct;
+import fr.max2.packeta.utils.NamingUtils;
+import fr.max2.packeta.utils.TypeHelper;
+import fr.max2.packeta.utils.ValueInitStatus;
 
 public enum DataType
 {
 	// Integers
-	BYTE(Byte.TYPE) {
-		
+	BYTE(Byte.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Byte", accesExpr) };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBuffer("Byte", accesExpr) };
+			addBufferInstructions("Byte", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
 	},
-	SHORT(Short.TYPE) {
-		
+	SHORT(Short.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Short", accesExpr) };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBuffer("Short", accesExpr) };
+			addBufferInstructions("Short", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
 	},
-	INT(Integer.TYPE) {
-		
+	INT(Integer.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Int", accesExpr) };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBuffer("Int", accesExpr) };
+			addBufferInstructions("Int", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
 	},
-	LONG(Long.TYPE) {
-		
+	LONG(Long.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Long", accesExpr) };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBuffer("Long", accesExpr) };
+			addBufferInstructions("Long", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
 	},
 	
 	//Floats
-	FLOAT(Float.TYPE) {
-		
+	FLOAT(Float.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Float", accesExpr) };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBuffer("Float", accesExpr) };
+			addBufferInstructions("Float", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
 	},
-	DOUBLE(Double.TYPE) {
-		
+	DOUBLE(Double.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Double", accesExpr) };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBuffer("Double", accesExpr) };
+			addBufferInstructions("Double", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
 	},
 	
 	// Other primitives
-	BOOLEAN(Boolean.TYPE) {
-		
+	BOOLEAN(Boolean.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Boolean", accesExpr) };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBuffer("Boolean", accesExpr) };
+			addBufferInstructions("Boolean", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
 	},
-	CHAR(Character.TYPE) {
-		
+	CHAR(Character.TYPE)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBuffer("Char", accesExpr) };
+			addBufferInstructions("Char", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions);
 		}
-		
+	},
+	ARRAY()
+	{
 		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { readBuffer("Char", accesExpr) };
+			ArrayType arrayType = (ArrayType)handler.type;
+			TypeMirror contentType = arrayType.getComponentType();
+			String typeName = NamingUtils.simpleTypeName(contentType);
+			String arrayTypeName = typeName + "[]";
+			
+			boolean constSize = handler.annotations.getAnnotation(ConstSize.class) != null || handler.type.getAnnotation(ConstSize.class) != null;
+			
+			int i;
+			for (i = arrayTypeName.length() - 2; i >= 2 && arrayTypeName.substring(i - 2, i).equals("[]"); i-=2);
+			
+			String elementVarName = handler.simpleName + "Element";
+			if (!constSize) saveInstructions.accept(writeBuffer("Int", handler.getExpr + ".length"));
+			saveInstructions.accept("for (" + typeName + " " + elementVarName + " : " + handler.getExpr + ")");
+			saveInstructions.accept("{");
+			
+			String lenghtVarName;
+			String indexVarName = handler.simpleName + "Index";
+			
+			if (constSize)
+			{
+				lenghtVarName = handler.simpleName + ".length";
+			}
+			else
+			{
+				lenghtVarName = handler.simpleName + "Length";
+				loadInstructions.accept(readBuffer("Int", "int " + lenghtVarName));
+				loadInstructions.accept(handler.firstSetInit() + " = new " + arrayTypeName.substring(0, i + 1) + lenghtVarName + arrayTypeName.substring(i + 1) + ";" );
+			}
+			
+			loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
+			loadInstructions.accept("{");
+			
+			DataHandler contentHandler = handler.finder.getDataType(elementVarName, elementVarName, handler.setExpr + "[" + indexVarName + "]", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.DECLARED);
+			contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
+			
+			saveInstructions.accept("}");
+			
+			loadInstructions.accept("}");
 		}
 	},
 	
 	// Classes
-	STRING(String.class) {
-
-		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { writeBufferUtils("UTF8String", accesExpr) };
-		}
-
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBufferUtils("UTF8String", accesExpr) };
-		}
-		
-		@Override
-		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
-		{
-			imports.add("net.minecraftforge.fml.common.network.ByteBufUtils");
-		}
-	},
-	ENUM(Enum.class, false) {
-		
-		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { "buf.writeInt(" + accesExpr + ".ordinal());" };
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { accesExpr + " = " + ((TypeElement)((DeclaredType)type).asElement()).getSimpleName() + ".values()[buf.readInt()];" };
-		}
-		
-		@Override
-		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
-		{
-			imports.add(type.toString());
-		}
-	},
-	UUID(UUID.class, false)
+	STRING(String.class)
 	{
-		
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] {
-				"buf.writeLong(" + accesExpr + ".getMostSignificantBits())",
-				"buf.writeLong(" + accesExpr + ".getLeastSignificantBits())"};
-		}
-		
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { accesExpr + " = new UUID(buf.readLong(), buf.readLong());" };
-		}
-		
-		@Override
-		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
-		{
-			imports.add("java.util.UUID");
+			addBufferUtilsInstructions("UTF8String", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions, imports);
 		}
 	},
-	NBT_COMPOUND("net.minecraft.nbt.NBTTagCompound") {
-
+	ENUM(Enum.class)
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return new String[] { writeBufferUtils("Tag", accesExpr) };
-		}
-
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBufferUtils("Tag", accesExpr) };
-		}
-		
-		@Override
-		public void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
-		{
-			imports.add("net.minecraftforge.fml.common.network.ByteBufUtils");
-		}
-	},
-	STACK("net.minecraft.item.ItemStack") {
-
-		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { writeBufferUtils("ItemStack", accesExpr) };
-		}
-
-		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			return new String[] { readBufferUtils("ItemStack", accesExpr) };
-		}
-		
-		@Override
-		public void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
-		{
-			imports.add("net.minecraftforge.fml.common.network.ByteBufUtils");
-		}
-	},
-	ARRAY("array") {
-
-		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
-		{
-			ArrayType arrayType = (ArrayType)type;
-			TypeMirror contentType = arrayType.getComponentType();
-			String typeName = contentType instanceof DeclaredType ? ((DeclaredType)contentType).asElement().getSimpleName().toString() : contentType.toString();
+			saveInstructions.accept(writeBuffer("Int", handler.getExpr + ".ordinal()"));
 			
-			String s1 = writeBuffer("Int", accesExpr + ".length");
-			String s2 = "for (" + typeName + " element : " + accesExpr + ")";
-			String s3 = "\t";
-			String[] s4 = finder.getDataType("element", contentType, EmptyAnnotationConstruct.INSTANCE).saveDataInstructions();
-			//String s3 = 
+			loadInstructions.accept(handler.firstSetInit() + " = " + ((TypeElement)((DeclaredType)handler.type).asElement()).getSimpleName() + ".values()[buf.readInt()];");
+		}
+	},
+	UUID(UUID.class)
+	{
+		@Override
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
+		{
+			saveInstructions.accept(writeBuffer("Long", handler.getExpr + ".getMostSignificantBits()"));
+			saveInstructions.accept(writeBuffer("Long", handler.getExpr + ".getLeastSignificantBits()"));
 			
-			return null;
+			loadInstructions.accept(handler.firstSetInit() + " = new UUID(buf.readLong(), buf.readLong());");
 		}
-
+	},
+	NBT_COMPOUND("net.minecraft.nbt.NBTTagCompound")
+	{
 		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			// TODO Auto-generated method stub
-			return null;
+			addBufferUtilsInstructions("Tag", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions, imports);
 		}
-		
+	},
+	STACK("net.minecraft.item.ItemStack")
+	{
 		@Override
-		protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			ArrayType arrayType = (ArrayType)type;
-			TypeMirror contentType = arrayType.getComponentType();
-			imports.add(simpleName(contentType));
-			finder.getDataType("element", contentType, EmptyAnnotationConstruct.INSTANCE).addImportsToSet(imports);
+			addBufferUtilsInstructions("ItemStack", handler.getExpr, handler.firstSetInit(), saveInstructions, loadInstructions, imports);
+		}
+	},
+	COLLECTION(Collection.class)
+	{
+		@Override
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
+		{
+			DeclaredType collectionType = TypeHelper.refineTo(handler.type, handler.finder.elemUtils.getTypeElement(Collection.class.getCanonicalName()).asType(), handler.finder.typeUtils);
+			TypeMirror contentType = collectionType.getTypeArguments().get(0);
+			String typeName = NamingUtils.simpleTypeName(contentType);
+			
+			boolean constSize = handler.annotations.getAnnotation(ConstSize.class) != null || handler.type.getAnnotation(ConstSize.class) != null;
+			
+			String elementVarName = handler.simpleName + "Element";
+			if (!constSize) saveInstructions.accept(writeBuffer("Int", handler.getExpr + ".size()"));
+			saveInstructions.accept("for (" + typeName + " " + elementVarName + " : " + handler.getExpr + ")");
+			saveInstructions.accept("{");
+			
+			String lenghtVarName = handler.simpleName + "Length";
+			String indexVarName = handler.simpleName + "Index";
+			if (constSize)
+			{
+				loadInstructions.accept("int " + lenghtVarName + " = " + handler.setExpr + ".size();");
+			}
+			else
+			{
+				loadInstructions.accept(readBuffer("Int", "int " + lenghtVarName));
+			}
+			
+			if (handler.initStatus.isInitialised())
+			{
+				loadInstructions.accept(handler.setExpr + ".clear();" );
+			}
+			else
+			{
+				loadInstructions.accept(handler.firstSetInit() + " = new " + NamingUtils.simpleTypeName(handler.type, true) + "();" ); //TODO use parameters to use the right class
+			}
+			
+			loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
+			loadInstructions.accept("{");
+			
+			DataHandler contentHandler = handler.finder.getDataType(elementVarName, elementVarName, elementVarName, contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.UNDEFINED);
+			contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
+			
+			saveInstructions.accept("}");
+			
+			loadInstructions.accept("\t" + handler.setExpr + ".add(" + elementVarName + ");");
+			loadInstructions.accept("}");
 		}
 	},
 	//TODO INBTSerializable, IByteSerialisable
-	//TODO collections
 	//TODO Entity + EntityPlayer
-	CUSTOM() {
-
+	CUSTOM()
+	{
 		@Override
-		protected String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			// TODO custom data handler
-			return null;
+			// TODO Auto-generated method stub
+			
 		}
-
+	},
+	DEFAULT()
+	{
 		@Override
-		protected String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters)
+		protected void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return null;
+			handler.finder.getDefaultDataType(handler.type).addInstructions(handler, saveInstructions, loadInstructions, imports);
 		}
-		
 	};
 	
-	private final String type;
+	private final String typeName;
 	private final boolean useBackwardCast;
 	
 	private DataType(String typeName, boolean backwardCast)
 	{
-		this.type = typeName;
+		this.typeName = typeName;
 		this.useBackwardCast = backwardCast;
 	}
 	
@@ -318,26 +275,28 @@ public enum DataType
 	
 	private DataType(String typeName)
 	{
-		this(typeName, true);
+		this(typeName, false);
 	}
 	
 	private DataType(Class<?> type)
 	{
-		this(type, true);
+		this(type, type.isPrimitive());
 	}
 	
 	private DataType()
 	{
-		this.type = null;
+		this.typeName = null;
 		this.useBackwardCast = false;
 	}
 	
-	//TODO merge methods and use Consumers
-	protected abstract String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters);
+	protected abstract void addInstructions(DataHandler handler, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports);
+	
+	
+	/*protected abstract String[] saveDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters);
 	protected abstract String[] loadDataInstructions(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters);
 	
 	protected void addImportsToSet(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, Finder finder, String[] parameters, Set<String> imports)
-	{ }
+	{ }*/
 	
 	private static String writeBuffer(String type, String value)
 	{
@@ -347,6 +306,12 @@ public enum DataType
 	private static String readBuffer(String type, String value)
 	{
 		return value + " = buf.read" + type + "();";
+	}
+	
+	private static void addBufferInstructions(String type, String saveValue, String loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions)
+	{
+		saveInstructions.accept(writeBuffer(type, saveValue));
+		loadInstructions.accept(readBuffer(type, loadValue));
 	}
 	
 	private static String writeBufferUtils(String type, String value)
@@ -359,76 +324,101 @@ public enum DataType
 		return value + " = ByteBufUtils.read" + type + "(buf);";
 	}
 	
+	private static void addBufferUtilsInstructions(String type, String saveValue, String loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
+	{
+		saveInstructions.accept(writeBufferUtils(type, saveValue));
+		loadInstructions.accept(readBufferUtils(type, loadValue));
+		imports.accept("net.minecraftforge.fml.common.network.ByteBufUtils");
+	}
+	
 	public static class DataHandler
 	{
-		private final String accesExpr;
-		private final TypeMirror type;
-		private final AnnotatedConstruct annotations;
-		private final DataType handler;
-		private final Finder finder;
-		private final String[] parameters;
+		public final String simpleName, getExpr, setExpr;
+		public final TypeMirror type;
+		public final AnnotatedConstruct annotations;
+		public final DataType typeHandler;
+		public final ValueInitStatus initStatus;
+		public final Finder finder;
+		public final String[] parameters;
 		
-		public DataHandler(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, DataType handler, Finder finder, String... parameters)
+		public DataHandler(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, DataType typeHandler, ValueInitStatus initStatus, Finder finder, String... parameters)
 		{
-			this.accesExpr = accesExpr;
+			this.simpleName = simpleName;
+			this.getExpr = getExpr;
+			this.setExpr = setExpr;
 			this.type = type;
 			this.annotations = annotations;
-			this.handler = handler;
+			this.typeHandler = typeHandler;
+			this.initStatus = initStatus;
 			this.finder = finder;
 			this.parameters = parameters;
 		}
 		
-		public DataHandler(String accesExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, Finder finder)
+		public DataHandler(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, ValueInitStatus hasDefaultValue, Finder finder)
 		{
-			this(accesExpr, type, annotations, data.type(), finder, data.value());
+			this(simpleName, getExpr, setExpr, type, annotations, data.type(), hasDefaultValue, finder, data.value());
 		}
 		
-		public String[] saveDataInstructions()
+		public void addInstructions(Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			return this.handler.saveDataInstructions(this.accesExpr, this.type, this.annotations, this.finder, this.parameters);
+			this.typeHandler.addInstructions(this, saveInstructions, loadInstructions, imports);
 		}
 		
-		public String[] loadDataInstructions()
+		private String firstSetInit()
 		{
-			return this.handler.loadDataInstructions(this.accesExpr, this.type, this.annotations, this.finder, this.parameters);
-		}
-		
-		public void addImportsToSet(Set<String> imports)
-		{
-			this.handler.addImportsToSet(this.accesExpr, this.type, this.annotations, this.finder, this.parameters, imports);
+			return this.initStatus.isDeclared() ? this.setExpr : NamingUtils.simpleTypeName(this.type) + " " + this.setExpr;
 		}
 	}
 	
 	public static class Finder
 	{
 		private final List<Map.Entry<TypeMirror, DataType>> typeMap;
+		private final Elements elemUtils;
 		private final Types typeUtils;
 		
 		public Finder(ProcessingEnvironment env)
 		{
-			Elements elemUtils = env.getElementUtils();
+			this.elemUtils = env.getElementUtils();
 			this.typeUtils = env.getTypeUtils();
 			
-			this.typeMap = Stream.of(DataType.values()).filter(data -> data.type != null).map(data -> new SimpleEntry<>(getKind(data.type) != null ? this.typeUtils.getPrimitiveType(getKind(data.type)) : this.typeUtils.erasure(elemUtils.getTypeElement(data.type).asType()), data)).collect(Collectors.toList());
+			this.typeMap = Stream.of(DataType.values()).filter(data -> data.typeName != null).map(data -> new SimpleEntry<>(getKind(data.typeName) != null ? this.typeUtils.getPrimitiveType(getKind(data.typeName)) : this.typeUtils.erasure(elemUtils.getTypeElement(data.typeName).asType()), data)).collect(Collectors.toList());
 		}
 		
 		public DataHandler getDataType(Element field)
 		{
-			return this.getDataType("this." + field.getSimpleName(), field.asType(), field);
+			return this.getDataType(field.getSimpleName().toString(), "this." + field.getSimpleName(), "this." + field.getSimpleName(), field.asType(), field, ValueInitStatus.INITIALISED);
 		}
 		
-		public DataHandler getDataType(String accesExpr, TypeMirror type, AnnotatedConstruct annotations)
+		public DataHandler getDataType(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, ValueInitStatus initStatus)
 		{
 			CustomData customData = annotations.getAnnotation(CustomData.class);
+			if (customData == null) customData = type.getAnnotation(CustomData.class);
+			if (customData == null && type instanceof DeclaredType) customData = ((DeclaredType)type).asElement().getAnnotation(CustomData.class);
 			
-			if (customData != null) return new DataHandler(accesExpr, type, annotations, customData, this);
+			if (customData != null)
+			{
+				return new DataHandler(simpleName, getExpr, setExpr, type, annotations, customData, initStatus, this);
+			}
+			
+			return new DataHandler(simpleName, getExpr, setExpr, type, annotations, this.getDefaultDataType(type), initStatus, this);
+		}
+		
+		public DataType getDefaultDataType(TypeMirror type)
+		{
+			if (type.getKind() == TypeKind.ARRAY)
+			{
+				return ARRAY;
+			}
 			
 			for (Entry<TypeMirror, DataType> entry : this.typeMap)
 			{
-				if (this.typeUtils.isAssignable(type, entry.getKey()) && (!entry.getValue().useBackwardCast || this.typeUtils.isAssignable(entry.getKey(), type))) return new DataHandler(accesExpr, type, annotations, entry.getValue(), this);
+				if (this.typeUtils.isAssignable(type, entry.getKey()) && (!entry.getValue().useBackwardCast || this.typeUtils.isAssignable(entry.getKey(), type)))
+				{
+					return entry.getValue();
+				}
 			}
 			
-			throw new InvalidParameterException("Unknown type " + type + " on " + accesExpr);
+			throw new InvalidParameterException("Unknown default DataType for type '" + type + "'");
 		}
 	}
 	
@@ -436,21 +426,12 @@ public enum DataType
 	
 	static
 	{
-		TYPE_KINDS = Stream.of(TypeKind.values()).filter(k -> k.isPrimitive() || k == TypeKind.ARRAY).collect(Collectors.toMap(k -> k.name().toLowerCase(), Function.identity()));
+		TYPE_KINDS = Stream.of(TypeKind.values()).filter(k -> k.isPrimitive()).collect(Collectors.toMap(k -> k.name().toLowerCase(), Function.identity()));
 	}
 	
 	public static TypeKind getKind(String type)
 	{
 		return TYPE_KINDS.get(type);
-	}
-	
-	public static String simpleName(TypeMirror type)
-	{
-		if (type instanceof DeclaredType)
-		{
-			return ((DeclaredType)type).asElement().getSimpleName().toString();
-		}
-		return type.toString();
 	}
 	
 }

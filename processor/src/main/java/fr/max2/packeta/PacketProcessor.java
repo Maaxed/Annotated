@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -27,13 +27,17 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.UnionType;
+import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -46,6 +50,7 @@ import fr.max2.packeta.api.network.DataType.DataHandler;
 import fr.max2.packeta.utils.ClassRef;
 import fr.max2.packeta.utils.EnumSides;
 import fr.max2.packeta.utils.ExceptionUtils;
+import fr.max2.packeta.utils.NamingUtils;
 
 @SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION, ClassRef.FORGE_MOD_ANNOTATION})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -184,25 +189,27 @@ public class PacketProcessor extends AbstractProcessor
 		
 		int packageSeparator = className.lastIndexOf('.');
 		
-		List<VariableElement> fields = ElementFilter.fieldsIn(members);
+		List<VariableElement> fields = ElementFilter.fieldsIn(members).stream().filter(field -> !field.getModifiers().contains(Modifier.STATIC)).collect(Collectors.toList());
 		List<DataHandler> dataHandlers = fields.stream().map(f -> this.finder.getDataType(f)).collect(Collectors.toList());
 		
-		Set<String> imports = new TreeSet<>();
+		Set<String> imports = new TreeSet<>();//TODO filter with the current package
+		List<String> saveInstructions = new ArrayList<>();
+		List<String> loadInstructions = new ArrayList<>();
 		
 		sides.addImports(imports);
 		
-		fields.stream().map(f -> f.asType()).filter(t -> t.getKind() == TypeKind.DECLARED).map(f -> f.toString()).filter(f -> !f.startsWith("java.lang")).forEach(imports::add);
+		dataHandlers.forEach(handler -> addTypeImports(handler.type, imports::add));
 		
-		dataHandlers.forEach(handler -> handler.addImportsToSet(imports));
+		dataHandlers.forEach(handler -> handler.addInstructions(saveInstructions::add, loadInstructions::add, imports::add));
 		
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", className.substring(0, packageSeparator));
 		replacements.put("baseClass", className.substring(packageSeparator + 1));
 		replacements.put("interfaces", sides.getInterfaces());
-		replacements.put("allFields" , fields.stream().map(f -> simpleName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
+		replacements.put("allFields" , fields.stream().map(f -> NamingUtils.simpleTypeName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsInit", fields.stream().map(f -> "this." + f.getSimpleName() + " = " + f.getSimpleName() + ";").collect(Collectors.joining(ls + "\t\t")));
-		replacements.put("toBytes"	, dataHandlers.stream().flatMap(h -> Stream.of(h.saveDataInstructions())).collect(Collectors.joining(ls + "\t\t")));
-		replacements.put("fromBytes", dataHandlers.stream().flatMap(h -> Stream.of(h.loadDataInstructions())).collect(Collectors.joining(ls + "\t\t")));
+		replacements.put("toBytes"	, saveInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
+		replacements.put("fromBytes", loadInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports", imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 
 		this.writeFileFromTemplaTe(className + "Message", "templates/TemplatePacket.jvtp", replacements);
@@ -218,7 +225,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("package", networkClass.substring(0, packageSeparator));
 		replacements.put("className", networkClass.substring(packageSeparator + 1));
 		replacements.put("networkName", networkName);
-		replacements.put("registerPackets", packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(packetName -> registerPacketInstruction(entry.getKey(), simpleName(packetName)))).collect(Collectors.joining(ls + "\t\t")));
+		replacements.put("registerPackets", packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(packetName -> registerPacketInstruction(entry.getKey(), NamingUtils.simpleName(packetName)))).collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports"		  , packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream()).map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		
 		this.writeFileFromTemplaTe(networkClass, "templates/TemplateNetwork.jvtp", replacements);
@@ -267,15 +274,57 @@ public class PacketProcessor extends AbstractProcessor
 		return sb.toString();
 	}
 	
-	private static CharSequence simpleName(TypeMirror type)
+	private static void addTypeImports(TypeMirror type,  Consumer<String> imports)
 	{
-		return type.getKind() == TypeKind.DECLARED ? ((TypeElement)((DeclaredType)type).asElement()).getSimpleName() : type.toString();
-	}
-	
-	public static String simpleName(String qualifiedName)
-	{
-		int ditIndex = qualifiedName.lastIndexOf('.') ;
-		return ditIndex < 0 ? qualifiedName : qualifiedName.substring(ditIndex + 1);
+		switch (type.getKind())
+		{
+		case DECLARED:
+		case ERROR:
+			DeclaredType declaredType = (DeclaredType)type;
+			Element elemType = declaredType.asElement();
+			
+			if (elemType instanceof QualifiedNameable)
+			{
+				String name = ((QualifiedNameable)elemType).getQualifiedName().toString();
+				if (!name.startsWith("java.lang"))
+				{
+					imports.accept(name);
+				}
+			}
+			
+			
+			for (TypeMirror subType : declaredType.getTypeArguments())
+			{
+				addTypeImports(subType, imports);
+			}
+			
+			break;
+		case ARRAY:
+			addTypeImports(((ArrayType)type).getComponentType(), imports);
+			break;
+		case UNION:
+			for (TypeMirror subType : ((UnionType)type).getAlternatives())
+			{
+				addTypeImports(subType, imports);
+			}
+			break;
+		case INTERSECTION:
+			for (TypeMirror subType : ((IntersectionType)type).getBounds())
+			{
+				addTypeImports(subType, imports);
+			}
+			break;
+		case WILDCARD:
+			WildcardType wildcardType = (WildcardType)type;
+			
+			TypeMirror extendsBound = wildcardType.getExtendsBound();
+			TypeMirror superBound = wildcardType.getSuperBound();
+			
+			if (extendsBound != null) addTypeImports(extendsBound, imports);
+			if (superBound != null) addTypeImports(superBound, imports);
+		default:
+			break;
+		}
 	}
 	
 }

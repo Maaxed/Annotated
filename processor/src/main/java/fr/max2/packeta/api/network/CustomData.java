@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 
 @Retention(RetentionPolicy.CLASS)
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.TYPE, ElementType.TYPE_USE})
 public @interface CustomData
 {
-	DataType type() default DataType.CUSTOM;
+	DataType type() default DataType.DEFAULT;
 	
 	String[] value() default { }; //parameters
 }
