@@ -3,10 +3,8 @@ package fr.max2.packeta.network.datahandler;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-
 import fr.max2.packeta.network.DataHandlerParameters;
+import fr.max2.packeta.utils.NamingUtils;
 
 public enum SimpleClassHandler implements INamedDataHandler
 {
@@ -25,7 +23,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 		{
 			saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.getExpr + ".ordinal()"));
 			
-			loadInstructions.accept(params.firstSetInit() + " = " + ((TypeElement)((DeclaredType)params.type).asElement()).getSimpleName() + ".values()[buf.readInt()];");
+			loadInstructions.accept(params.firstSetInit() + " = " + NamingUtils.simpleTypeName(params.type) + ".values()[buf.readInt()];");
 		}
 	},
 	UUID(UUID.class)

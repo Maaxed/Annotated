@@ -2,7 +2,7 @@ package fr.max2.packeta.utils;
 
 import java.util.Set;
 
-public enum EnumSides
+public enum EnumSides //Logical side
 {
 	CLIENT,
 	SERVER,

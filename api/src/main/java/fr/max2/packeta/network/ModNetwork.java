@@ -12,9 +12,9 @@ public class ModNetwork
 {
 	public final SimpleNetworkWrapper modChannel;
 	
-	public ModNetwork(String modID)
+	public ModNetwork(String channelName)
 	{
-		modChannel = NetworkRegistry.INSTANCE.newSimpleChannel(modID);
+		modChannel = NetworkRegistry.INSTANCE.newSimpleChannel(channelName);
 	}
 	
 	private int lastIndex = 0;

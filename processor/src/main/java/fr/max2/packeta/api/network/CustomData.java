@@ -10,7 +10,15 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE, ElementType.TYPE_USE})
 public @interface CustomData
 {
+	/**
+	 * The type of data
+	 * @return the DataType
+	 */
 	DataType type() default DataType.DEFAULT;
 	
-	String[] value() default { }; //parameters
+	/**
+	 * The parameters for the DataHandler
+	 * @return the parameters in a string array
+	 */
+	String[] value() default { };
 }

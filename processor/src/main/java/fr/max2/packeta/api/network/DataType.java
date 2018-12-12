@@ -27,6 +27,7 @@ public enum DataType
 	COLLECTION,
 	//TODO INBTSerializable, IByteSerialisable
 	//TODO Entity + EntityPlayer
+	//TODO other data/packet class
 	
 	// Special types
 	CUSTOM,

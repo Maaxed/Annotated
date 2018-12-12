@@ -21,6 +21,8 @@ public enum CollectionDataHandler implements INamedDataHandler
 	public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
 		DeclaredType collectionType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
+		if (collectionType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+		
 		TypeMirror contentType = collectionType.getTypeArguments().get(0);
 		String typeName = NamingUtils.simpleTypeName(contentType);
 		

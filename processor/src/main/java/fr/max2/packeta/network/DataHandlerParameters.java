@@ -99,7 +99,12 @@ public class DataHandlerParameters
 				return new DataHandlerParameters(simpleName, getExpr, setExpr, type, annotations, customData, initStatus, this);
 			}
 			
-			return new DataHandlerParameters(simpleName, getExpr, setExpr, type, annotations, this.getDefaultDataType(type), initStatus, this);
+			IDataHandler defaultHandler = this.getDefaultDataType(type);
+			
+			if (defaultHandler == SpecialDataHandler.CUSTOM) 
+				throw new InvalidParameterException("Unknown default DataHandler for type '" + type + "'");
+			
+			return new DataHandlerParameters(simpleName, getExpr, setExpr, type, annotations, defaultHandler, initStatus, this);
 		}
 		
 		public IDataHandler getDefaultDataType(TypeMirror type)
@@ -112,7 +117,7 @@ public class DataHandlerParameters
 				}
 			}
 			
-			throw new InvalidParameterException("Unknown default DataType for type '" + type + "'");
+			return SpecialDataHandler.CUSTOM;
 		}
 	}
 	

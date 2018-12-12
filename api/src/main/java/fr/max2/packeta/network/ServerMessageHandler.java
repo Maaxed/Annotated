@@ -12,7 +12,8 @@ public enum ServerMessageHandler implements IMessageHandler<IServerMessage, IMes
 	@Override
 	public IMessage onMessage(IServerMessage message, MessageContext ctx)
 	{
-		final EntityPlayerMP sender = ctx.getServerHandler().player;
+		EntityPlayerMP sender = ctx.getServerHandler().player;
+		
 		if (message.doesServerSynchronize())
 			sender.getServer().addScheduledTask(() -> message.onServerReceive(sender));
 		else

@@ -29,7 +29,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
-import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
@@ -52,8 +51,9 @@ import fr.max2.packeta.utils.DefaultTypeVisitor;
 import fr.max2.packeta.utils.EnumSides;
 import fr.max2.packeta.utils.ExceptionUtils;
 import fr.max2.packeta.utils.NamingUtils;
+import fr.max2.packeta.utils.TypeHelper;
 
-@SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION, ClassRef.FORGE_MOD_ANNOTATION})
+@SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION, ClassRef.FORGE_MOD_ANNOTATION, ClassRef.CONSTSIZE_ANNOTATION})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {
@@ -84,20 +84,18 @@ public class PacketProcessor extends AbstractProcessor
 		
 		Elements elemUtils = this.processingEnv.getElementUtils();
 		
-		for (Element elem : roundEnv.getElementsAnnotatedWith(GeneratePacket.class))
+		for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(GeneratePacket.class)))
 		{
 			if (elem.getKind() == ElementKind.CLASS)
 			{
-				TypeElement type = (TypeElement)elem;
-				
-				Name className = type.getQualifiedName();
-				EnumSides sides = sidesFromClass(type.asType());
-				List<? extends Element> members = elemUtils.getAllMembers(type);
+				Name className = elem.getQualifiedName();
+				EnumSides sides = sidesFromClass(elem.asType());
+				List<? extends Element> members = elemUtils.getAllMembers(elem);
 				try
 				{
 					this.writePacket(className.toString(), sides, members);
 					
-					packetsToRegister.get(sides).add(type.getQualifiedName() + "Message");
+					packetsToRegister.get(sides).add(elem.getQualifiedName() + "Message");
 				}
 				catch (IOException e)
 				{
@@ -137,13 +135,14 @@ public class PacketProcessor extends AbstractProcessor
 					parent = parent.getEnclosingElement();
 				}
 				
-				if (parent.getKind() == ElementKind.PACKAGE) //TODO use ElementVisitor
+				/*if (parent.getKind() == ElementKind.PACKAGE)
 				{
 					networkClass = ((QualifiedNameable)parent).getQualifiedName() + "." + parent.getSimpleName() + "Network";
 				}
-				else if (parent.getKind().isClass() || parent.getKind().isInterface())
+				else */
+				if (parent.getKind().isClass() || parent.getKind().isInterface())
 				{
-					networkClass = ((QualifiedNameable)parent).getQualifiedName() + "Network";
+					networkClass = TypeHelper.asTypeElement(parent).getQualifiedName() + "Network";
 				}
 			}
 			

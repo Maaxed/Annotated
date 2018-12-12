@@ -7,6 +7,7 @@ public class ClassRef
 	
 	public static final String NETWORK_ANNOTATION = MAIN_PACKAGE + ".api.network.GenerateNetwork";
 	public static final String PACKET_ANNOTATION = MAIN_PACKAGE + ".api.network.GeneratePacket";
+	public static final String CONSTSIZE_ANNOTATION = MAIN_PACKAGE + ".api.network.ConstSize";
 	
 	public static final String CLIENT_PACKET = MAIN_PACKAGE + ".api.network.IClientPacket";
 	public static final String SERVER_PACKET = MAIN_PACKAGE + ".api.network.IServerPacket";

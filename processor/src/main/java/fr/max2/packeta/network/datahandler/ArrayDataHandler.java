@@ -13,6 +13,7 @@ import fr.max2.packeta.api.network.ConstSize;
 import fr.max2.packeta.network.DataHandlerParameters;
 import fr.max2.packeta.utils.EmptyAnnotationConstruct;
 import fr.max2.packeta.utils.NamingUtils;
+import fr.max2.packeta.utils.TypeHelper;
 import fr.max2.packeta.utils.ValueInitStatus;
 
 public enum ArrayDataHandler implements IDataHandler
@@ -22,7 +23,9 @@ public enum ArrayDataHandler implements IDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
-		ArrayType arrayType = (ArrayType)params.type;
+		ArrayType arrayType = TypeHelper.asArrayElement(params.type);
+		if (arrayType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not an array");
+		
 		TypeMirror contentType = arrayType.getComponentType();
 		String typeName = NamingUtils.simpleTypeName(contentType);
 		String arrayTypeName = typeName + "[]";
