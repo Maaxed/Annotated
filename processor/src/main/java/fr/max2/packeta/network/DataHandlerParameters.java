@@ -31,7 +31,7 @@ import fr.max2.packeta.utils.ValueInitStatus;
 
 public class DataHandlerParameters
 {
-	public final String simpleName, getExpr, setExpr;
+	public final String simpleName, getExpr, setExpr; //TODO replace setExpr to UnaryOperator<String>
 	public final TypeMirror type;
 	public final AnnotatedConstruct annotations;
 	public final IDataHandler typeHandler;
@@ -90,6 +90,13 @@ public class DataHandlerParameters
 		
 		public DataHandlerParameters getDataType(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, ValueInitStatus initStatus)
 		{
+			DataHandlerParameters params = this.getDataTypeOrNull(simpleName, getExpr, setExpr, type, annotations, initStatus);
+			if (params == null) throw new InvalidParameterException("Unknown default DataHandler for type '" + type + "'");
+			return params;
+		}
+		
+		public DataHandlerParameters getDataTypeOrNull(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, ValueInitStatus initStatus)
+		{
 			CustomData customData = annotations.getAnnotation(CustomData.class);
 			if (customData == null) customData = type.getAnnotation(CustomData.class);
 			if (customData == null && type instanceof DeclaredType) customData = ((DeclaredType)type).asElement().getAnnotation(CustomData.class);
@@ -101,8 +108,7 @@ public class DataHandlerParameters
 			
 			IDataHandler defaultHandler = this.getDefaultDataType(type);
 			
-			if (defaultHandler == SpecialDataHandler.CUSTOM) 
-				throw new InvalidParameterException("Unknown default DataHandler for type '" + type + "'");
+			if (defaultHandler == SpecialDataHandler.CUSTOM) return null;
 			
 			return new DataHandlerParameters(simpleName, getExpr, setExpr, type, annotations, defaultHandler, initStatus, this);
 		}
@@ -144,6 +150,10 @@ public class DataHandlerParameters
 		TYPE_TO_HANDLER.put(DataType.STACK, SimpleClassHandler.STACK);
 		
 		TYPE_TO_HANDLER.put(DataType.COLLECTION, CollectionDataHandler.INSTANCE);
+		
+		TYPE_TO_HANDLER.put(DataType.WILDCARD, SpecialDataHandler.WILDCRD);
+		TYPE_TO_HANDLER.put(DataType.TYPE_VARIABLE, SpecialDataHandler.VARIABLE_TYPE);
+		TYPE_TO_HANDLER.put(DataType.INTERSECTION, SpecialDataHandler.INTERSECTION);
 		
 		TYPE_TO_HANDLER.put(DataType.DEFAULT, SpecialDataHandler.DEFAULT);
 		TYPE_TO_HANDLER.put(DataType.CUSTOM, SpecialDataHandler.CUSTOM);

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,12 +30,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.UnionType;
-import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -46,8 +40,6 @@ import fr.max2.packeta.api.network.GenerateNetwork;
 import fr.max2.packeta.api.network.GeneratePacket;
 import fr.max2.packeta.network.DataHandlerParameters;
 import fr.max2.packeta.utils.ClassRef;
-import fr.max2.packeta.utils.DefaultElementVisitor;
-import fr.max2.packeta.utils.DefaultTypeVisitor;
 import fr.max2.packeta.utils.EnumSides;
 import fr.max2.packeta.utils.ExceptionUtils;
 import fr.max2.packeta.utils.NamingUtils;
@@ -198,7 +190,7 @@ public class PacketProcessor extends AbstractProcessor
 		
 		sides.addImports(imports);
 		
-		fields.forEach(f -> addTypeImports(f.asType(), imports::add));
+		fields.forEach(f -> TypeHelper.addTypeImports(f.asType(), imports::add));
 		
 		dataHandlers.forEach(handler -> handler.addInstructions(saveInstructions::add, loadInstructions::add, imports::add));
 		
@@ -272,116 +264,6 @@ public class PacketProcessor extends AbstractProcessor
 		m.appendTail(sb);
 		
 		return sb.toString();
-	}
-	
-	private static void addTypeImports(TypeMirror type,  Consumer<String> imports)
-	{
-		TypeImporter.INSTANCE.visit(type, imports);
-	}
-	
-	private static enum TypeImporter implements DefaultTypeVisitor<Void, Consumer<String>>, DefaultElementVisitor<Void, Consumer<String>>
-	{
-		INSTANCE;
-		
-		// TypeVisitor
-		@Override
-		public Void visit(TypeMirror t, Consumer<String> imports)
-		{
-			return imports == null ? this.visit(t) : t.accept(this, imports);
-		}
-		
-		@Override
-		public Void visit(TypeMirror t)
-		{
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public Void visitArray(ArrayType t, Consumer<String> imports)
-		{
-			this.visit(t.getComponentType(), imports);
-			return null;
-		}
-		
-		@Override
-		public Void visitDeclared(DeclaredType t, Consumer<String> imports)
-		{
-			this.visit(t.asElement(), imports);
-			
-			for (TypeMirror subType : t.getTypeArguments())
-			{
-				this.visit(subType, imports);
-			}
-			return null;
-		}
-		
-		@Override
-		public Void visitWildcard(WildcardType t, Consumer<String> imports)
-		{
-			TypeMirror extendsBound = t.getExtendsBound();
-			TypeMirror superBound = t.getSuperBound();
-			
-			if (extendsBound != null) this.visit(extendsBound, imports);
-			if (superBound != null) this.visit(superBound, imports);
-			return null;
-		}
-		
-		@Override
-		public Void visitUnion(UnionType t, Consumer<String> imports)
-		{
-			for (TypeMirror subType : t.getAlternatives())
-			{
-				addTypeImports(subType, imports);
-			}
-			return null;
-		}
-		
-		@Override
-		public Void visitIntersection(IntersectionType t, Consumer<String> imports)
-		{
-			for (TypeMirror subType : t.getBounds())
-			{
-				addTypeImports(subType, imports);
-			}
-			return null;
-		}
-		
-		@Override
-		public Void visitDefault(TypeMirror t, Consumer<String> imports)
-		{
-			return null;
-		}
-		
-		//ElementVisitor
-		@Override
-		public Void visit(Element e, Consumer<String> imports)
-		{
-			return imports == null ? this.visit(e) : e.accept(this, imports);
-		}
-		
-		@Override
-		public Void visit(Element e)
-		{
-			throw new UnsupportedOperationException();
-		}
-		
-		@Override
-		public Void visitType(TypeElement e, Consumer<String> imports)
-		{
-			String name = e.getQualifiedName().toString();
-			if (!name.startsWith("java.lang"))
-			{
-				imports.accept(name);
-			}
-			return null;
-		}
-		
-		@Override
-		public Void visitDefault(Element e, Consumer<String> imports)
-		{
-			return null;
-		}
-		
 	}
 	
 }

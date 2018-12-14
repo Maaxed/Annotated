@@ -18,4 +18,5 @@ public class ClassRef
 	public static final String SERVER_MESSAGE = MAIN_PACKAGE + ".network." + SERVER_MESSAGE_NAME;
 	
 	public static final String FORGE_MOD_ANNOTATION = "net.minecraftforge.fml.common.Mod";
+	public static final String NBT_SERIALIZABLE_INTERFACE = "net.minecraftforge.common.util.INBTSerializable";
 }

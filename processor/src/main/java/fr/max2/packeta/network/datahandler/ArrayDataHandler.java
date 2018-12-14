@@ -23,17 +23,13 @@ public enum ArrayDataHandler implements IDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
-		ArrayType arrayType = TypeHelper.asArrayElement(params.type);
+		ArrayType arrayType = TypeHelper.asArrayType(params.type);
 		if (arrayType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not an array");
 		
 		TypeMirror contentType = arrayType.getComponentType();
 		String typeName = NamingUtils.simpleTypeName(contentType);
-		String arrayTypeName = typeName + "[]";
 		
 		boolean constSize = params.annotations.getAnnotation(ConstSize.class) != null || params.type.getAnnotation(ConstSize.class) != null;
-		
-		int i;
-		for (i = arrayTypeName.length() - 2; i >= 2 && arrayTypeName.substring(i - 2, i).equals("[]"); i-=2);
 		
 		String elementVarName = params.simpleName + "Element";
 		if (!constSize) saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.getExpr + ".length"));
@@ -49,6 +45,11 @@ public enum ArrayDataHandler implements IDataHandler
 		}
 		else
 		{
+			String arrayTypeName = typeName + "[]";
+			
+			int i;
+			for (i = arrayTypeName.length() - 2; i >= 2 && arrayTypeName.substring(i - 2, i).equals("[]"); i-=2);
+			
 			lenghtVarName = params.simpleName + "Length";
 			loadInstructions.accept(DataHandlerUtils.readBuffer("Int", "int " + lenghtVarName));
 			loadInstructions.accept(params.firstSetInit() + " = new " + arrayTypeName.substring(0, i + 1) + lenghtVarName + arrayTypeName.substring(i + 1) + ";" );

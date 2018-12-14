@@ -24,6 +24,11 @@ public class NamingUtils
 		return simpleTypeName(type, false);
 	}
 	
+	public static String simplifiedTypeName(TypeMirror type)
+	{
+		return simpleTypeName(type, false);
+	}
+	
 	public static String simpleTypeName(TypeMirror type, boolean simplifyGenerics)
 	{
 		StringBuilder builder = new StringBuilder();
