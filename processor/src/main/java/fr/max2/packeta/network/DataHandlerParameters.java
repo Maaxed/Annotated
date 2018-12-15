@@ -8,6 +8,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -26,12 +27,12 @@ import fr.max2.packeta.network.datahandler.IDataHandler;
 import fr.max2.packeta.network.datahandler.PrimitiveDataHandler;
 import fr.max2.packeta.network.datahandler.SimpleClassHandler;
 import fr.max2.packeta.network.datahandler.SpecialDataHandler;
-import fr.max2.packeta.utils.NamingUtils;
 import fr.max2.packeta.utils.ValueInitStatus;
 
 public class DataHandlerParameters
 {
-	public final String simpleName, getExpr, setExpr; //TODO replace setExpr to UnaryOperator<String>
+	public final String simpleName, saveAccessExpr, loadAccessExpr;
+	public final UnaryOperator<String> setExpr;
 	public final TypeMirror type;
 	public final AnnotatedConstruct annotations;
 	public final IDataHandler typeHandler;
@@ -39,10 +40,11 @@ public class DataHandlerParameters
 	public final Finder finder;
 	public final String[] parameters;
 	
-	public DataHandlerParameters(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, IDataHandler typeHandler, ValueInitStatus initStatus, Finder finder, String... parameters)
+	public DataHandlerParameters(String simpleName, String saveGetExpr, String loadGetExpr, UnaryOperator<String> setExpr, TypeMirror type, AnnotatedConstruct annotations, IDataHandler typeHandler, ValueInitStatus initStatus, Finder finder, String... parameters)
 	{
 		this.simpleName = simpleName;
-		this.getExpr = getExpr;
+		this.saveAccessExpr = saveGetExpr;
+		this.loadAccessExpr = loadGetExpr;
 		this.setExpr = setExpr;
 		this.type = type;
 		this.annotations = annotations;
@@ -52,15 +54,15 @@ public class DataHandlerParameters
 		this.parameters = parameters;
 	}
 	
-	public DataHandlerParameters(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, ValueInitStatus hasDefaultValue, Finder finder)
+	public DataHandlerParameters(String simpleName, String saveGetExpr, String loadGetExpr, UnaryOperator<String> setExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, ValueInitStatus hasDefaultValue, Finder finder)
 	{
-		this(simpleName, getExpr, setExpr, type, annotations, dataTypeToHandler(data.type()), hasDefaultValue, finder, data.value());
+		this(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations, dataTypeToHandler(data.type()), hasDefaultValue, finder, data.value());
 	}
 
-	public String firstSetInit()
+	/*public String firstSetInit()
 	{
 		return this.initStatus.isDeclared() ? this.setExpr : NamingUtils.simpleTypeName(this.type) + " " + this.setExpr;
-	}
+	}*/
 	
 	public void addInstructions(Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
@@ -84,18 +86,19 @@ public class DataHandlerParameters
 		}
 		
 		public DataHandlerParameters getDataType(Element field)
-		{
-			return this.getDataType(field.getSimpleName().toString(), "this." + field.getSimpleName(), "this." + field.getSimpleName(), field.asType(), field, ValueInitStatus.INITIALISED);
+		{//TODO special case for setExpr if undefined status
+			String setExpr = "this." + field.getSimpleName() + " = ";
+			return this.getDataType(field.getSimpleName().toString(), "this." + field.getSimpleName(), "this." + field.getSimpleName(), value -> setExpr + value + ";", field.asType(), field, ValueInitStatus.INITIALISED);
 		}
 		
-		public DataHandlerParameters getDataType(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, ValueInitStatus initStatus)
+		public DataHandlerParameters getDataType(String simpleName, String saveGetExpr, String loadGetExpr, UnaryOperator<String> setExpr, TypeMirror type, AnnotatedConstruct annotations, ValueInitStatus initStatus)
 		{
-			DataHandlerParameters params = this.getDataTypeOrNull(simpleName, getExpr, setExpr, type, annotations, initStatus);
+			DataHandlerParameters params = this.getDataTypeOrNull(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations, initStatus);
 			if (params == null) throw new InvalidParameterException("Unknown default DataHandler for type '" + type + "'");
 			return params;
 		}
 		
-		public DataHandlerParameters getDataTypeOrNull(String simpleName, String getExpr, String setExpr, TypeMirror type, AnnotatedConstruct annotations, ValueInitStatus initStatus)
+		public DataHandlerParameters getDataTypeOrNull(String simpleName, String saveGetExpr, String loadGetExpr, UnaryOperator<String> setExpr, TypeMirror type, AnnotatedConstruct annotations, ValueInitStatus initStatus)
 		{
 			CustomData customData = annotations.getAnnotation(CustomData.class);
 			if (customData == null) customData = type.getAnnotation(CustomData.class);
@@ -103,14 +106,14 @@ public class DataHandlerParameters
 			
 			if (customData != null)
 			{
-				return new DataHandlerParameters(simpleName, getExpr, setExpr, type, annotations, customData, initStatus, this);
+				return new DataHandlerParameters(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations, customData, initStatus, this);
 			}
 			
 			IDataHandler defaultHandler = this.getDefaultDataType(type);
 			
 			if (defaultHandler == SpecialDataHandler.CUSTOM) return null;
 			
-			return new DataHandlerParameters(simpleName, getExpr, setExpr, type, annotations, defaultHandler, initStatus, this);
+			return new DataHandlerParameters(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations, defaultHandler, initStatus, this);
 		}
 		
 		public IDataHandler getDefaultDataType(TypeMirror type)

@@ -45,7 +45,7 @@ import fr.max2.packeta.utils.ExceptionUtils;
 import fr.max2.packeta.utils.NamingUtils;
 import fr.max2.packeta.utils.TypeHelper;
 
-@SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION, ClassRef.FORGE_MOD_ANNOTATION, ClassRef.CONSTSIZE_ANNOTATION})
+@SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION/*, ClassRef.FORGE_MOD_ANNOTATION, ClassRef.CONSTSIZE_ANNOTATION*/})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {

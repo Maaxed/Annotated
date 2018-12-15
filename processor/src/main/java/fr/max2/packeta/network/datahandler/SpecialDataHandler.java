@@ -29,7 +29,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			if (extendsBound == null) throw new IllegalArgumentException("The wildcard type '" + params.type + "' has no extends bound");
 			
-			params.finder.getDataType(params.simpleName, params.getExpr, params.setExpr, extendsBound, params.annotations, params.initStatus).addInstructions(saveInstructions, loadInstructions, imports);
+			params.finder.getDataType(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, extendsBound, params.annotations, params.initStatus).addInstructions(saveInstructions, loadInstructions, imports);
 		}
 
 		@Override
@@ -48,7 +48,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			TypeMirror extendsBound = wildcardType.getUpperBound();
 			
-			params.finder.getDataType(params.simpleName, params.getExpr, params.setExpr, extendsBound, params.annotations, params.initStatus).addInstructions(saveInstructions, loadInstructions, imports);
+			params.finder.getDataType(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, extendsBound, params.annotations, params.initStatus).addInstructions(saveInstructions, loadInstructions, imports);
 		}
 
 		@Override
@@ -70,7 +70,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			for (TypeMirror type : intersectionType.getBounds())
 			{
-				DataHandlerParameters newParams = params.finder.getDataTypeOrNull(params.simpleName, params.getExpr, params.setExpr, type, params.annotations, initStatus);
+				DataHandlerParameters newParams = params.finder.getDataTypeOrNull(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, type, params.annotations, initStatus);
 				if (newParams != null)
 				{
 					newParams.addInstructions(saveInstructions, loadInstructions, imports);
@@ -96,7 +96,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			DataHandlerParameters handler = new DataHandlerParameters(params.simpleName, params.getExpr, params.setExpr, params.type, params.annotations, params.finder.getDefaultDataType(params.type), params.initStatus, params.finder, params.parameters);
+			DataHandlerParameters handler = new DataHandlerParameters(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, params.type, params.annotations, params.finder.getDefaultDataType(params.type), params.initStatus, params.finder, params.parameters);
 			handler.addInstructions(saveInstructions, loadInstructions, imports);
 		}
 	},

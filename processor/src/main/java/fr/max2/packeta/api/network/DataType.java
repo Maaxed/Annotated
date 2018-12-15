@@ -25,7 +25,7 @@ public enum DataType
 	NBT_COMPOUND,
 	STACK,
 	COLLECTION,
-	//TODO NBT tags
+	//TODO NBT tags, BlockPos, registry value
 	//TODO INBTSerializable, IByteSerialisable
 	//TODO Entity + EntityPlayer
 	//TODO other data/packet class

@@ -39,7 +39,7 @@ public enum PrimitiveDataHandler implements INamedDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
-		DataHandlerUtils.addBufferInstructions(this.primitiveName, params.getExpr, params.firstSetInit(), saveInstructions, loadInstructions);
+		DataHandlerUtils.addBufferInstructions(this.primitiveName, params.saveAccessExpr, params.setExpr, saveInstructions, loadInstructions);
 	}
 	
 	@Override

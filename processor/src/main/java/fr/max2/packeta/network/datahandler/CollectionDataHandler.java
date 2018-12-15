@@ -29,18 +29,12 @@ public enum CollectionDataHandler implements INamedDataHandler
 		boolean constSize = params.annotations.getAnnotation(ConstSize.class) != null || params.type.getAnnotation(ConstSize.class) != null;
 		
 		String elementVarName = params.simpleName + "Element";
-		if (!constSize) saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.getExpr + ".size()"));
-		saveInstructions.accept("for (" + typeName + " " + elementVarName + " : " + params.getExpr + ")");
+		if (!constSize) saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"));
+		saveInstructions.accept("for (" + typeName + " " + elementVarName + " : " + params.saveAccessExpr + ")");
 		saveInstructions.accept("{");
 		
 		String lenghtVarName = params.simpleName + "Length";
 		String indexVarName = params.simpleName + "Index";
-		
-		if (!params.initStatus.isInitialised())
-		{
-			String simplifiedName = NamingUtils.simplifiedTypeName(contentType);
-			loadInstructions.accept(params.firstSetInit() + " = new " + simplifiedName + "()");
-		}
 		
 		if (constSize)
 		{
@@ -48,7 +42,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		}
 		else
 		{
-			loadInstructions.accept(DataHandlerUtils.readBuffer("Int", "int " + lenghtVarName));
+			loadInstructions.accept("int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";");
 		}
 		
 		if (params.initStatus.isInitialised())
@@ -57,13 +51,13 @@ public enum CollectionDataHandler implements INamedDataHandler
 		}
 		else
 		{
-			loadInstructions.accept(params.firstSetInit() + " = new " + NamingUtils.simpleTypeName(params.type, true) + "();" ); //TODO use parameters to use the right class
+			loadInstructions.accept(params.setExpr.apply("new " + NamingUtils.simpleTypeName(params.type, true) + "()")); //TODO use parameters to use the right class
 		}
 		
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
 		loadInstructions.accept("{");
 		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, elementVarName, contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.UNDEFINED);
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, elementVarName, value -> elementVarName + " = " + value + ";", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.UNDEFINED);
 		contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
 		
 		saveInstructions.accept("}");

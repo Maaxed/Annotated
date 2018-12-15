@@ -32,8 +32,8 @@ public enum ArrayDataHandler implements IDataHandler
 		boolean constSize = params.annotations.getAnnotation(ConstSize.class) != null || params.type.getAnnotation(ConstSize.class) != null;
 		
 		String elementVarName = params.simpleName + "Element";
-		if (!constSize) saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.getExpr + ".length"));
-		saveInstructions.accept("for (" + typeName + " " + elementVarName + " : " + params.getExpr + ")");
+		if (!constSize) saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".length"));
+		saveInstructions.accept("for (" + typeName + " " + elementVarName + " : " + params.saveAccessExpr + ")");
 		saveInstructions.accept("{");
 		
 		String lenghtVarName;
@@ -51,14 +51,15 @@ public enum ArrayDataHandler implements IDataHandler
 			for (i = arrayTypeName.length() - 2; i >= 2 && arrayTypeName.substring(i - 2, i).equals("[]"); i-=2);
 			
 			lenghtVarName = params.simpleName + "Length";
-			loadInstructions.accept(DataHandlerUtils.readBuffer("Int", "int " + lenghtVarName));
-			loadInstructions.accept(params.firstSetInit() + " = new " + arrayTypeName.substring(0, i + 1) + lenghtVarName + arrayTypeName.substring(i + 1) + ";" );
+			loadInstructions.accept("int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";");
+			loadInstructions.accept(params.setExpr.apply("new " + arrayTypeName.substring(0, i + 1) + lenghtVarName + arrayTypeName.substring(i + 1)));
 		}
 		
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
 		loadInstructions.accept("{");
 		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, params.setExpr + "[" + indexVarName + "]", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.DECLARED);
+		String getLoadExpr = params.loadAccessExpr + "[" + indexVarName + "] = ";
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, elementVarName, value -> getLoadExpr + value + ";", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.DECLARED);
 		contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
 		
 		saveInstructions.accept("}");

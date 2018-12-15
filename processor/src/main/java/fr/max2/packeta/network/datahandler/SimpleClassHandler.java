@@ -13,7 +13,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			DataHandlerUtils.addBufferUtilsInstructions("UTF8String", params.getExpr, params.firstSetInit(), saveInstructions, loadInstructions, imports);
+			DataHandlerUtils.addBufferUtilsInstructions("UTF8String", params.saveAccessExpr, params.setExpr, saveInstructions, loadInstructions, imports);
 		}
 	},
 	ENUM(Enum.class)
@@ -21,9 +21,9 @@ public enum SimpleClassHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.getExpr + ".ordinal()"));
+			saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".ordinal()"));
 			
-			loadInstructions.accept(params.firstSetInit() + " = " + NamingUtils.simpleTypeName(params.type) + ".values()[buf.readInt()];");
+			loadInstructions.accept(params.setExpr.apply(NamingUtils.simpleTypeName(params.type) + ".values()[buf.readInt()]"));
 		}
 	},
 	UUID(UUID.class)
@@ -31,10 +31,10 @@ public enum SimpleClassHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			saveInstructions.accept(DataHandlerUtils.writeBuffer("Long", params.getExpr + ".getMostSignificantBits()"));
-			saveInstructions.accept(DataHandlerUtils.writeBuffer("Long", params.getExpr + ".getLeastSignificantBits()"));
+			saveInstructions.accept(DataHandlerUtils.writeBuffer("Long", params.saveAccessExpr + ".getMostSignificantBits()"));
+			saveInstructions.accept(DataHandlerUtils.writeBuffer("Long", params.saveAccessExpr + ".getLeastSignificantBits()"));
 			
-			loadInstructions.accept(params.firstSetInit() + " = new UUID(buf.readLong(), buf.readLong());");
+			loadInstructions.accept(params.setExpr.apply("new UUID(buf.readLong(), buf.readLong())"));
 		}
 	},
 	NBT_COMPOUND("net.minecraft.nbt.NBTTagCompound")
@@ -42,7 +42,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			DataHandlerUtils.addBufferUtilsInstructions("Tag", params.getExpr, params.firstSetInit(), saveInstructions, loadInstructions, imports);
+			DataHandlerUtils.addBufferUtilsInstructions("Tag", params.saveAccessExpr, params.setExpr, saveInstructions, loadInstructions, imports);
 		}
 	},
 	STACK("net.minecraft.item.ItemStack")
@@ -50,7 +50,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			DataHandlerUtils.addBufferUtilsInstructions("ItemStack", params.getExpr, params.firstSetInit(), saveInstructions, loadInstructions, imports);
+			DataHandlerUtils.addBufferUtilsInstructions("ItemStack", params.saveAccessExpr, params.setExpr, saveInstructions, loadInstructions, imports);
 		}
 	};
 	
