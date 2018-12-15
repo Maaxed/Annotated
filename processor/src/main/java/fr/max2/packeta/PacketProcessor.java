@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -34,6 +35,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 import fr.max2.packeta.api.network.GenerateNetwork;
@@ -60,10 +62,16 @@ public class PacketProcessor extends AbstractProcessor
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
 	{
+		Messager logs = this.processingEnv.getMessager();
+		
+		logs.printMessage(Kind.NOTE, "Starting " + this.getClass().getCanonicalName() + " annotation processos !");
+		
 		Set<? extends Element> networkAnnotations = roundEnv.getElementsAnnotatedWith(GenerateNetwork.class);
 		
 		if (networkAnnotations.size() > 1)
 		{
+			logs.printMessage(Kind.ERROR, "Multiple '" + GenerateNetwork.class.getCanonicalName() + "' annotations have been detected. The processor only suport one network currently.");
+			
 			throw new RuntimeException("The annotation '" + ClassRef.NETWORK_ANNOTATION + "' cannot be used twice.");
 		}
 		
@@ -80,8 +88,10 @@ public class PacketProcessor extends AbstractProcessor
 		{
 			if (elem.getKind() == ElementKind.CLASS)
 			{
+				logs.printMessage(Kind.NOTE, "Processing packet class generation", elem);
+				
 				Name className = elem.getQualifiedName();
-				EnumSides sides = sidesFromClass(elem.asType());
+				EnumSides sides = sidesFromClass(elem);
 				List<? extends Element> members = elemUtils.getAllMembers(elem);
 				try
 				{
@@ -91,6 +101,8 @@ public class PacketProcessor extends AbstractProcessor
 				}
 				catch (IOException e)
 				{
+					logs.printMessage(Kind.ERROR, "An error has occured during the generation of the packet class", elem);
+					
 					throw new UncheckedIOException(e);
 				}
 			}
@@ -99,6 +111,8 @@ public class PacketProcessor extends AbstractProcessor
 		if (networkAnnotations.size() == 1)
 		{
 			Element networkElement = networkAnnotations.iterator().next();
+			logs.printMessage(Kind.NOTE, "Processing network class generation", networkElement);
+			
 			GenerateNetwork networkAnnotation = networkElement.getAnnotation(GenerateNetwork.class);
 			
 			String networkClass = networkAnnotation.className();
@@ -144,14 +158,19 @@ public class PacketProcessor extends AbstractProcessor
 			}
 			catch (IOException e)
 			{
+				logs.printMessage(Kind.ERROR, "Error writing the network class (class name : " + networkClass + ", network name : " + networkName + ")", networkElement);
 				throw new UncheckedIOException(e);
 			}
 		}
+		
+		logs.printMessage(Kind.NOTE, "End of the " + this.getClass().getCanonicalName() + " annotation processos !");
+		
 		return true;
 	}
 	
-	public EnumSides sidesFromClass(TypeMirror type)
+	public EnumSides sidesFromClass(TypeElement elem)
 	{
+		TypeMirror type = elem.asType();
 		Elements elemUtils = this.processingEnv.getElementUtils();
 		Types typeUtils = this.processingEnv.getTypeUtils();
 		
@@ -171,6 +190,7 @@ public class PacketProcessor extends AbstractProcessor
 		}
 		else
 		{
+			this.processingEnv.getMessager().printMessage(Kind.ERROR, "The packet data class diesn't implement any of the requested interfaces", elem);
 			throw new IllegalArgumentException();
 		}
 	}
@@ -192,7 +212,18 @@ public class PacketProcessor extends AbstractProcessor
 		
 		fields.forEach(f -> TypeHelper.addTypeImports(f.asType(), imports::add));
 		
-		dataHandlers.forEach(handler -> handler.addInstructions(saveInstructions::add, loadInstructions::add, imports::add));
+		Messager logs = this.processingEnv.getMessager();
+		dataHandlers.forEach(handler -> {
+			if (handler.annotations instanceof Element)
+			{
+				logs.printMessage(Kind.NOTE, "Processing field '" + handler.simpleName + "' with DataHandler '" + handler.typeHandler + "'", (Element)handler.annotations);
+			}
+			else
+			{
+				logs.printMessage(Kind.NOTE, "Processing field '" + handler.simpleName + "' with DataHandler '" + handler.typeHandler + "'");
+			}
+			handler.addInstructions(saveInstructions::add, loadInstructions::add, imports::add);
+		});
 		
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", className.substring(0, packageSeparator));
@@ -204,7 +235,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("fromBytes", loadInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports", imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 
-		this.writeFileFromTemplaTe(className + "Message", "templates/TemplatePacket.jvtp", replacements);
+		this.writeFileFromTemplate(className + "Message", "templates/TemplatePacket.jvtp", replacements);
 	}
 	
 	private void writeNetwork(String networkClass, String networkName, Map<EnumSides, Collection<String>> packetsToRegister) throws IOException
@@ -220,7 +251,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("registerPackets", packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(packetName -> registerPacketInstruction(entry.getKey(), NamingUtils.simpleName(packetName)))).collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports"		  , packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream()).map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		
-		this.writeFileFromTemplaTe(networkClass, "templates/TemplateNetwork.jvtp", replacements);
+		this.writeFileFromTemplate(networkClass, "templates/TemplateNetwork.jvtp", replacements);
 	}
 	
 	private static String registerPacketInstruction(EnumSides sides, String packetClass)
@@ -228,10 +259,12 @@ public class PacketProcessor extends AbstractProcessor
 		return "NETWORK.register" + sides.getSimpleName() + "(" + packetClass + ".class);";
 	}
 	
-	private void writeFileFromTemplaTe(String className, String templateFile, Map<String, String> replacements) throws IOException
+	private void writeFileFromTemplate(String className, String templateFile, Map<String, String> replacements) throws IOException
 	{
 		try
 		{
+			this.processingEnv.getMessager().printMessage(Kind.NOTE, "Generation file '" + className + "' from tmplate '" + templateFile + "'");
+			
 			JavaFileObject file = this.processingEnv.getFiler().createSourceFile(className);
 			Writer writer = file.openWriter();
 			
@@ -244,6 +277,7 @@ public class PacketProcessor extends AbstractProcessor
 		}
 		catch (IOException e)
 		{
+			this.processingEnv.getMessager().printMessage(Kind.ERROR, "An error occured during the generation of the file '" + className + "' from tmplate '" + templateFile + "'");
 			throw new UncheckedIOException(e);
 		}
 		
