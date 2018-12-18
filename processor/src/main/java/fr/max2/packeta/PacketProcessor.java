@@ -293,6 +293,7 @@ public class PacketProcessor extends AbstractProcessor
 		{
 			String key = m.group(1);
 			String rep = replacements.get(key);
+			
 		    m.appendReplacement(sb, rep == null ? key : rep);
 		}
 		m.appendTail(sb);

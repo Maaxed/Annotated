@@ -38,7 +38,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		if (constSize)
 		{
-			loadInstructions.accept("int " + lenghtVarName + " = " + params.setExpr + ".size();");
+			loadInstructions.accept("int " + lenghtVarName + " = " + params.loadAccessExpr + ".size();");
 		}
 		else
 		{
@@ -47,7 +47,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		if (params.initStatus.isInitialised())
 		{
-			loadInstructions.accept(params.setExpr + ".clear();" );
+			loadInstructions.accept(params.loadAccessExpr + ".clear();" );
 		}
 		else
 		{
@@ -57,12 +57,10 @@ public enum CollectionDataHandler implements INamedDataHandler
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
 		loadInstructions.accept("{");
 		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, elementVarName, value -> elementVarName + " = " + value + ";", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.UNDEFINED);
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, params.loadAccessExpr + ".get(" + indexVarName + ")", value -> params.loadAccessExpr + ".add(" + value + ");", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.UNDEFINED);
 		contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
 		
 		saveInstructions.accept("}");
-		
-		loadInstructions.accept("\t" + params.setExpr + ".add(" + elementVarName + ");");
 		loadInstructions.accept("}");
 	}
 

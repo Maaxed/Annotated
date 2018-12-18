@@ -13,7 +13,7 @@ public class DataHandlerUtils
 	
 	public static String readBuffer(String type)
 	{
-		return "buf.read" + type + "();";
+		return "buf.read" + type + "()";
 	}
 	
 	public static void addBufferInstructions(String type, String saveValue, UnaryOperator<String> loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions)
@@ -29,7 +29,7 @@ public class DataHandlerUtils
 
 	public static String readBufferUtils(String type)
 	{
-		return "ByteBufUtils.read" + type + "(buf);";
+		return "ByteBufUtils.read" + type + "(buf)";
 	}
 	
 	public static void addBufferUtilsInstructions(String type, String saveValue, UnaryOperator<String> loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)

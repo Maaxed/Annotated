@@ -161,4 +161,10 @@ public enum NBTDataHandler implements INamedDataHandler
 		return this.className;
 	}
 	
+	@Override
+	public String toString()
+	{
+		return "NBT" + super.toString();
+	}
+	
 }

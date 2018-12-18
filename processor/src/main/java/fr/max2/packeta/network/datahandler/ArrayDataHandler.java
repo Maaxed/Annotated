@@ -58,8 +58,8 @@ public enum ArrayDataHandler implements IDataHandler
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
 		loadInstructions.accept("{");
 		
-		String getLoadExpr = params.loadAccessExpr + "[" + indexVarName + "] = ";
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, elementVarName, value -> getLoadExpr + value + ";", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.DECLARED);
+		String getLoadExpr = params.loadAccessExpr + "[" + indexVarName + "]";
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, getLoadExpr, value -> getLoadExpr + " = " + value + ";", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.DECLARED);
 		contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
 		
 		saveInstructions.accept("}");
