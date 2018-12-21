@@ -7,6 +7,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
 
@@ -32,23 +33,25 @@ public class NamingUtils
 	public static String simpleTypeName(TypeMirror type, boolean simplifyGenerics)
 	{
 		StringBuilder builder = new StringBuilder();
-		new TypeToString(simplifyGenerics, builder).visit(type);
+		TypeToString visitor = simplifyGenerics ? TypeToString.SIMPLIFIED : TypeToString.FULL;
+		visitor.visit(type, builder);
 		return builder.toString();
 	}
 	
-	private static class TypeToString implements DefaultTypeVisitor<Void, Void>
+	private static enum TypeToString implements DefaultTypeVisitor<Void, StringBuilder>
 	{
-		private final boolean simplifyGenerics;
-		private final StringBuilder builder;
+		FULL(false),
+		SIMPLIFIED(true);
 		
-		public TypeToString(boolean simplifyGenerics, StringBuilder builder)
+		private final boolean simplifyGenerics;
+		
+		private TypeToString(boolean simplifyGenerics)
 		{
 			this.simplifyGenerics = simplifyGenerics;
-			this.builder = builder;
 		}
 		
 		@Override
-		public Void visitPrimitive(PrimitiveType t, Void p)
+		public Void visitPrimitive(PrimitiveType t, StringBuilder builder)
 		{
 			builder.append(t.getKind().name().toLowerCase());
 			
@@ -56,7 +59,7 @@ public class NamingUtils
 		}
 
 		@Override
-		public Void visitArray(ArrayType t, Void p)
+		public Void visitArray(ArrayType t, StringBuilder builder)
 		{
 			t.getComponentType().accept(this, null);
 			builder.append("[]");
@@ -65,7 +68,7 @@ public class NamingUtils
 		}
 		
 		@Override
-		public Void visitDeclared(DeclaredType t, Void p)
+		public Void visitDeclared(DeclaredType t, StringBuilder builder)
 		{
 			builder.append(t.asElement().getSimpleName());
 			
@@ -94,7 +97,28 @@ public class NamingUtils
 		}
 		
 		@Override
-		public Void visitWildcard(WildcardType t, Void p)
+		public Void visitTypeVariable(TypeVariable t, StringBuilder builder)
+		{
+			TypeMirror extendsBound = t.getUpperBound();
+			TypeMirror superBound = t.getLowerBound();
+			
+			builder.append(t.asElement().getSimpleName());
+			if (extendsBound != null)
+			{
+				builder.append(" extends ");
+				this.visit(extendsBound);
+			}
+			if (superBound != null)
+			{
+				builder.append(" super ");
+				this.visit(superBound);
+			}
+			
+			return null;
+		}
+		
+		@Override
+		public Void visitWildcard(WildcardType t, StringBuilder builder)
 		{
 			TypeMirror extendsBound = t.getExtendsBound();
 			TypeMirror superBound = t.getSuperBound();
@@ -112,10 +136,10 @@ public class NamingUtils
 			}
 			
 			return null;
-		}
+		}		
 		
 		@Override
-		public Void visitUnion(UnionType t, Void p)
+		public Void visitUnion(UnionType t, StringBuilder builder)
 		{
 			boolean first = true;
 			for (TypeMirror alt : t.getAlternatives())
@@ -132,7 +156,7 @@ public class NamingUtils
 		}
 		
 		@Override
-		public Void visitIntersection(IntersectionType t, Void p)
+		public Void visitIntersection(IntersectionType t, StringBuilder builder)
 		{
 			boolean first = true;
 			for (TypeMirror bound : t.getBounds())
@@ -149,7 +173,7 @@ public class NamingUtils
 		}
 		
 		@Override
-		public Void visitDefault(TypeMirror t, Void p)
+		public Void visitDefault(TypeMirror t, StringBuilder builder)
 		{
 			builder.append(t.toString());
 			

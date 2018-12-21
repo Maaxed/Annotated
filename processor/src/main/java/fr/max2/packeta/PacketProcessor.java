@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -46,8 +47,9 @@ import fr.max2.packeta.utils.EnumSides;
 import fr.max2.packeta.utils.ExceptionUtils;
 import fr.max2.packeta.utils.NamingUtils;
 import fr.max2.packeta.utils.TypeHelper;
+import fr.max2.packeta.utils.Visibility;
 
-@SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION/*, ClassRef.FORGE_MOD_ANNOTATION, ClassRef.CONSTSIZE_ANNOTATION*/})
+@SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {
@@ -82,20 +84,16 @@ public class PacketProcessor extends AbstractProcessor
 			packetsToRegister.put(sides, new ArrayList<>());
 		}
 		
-		Elements elemUtils = this.processingEnv.getElementUtils();
-		
 		for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(GeneratePacket.class)))
 		{
 			if (elem.getKind() == ElementKind.CLASS)
 			{
 				logs.printMessage(Kind.NOTE, "Processing packet class generation", elem);
 				
-				Name className = elem.getQualifiedName();
 				EnumSides sides = sidesFromClass(elem);
-				List<? extends Element> members = elemUtils.getAllMembers(elem);
 				try
 				{
-					this.writePacket(className.toString(), sides, members);
+					this.writePacket(elem, sides);
 					
 					packetsToRegister.get(sides).add(elem.getQualifiedName() + "Message");
 				}
@@ -122,7 +120,7 @@ public class PacketProcessor extends AbstractProcessor
 			{
 				Types typeUtils = this.processingEnv.getTypeUtils();
 				
-				TypeMirror modAnnotationType = elemUtils.getTypeElement(ClassRef.FORGE_MOD_ANNOTATION).asType();
+				TypeMirror modAnnotationType = this.processingEnv.getElementUtils().getTypeElement(ClassRef.FORGE_MOD_ANNOTATION).asType();
 				
 				networkName = networkElement.getAnnotationMirrors().stream()						// all annotations
 					.filter(a -> typeUtils.isSameType(a.getAnnotationType(), modAnnotationType))	// mod annotation
@@ -195,22 +193,34 @@ public class PacketProcessor extends AbstractProcessor
 		}
 	}
 	
-	private void writePacket(String className, EnumSides sides, List<? extends Element> members) throws IOException
+	private void writePacket(TypeElement packetClass, EnumSides sides) throws IOException
 	{
+		List<? extends Element> members = TypeHelper.getAllAccessibleMembers(packetClass, Visibility.PROTECTED);
+		String className = packetClass.getQualifiedName().toString();
 		String ls = System.lineSeparator();
 		
 		int packageSeparator = className.lastIndexOf('.');
+		PackageElement packetPackage = TypeHelper.getPackage(packetClass);
 		
+		//TODO [v1.1] use getters and setters
+		//TODO [v1.0] add the possibility the ignore a field
 		List<VariableElement> fields = ElementFilter.fieldsIn(members).stream().filter(field -> !field.getModifiers().contains(Modifier.STATIC)).collect(Collectors.toList());
 		List<DataHandlerParameters> dataHandlers = fields.stream().map(f -> this.finder.getDataType(f)).collect(Collectors.toList());
 		
-		Set<String> imports = new TreeSet<>();//TODO filter with the current package
+		Set<String> imports = new TreeSet<>();
+		Consumer<String> importFilter = imp -> {
+			TypeElement type = this.processingEnv.getElementUtils().getTypeElement(imp);
+			if (!packetPackage.equals(TypeHelper.getPackage(type)))
+			{
+				imports.add(imp);
+			}
+		};
 		List<String> saveInstructions = new ArrayList<>();
 		List<String> loadInstructions = new ArrayList<>();
 		
-		sides.addImports(imports);
+		sides.addImports(importFilter);
 		
-		fields.forEach(f -> TypeHelper.addTypeImports(f.asType(), imports::add));
+		fields.forEach(f -> TypeHelper.addTypeImports(f.asType(), importFilter));
 		
 		Messager logs = this.processingEnv.getMessager();
 		dataHandlers.forEach(handler -> {
@@ -222,7 +232,7 @@ public class PacketProcessor extends AbstractProcessor
 			{
 				logs.printMessage(Kind.NOTE, "Processing field '" + handler.simpleName + "' with DataHandler '" + handler.typeHandler + "'");
 			}
-			handler.addInstructions(saveInstructions::add, loadInstructions::add, imports::add);
+			handler.addInstructions(saveInstructions::add, loadInstructions::add, importFilter);
 		});
 		
 		Map<String, String> replacements = new HashMap<>();
@@ -231,6 +241,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("interfaces", sides.getInterfaces());
 		replacements.put("allFields" , fields.stream().map(f -> NamingUtils.simpleTypeName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsInit", fields.stream().map(f -> "this." + f.getSimpleName() + " = " + f.getSimpleName() + ";").collect(Collectors.joining(ls + "\t\t")));
+		//TODO [v1.2] use method templates, parameters map
 		replacements.put("toBytes"	, saveInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("fromBytes", loadInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports", imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));

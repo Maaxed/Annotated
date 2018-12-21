@@ -16,7 +16,8 @@ public enum NBTDataHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			//Do nothing, doesn't need to be saved
+			//Just create a new TagEnd, doesn't need to be saved
+			loadInstructions.accept(params.setExpr.apply("new TagEnd()"));
 		}
 	},
 	BYTE("TagByte")
@@ -115,7 +116,7 @@ public enum NBTDataHandler implements INamedDataHandler
 			addCustomInstructions("Primitive", params, saveInstructions, loadInstructions, imports);
 		}
 	},
-	Base("Base")
+	BASE("Base")
 	{
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)

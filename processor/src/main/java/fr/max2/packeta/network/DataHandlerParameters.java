@@ -24,6 +24,7 @@ import fr.max2.packeta.api.network.DataType;
 import fr.max2.packeta.network.datahandler.ArrayDataHandler;
 import fr.max2.packeta.network.datahandler.CollectionDataHandler;
 import fr.max2.packeta.network.datahandler.IDataHandler;
+import fr.max2.packeta.network.datahandler.NBTDataHandler;
 import fr.max2.packeta.network.datahandler.PrimitiveDataHandler;
 import fr.max2.packeta.network.datahandler.SimpleClassHandler;
 import fr.max2.packeta.network.datahandler.SpecialDataHandler;
@@ -31,7 +32,7 @@ import fr.max2.packeta.utils.ValueInitStatus;
 
 public class DataHandlerParameters
 {
-	public final String simpleName, saveAccessExpr, loadAccessExpr;
+	public final String simpleName, saveAccessExpr, loadAccessExpr; //TODO [v1.1] make loadAccessExpr nullable
 	public final UnaryOperator<String> setExpr;
 	public final TypeMirror type;
 	public final AnnotatedConstruct annotations;
@@ -86,7 +87,7 @@ public class DataHandlerParameters
 		}
 		
 		public DataHandlerParameters getDataType(Element field)
-		{//TODO special case for setExpr if undefined status
+		{
 			String setExpr = "this." + field.getSimpleName() + " = ";
 			return this.getDataType(field.getSimpleName().toString(), "this." + field.getSimpleName(), "this." + field.getSimpleName(), value -> setExpr + value + ";", field.asType(), field, ValueInitStatus.INITIALISED);
 		}
@@ -148,11 +149,26 @@ public class DataHandlerParameters
 		
 		TYPE_TO_HANDLER.put(DataType.STRING, SimpleClassHandler.STRING);
 		TYPE_TO_HANDLER.put(DataType.ENUM, SimpleClassHandler.ENUM);
+		TYPE_TO_HANDLER.put(DataType.COLLECTION, CollectionDataHandler.INSTANCE);
 		TYPE_TO_HANDLER.put(DataType.UUID, SimpleClassHandler.UUID);
-		TYPE_TO_HANDLER.put(DataType.NBT_COMPOUND, SimpleClassHandler.NBT_COMPOUND);
+		
 		TYPE_TO_HANDLER.put(DataType.STACK, SimpleClassHandler.STACK);
 		
-		TYPE_TO_HANDLER.put(DataType.COLLECTION, CollectionDataHandler.INSTANCE);
+		TYPE_TO_HANDLER.put(DataType.NBT_END, NBTDataHandler.END);
+		TYPE_TO_HANDLER.put(DataType.NBT_BYTE, NBTDataHandler.BYTE);
+		TYPE_TO_HANDLER.put(DataType.NBT_SHORT, NBTDataHandler.SHORT);
+		TYPE_TO_HANDLER.put(DataType.NBT_INT, NBTDataHandler.INT);
+		TYPE_TO_HANDLER.put(DataType.NBT_LONG, NBTDataHandler.LONG);
+		TYPE_TO_HANDLER.put(DataType.NBT_FLOAT, NBTDataHandler.FLOAT);
+		TYPE_TO_HANDLER.put(DataType.NBT_DOUBLE, NBTDataHandler.DOUBLE);
+		TYPE_TO_HANDLER.put(DataType.NBT_STRING, NBTDataHandler.STRING);
+		TYPE_TO_HANDLER.put(DataType.NBT_BYTE_ARRAY, NBTDataHandler.BYTE_ARRAY);
+		TYPE_TO_HANDLER.put(DataType.NBT_INT_ARRAY, NBTDataHandler.INT_ARRAY);
+		TYPE_TO_HANDLER.put(DataType.NBT_LIST, NBTDataHandler.LIST);
+		TYPE_TO_HANDLER.put(DataType.NBT_COMPOUND, NBTDataHandler.COMPOUND);
+		TYPE_TO_HANDLER.put(DataType.NBT_ANY_NUMBER, NBTDataHandler.PRIMITIVE);
+		TYPE_TO_HANDLER.put(DataType.NBT_ANY, NBTDataHandler.BASE);
+		
 		
 		TYPE_TO_HANDLER.put(DataType.WILDCARD, SpecialDataHandler.WILDCRD);
 		TYPE_TO_HANDLER.put(DataType.TYPE_VARIABLE, SpecialDataHandler.VARIABLE_TYPE);

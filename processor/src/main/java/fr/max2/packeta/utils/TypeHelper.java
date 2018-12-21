@@ -1,9 +1,13 @@
 package fr.max2.packeta.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
@@ -126,6 +130,29 @@ public class TypeHelper
 
 		@Override
 		public IntersectionType visitDefault(TypeMirror t, Void p)
+		{
+			return null;
+		}
+		
+	}
+	
+	public static PackageElement asPackage(Element type)
+	{
+		return PackageElementCaster.INSTANCE.visit(type);
+	}
+	
+	private static enum PackageElementCaster implements DefaultElementVisitor<PackageElement, Void>
+	{
+		INSTANCE;
+		
+		@Override
+		public PackageElement visitPackage(PackageElement e, Void p)
+		{
+			return e;
+		}
+
+		@Override
+		public PackageElement visitDefault(Element e, Void p)
 		{
 			return null;
 		}
@@ -283,5 +310,71 @@ public class TypeHelper
 			return null;
 		}
 		
+	}
+	
+	public static List<Element> getAllAccessibleMembers(TypeElement type, Visibility visibility)
+	{
+		return getAllMembers(type, visibility.filterAtLeast);
+	}
+	
+	public static List<Element> getAllMembers(TypeElement type, Predicate<Element> predicate)
+	{
+		List<Element> elems = new ArrayList<>();
+		
+		visitAllMembers(type, elem -> {
+			if (predicate.test(elem)) elems.add(elem);
+		});
+		
+		return elems;
+	}
+	
+	public static void visitAllMembers(TypeElement type, Consumer<Element> memberConsumer)
+	{
+		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer);
+	}
+	
+	private static enum ElementMemberVisitor implements DefaultElementVisitor<Void, Consumer<Element>>, DefaultTypeVisitor<Void, Consumer<Element>>
+	{
+		INSTANCE;
+
+		// TypeVisitor
+		@Override
+		public Void visitType(TypeElement e, Consumer<Element> p)
+		{
+			this.visit(e.getSuperclass(), p);
+			e.getEnclosedElements().forEach(p);
+			
+			return null;
+		}
+
+		@Override
+		public Void visitDefault(Element e, Consumer<Element> memberConsumer)
+		{
+			return null;
+		}
+
+		//ElementVisitor
+		@Override
+		public Void visitDeclared(DeclaredType t, Consumer<Element> p)
+		{
+			this.visit(t.asElement(), p);
+			return null;
+		}
+		
+		@Override
+		public Void visitDefault(TypeMirror t, Consumer<Element> p)
+		{
+			return null;
+		}
+	}
+
+	public static PackageElement getPackage(TypeElement packetClass)
+	{
+		Element parent = packetClass;
+		while (parent != null && parent.getKind() != ElementKind.PACKAGE)
+		{
+			parent = parent.getEnclosingElement();
+		}
+		return asPackage(parent);
 	}
 }

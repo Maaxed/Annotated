@@ -105,7 +105,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
-			// TODO custom handler
+			//TODO [v1.1] custom handler
 			
 		}
 	};

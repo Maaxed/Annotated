@@ -37,14 +37,6 @@ public enum SimpleClassHandler implements INamedDataHandler
 			loadInstructions.accept(params.setExpr.apply("new UUID(buf.readLong(), buf.readLong())"));
 		}
 	},
-	NBT_COMPOUND("net.minecraft.nbt.NBTTagCompound")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
-		{
-			DataHandlerUtils.addBufferUtilsInstructions("Tag", params.saveAccessExpr, params.setExpr, saveInstructions, loadInstructions, imports);
-		}
-	},
 	STACK("net.minecraft.item.ItemStack")
 	{
 		@Override

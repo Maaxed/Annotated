@@ -1,6 +1,6 @@
 package fr.max2.packeta.utils;
 
-import java.util.Set;
+import java.util.function.Consumer;
 
 public enum EnumSides //Logical side
 {
@@ -48,10 +48,10 @@ public enum EnumSides //Logical side
 		}
 	}
 
-	public void addImports(Set<String> imports)
+	public void addImports(Consumer<String> imports)
 	{
-		if (this.isClient()) imports.add(ClassRef.CLIENT_MESSAGE);
-		if (this.isServer()) imports.add(ClassRef.SERVER_MESSAGE);
+		if (this.isClient()) imports.accept(ClassRef.CLIENT_MESSAGE);
+		if (this.isServer()) imports.accept(ClassRef.SERVER_MESSAGE);
 	}
 	
 }

@@ -16,7 +16,7 @@ import fr.max2.packeta.utils.ValueInitStatus;
 public enum CollectionDataHandler implements INamedDataHandler
 {
 	INSTANCE;
-	//TODO put size in parameters
+	//TODO [v1.1] put size in parameters
 	@Override
 	public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
@@ -51,7 +51,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		}
 		else
 		{
-			loadInstructions.accept(params.setExpr.apply("new " + NamingUtils.simpleTypeName(params.type, true) + "()")); //TODO use parameters to use the right class
+			loadInstructions.accept(params.setExpr.apply("new " + NamingUtils.simpleTypeName(params.type, true) + "()")); //TODO [v1.1] use parameters to use the right class
 		}
 		
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
