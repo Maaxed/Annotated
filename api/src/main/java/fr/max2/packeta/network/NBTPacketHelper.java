@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class NBTPacketHelper
 {
-	public static void saveNBTByteArray(ByteBuf buffer, @Nullable NBTTagByteArray nbt)
+	public static void writeNBTByteArray(ByteBuf buffer, @Nullable NBTTagByteArray nbt)
 	{
 		if (nbt == null)
 		{
@@ -38,7 +38,7 @@ public class NBTPacketHelper
 	}
 	
 	@Nullable
-	public static NBTTagByteArray loadNBTByteArray(ByteBuf buffer)
+	public static NBTTagByteArray readNBTByteArray(ByteBuf buffer)
 	{
 		int size = buffer.readInt();
 		if (size == -1) return null;
@@ -49,7 +49,7 @@ public class NBTPacketHelper
 	}
 	
 	
-	public static void saveNBTIntArray(ByteBuf buffer, @Nullable NBTTagIntArray nbt)
+	public static void writeNBTIntArray(ByteBuf buffer, @Nullable NBTTagIntArray nbt)
 	{
 		if (nbt == null)
 		{
@@ -68,7 +68,7 @@ public class NBTPacketHelper
 	}
 	
 	@Nullable
-	public static NBTTagIntArray loadNBTIntArray(ByteBuf buffer)
+	public static NBTTagIntArray readNBTIntArray(ByteBuf buffer)
 	{
 		int size = buffer.readInt();
 		if (size == -1) return null;
@@ -83,7 +83,7 @@ public class NBTPacketHelper
 	}
 	
 	
-	public static void saveNBTList(ByteBuf buffer, @Nullable NBTTagList nbt)
+	public static void writeNBTList(ByteBuf buffer, @Nullable NBTTagList nbt)
 	{
 		if (nbt == null)
 		{
@@ -100,14 +100,14 @@ public class NBTPacketHelper
 				
 				for (int i = 0; i < size; ++i)
 				{
-					saveNBTData(buffer, nbt.get(i));
+					writeNBTData(buffer, nbt.get(i));
 				}
 			}
 		}
 	}
 	
 	@Nullable
-	public static NBTTagList loadNBTList(ByteBuf buffer)
+	public static NBTTagList readNBTList(ByteBuf buffer)
 	{
 		int type = buffer.readByte();
 		if (type == -1) return null;
@@ -120,14 +120,14 @@ public class NBTPacketHelper
 
         for (int j = 0; j < i; ++j)
         {
-            nbt.appendTag(loadNBTData(buffer, type));
+            nbt.appendTag(readNBTData(buffer, type));
         }
         
         return nbt;
 	}
 	
 	
-	public static void saveNBTTagCompound(ByteBuf buffer, @Nullable NBTTagCompound nbt)
+	public static void writeNBTCompound(ByteBuf buffer, @Nullable NBTTagCompound nbt)
 	{
 		if (nbt == null)
 		{
@@ -144,7 +144,7 @@ public class NBTPacketHelper
 				if (nbtbase.getId() != 0)
 				{
 					ByteBufUtils.writeUTF8String(buffer, s);
-					saveNBTData(buffer, nbtbase);
+					writeNBTData(buffer, nbtbase);
 				}
 			}
 			
@@ -153,7 +153,7 @@ public class NBTPacketHelper
 	}
 	
 	@Nullable
-	public static NBTTagCompound loadNBTTagCompound(ByteBuf buffer)
+	public static NBTTagCompound readNBTCompound(ByteBuf buffer)
 	{
         byte type = buffer.readByte();
 
@@ -164,7 +164,7 @@ public class NBTPacketHelper
         while (type != 0)
         {
             String key = ByteBufUtils.readUTF8String(buffer);
-            NBTBase content = loadNBTData(buffer, type);
+            NBTBase content = readNBTData(buffer, type);
 
             nbt.setTag(key, content);
             type = buffer.readByte();
@@ -174,7 +174,7 @@ public class NBTPacketHelper
 	}
 	
 	
-	public static void saveNBTPrimitive(ByteBuf buffer, @Nullable NBTPrimitive nbt)
+	public static void writeNBTPrimitive(ByteBuf buffer, @Nullable NBTPrimitive nbt)
 	{
 		if (nbt == null) buffer.writeByte(0);
 		else
@@ -207,7 +207,7 @@ public class NBTPacketHelper
 	}
 	
 	@Nullable
-	public static NBTPrimitive loadNBTPrimitive(ByteBuf buffer)
+	public static NBTPrimitive readNBTPrimitive(ByteBuf buffer)
 	{
 		int type = buffer.readByte();
 		switch (type)
@@ -230,26 +230,26 @@ public class NBTPacketHelper
 	}
 	
 	
-	public static void saveNBTBase(ByteBuf buffer, @Nullable NBTBase nbt)
+	public static void writeNBTBase(ByteBuf buffer, @Nullable NBTBase nbt)
 	{
 		if (nbt == null) buffer.writeByte(-1);
 		else
 		{
 			buffer.writeByte(nbt.getId());
-			saveNBTData(buffer, nbt);
+			writeNBTData(buffer, nbt);
 		}
 	}
 	
 	@Nullable
-	public static NBTBase loadNBTBase(ByteBuf buffer)
+	public static NBTBase readNBTBase(ByteBuf buffer)
 	{
 		int type = buffer.readByte();
 		if (type == -1) return null;
-		return loadNBTData(buffer, type);
+		return readNBTData(buffer, type);
 	}
 	
 	
-	private static void saveNBTData(ByteBuf buffer, @Nonnull NBTBase nbt)
+	private static void writeNBTData(ByteBuf buffer, @Nonnull NBTBase nbt)
 	{
 		switch (buffer.readInt())
 		{
@@ -277,17 +277,17 @@ public class NBTPacketHelper
 			break;
 			
 		case NBT.TAG_BYTE_ARRAY:
-			saveNBTByteArray(buffer, (NBTTagByteArray)nbt);
+			writeNBTByteArray(buffer, (NBTTagByteArray)nbt);
 			break;
 		case NBT.TAG_INT_ARRAY:
-			saveNBTIntArray(buffer, (NBTTagIntArray)nbt);
+			writeNBTIntArray(buffer, (NBTTagIntArray)nbt);
 			break;
 			
 		case NBT.TAG_LIST:
-			saveNBTList(buffer, (NBTTagList)nbt);
+			writeNBTList(buffer, (NBTTagList)nbt);
 			break;
 		case NBT.TAG_COMPOUND:
-			saveNBTTagCompound(buffer, (NBTTagCompound)nbt);
+			writeNBTCompound(buffer, (NBTTagCompound)nbt);
 			break;
 		default:
 			break;
@@ -295,7 +295,7 @@ public class NBTPacketHelper
 	}
 	
 	@Nonnull
-	private static NBTBase loadNBTData(ByteBuf buffer, int type)
+	private static NBTBase readNBTData(ByteBuf buffer, int type)
 	{
 		switch (buffer.readInt())
 		{
@@ -316,14 +316,14 @@ public class NBTPacketHelper
 			return new NBTTagString(ByteBufUtils.readUTF8String(buffer));
 			
 		case NBT.TAG_BYTE_ARRAY:
-			return loadNBTByteArray(buffer);
+			return readNBTByteArray(buffer);
 		case NBT.TAG_INT_ARRAY:
-			return loadNBTIntArray(buffer);
+			return readNBTIntArray(buffer);
 			
 		case NBT.TAG_LIST:
-			return loadNBTList(buffer);
+			return readNBTList(buffer);
 		case NBT.TAG_COMPOUND:
-			return loadNBTTagCompound(buffer);
+			return readNBTCompound(buffer);
 		default:
 			return new NBTTagEnd();
 		}

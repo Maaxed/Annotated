@@ -100,7 +100,7 @@ public enum NBTDataHandler implements INamedDataHandler
 			addCustomInstructions("List", params, saveInstructions, loadInstructions, imports);
 		}
 	},
-	COMPOUND("Compound")
+	COMPOUND("TagCompound")
 	{
 		@Override
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
@@ -144,7 +144,7 @@ public enum NBTDataHandler implements INamedDataHandler
 	
 	private static void addCustomInstructions(String type, DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
-		saveInstructions.accept("NBTPacketHelper.writeNBT" + type + "(buf, " + params.saveAccessExpr);
+		saveInstructions.accept("NBTPacketHelper.writeNBT" + type + "(buf, " + params.saveAccessExpr + ");");
 		loadInstructions.accept(params.setExpr.apply("NBTPacketHelper.readNBT" + type + "(buf)"));
 		imports.accept("fr.max2.packeta.network.NBTPacketHelper");
 	}

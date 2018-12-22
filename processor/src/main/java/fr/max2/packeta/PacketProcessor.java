@@ -305,7 +305,14 @@ public class PacketProcessor extends AbstractProcessor
 			String key = m.group(1);
 			String rep = replacements.get(key);
 			
-		    m.appendReplacement(sb, rep == null ? key : rep);
+			try
+			{
+				m.appendReplacement(sb, rep == null ? key : rep);
+			}
+			catch (RuntimeException e)
+			{
+				throw new RuntimeException("Unable tu replace the value of '" + key + "' in line '" + content + "' with '" + rep + "'", e);
+			}
 		}
 		m.appendTail(sb);
 		

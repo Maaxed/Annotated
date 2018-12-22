@@ -61,7 +61,7 @@ public class NamingUtils
 		@Override
 		public Void visitArray(ArrayType t, StringBuilder builder)
 		{
-			t.getComponentType().accept(this, null);
+			this.visit(t.getComponentType(), builder);
 			builder.append("[]");
 			
 			return null;
@@ -86,7 +86,7 @@ public class NamingUtils
 						{
 							builder.append(", ");
 						}
-						this.visit(arg);
+						this.visit(arg, builder);
 						first = false;
 					}
 				}
@@ -106,12 +106,12 @@ public class NamingUtils
 			if (extendsBound != null)
 			{
 				builder.append(" extends ");
-				this.visit(extendsBound);
+				this.visit(extendsBound, builder);
 			}
 			if (superBound != null)
 			{
 				builder.append(" super ");
-				this.visit(superBound);
+				this.visit(superBound, builder);
 			}
 			
 			return null;
@@ -127,12 +127,12 @@ public class NamingUtils
 			if (extendsBound != null)
 			{
 				builder.append(" extends ");
-				this.visit(extendsBound);
+				this.visit(extendsBound, builder);
 			}
 			if (superBound != null)
 			{
 				builder.append(" super ");
-				this.visit(superBound);
+				this.visit(superBound, builder);
 			}
 			
 			return null;
@@ -148,7 +148,7 @@ public class NamingUtils
 				{
 					builder.append(" | ");
 				}
-				this.visit(alt);
+				this.visit(alt, builder);
 				first = false;
 			}
 			
@@ -165,7 +165,7 @@ public class NamingUtils
 				{
 					builder.append(" & ");
 				}
-				this.visit(bound);
+				this.visit(bound, builder);
 				first = false;
 			}
 			
