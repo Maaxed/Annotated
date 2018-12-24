@@ -23,7 +23,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 		{
 			saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".ordinal()"));
 			
-			loadInstructions.accept(params.setExpr.apply(NamingUtils.simpleTypeName(params.type) + ".values()[buf.readInt()]"));
+			params.setExpr.accept(loadInstructions, NamingUtils.simpleTypeName(params.type) + ".values()[buf.readInt()]");
 		}
 	},
 	UUID(UUID.class)
@@ -34,7 +34,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 			saveInstructions.accept(DataHandlerUtils.writeBuffer("Long", params.saveAccessExpr + ".getMostSignificantBits()"));
 			saveInstructions.accept(DataHandlerUtils.writeBuffer("Long", params.saveAccessExpr + ".getLeastSignificantBits()"));
 			
-			loadInstructions.accept(params.setExpr.apply("new UUID(buf.readLong(), buf.readLong())"));
+			params.setExpr.accept(loadInstructions, "new UUID(buf.readLong(), buf.readLong())");
 		}
 	},
 	STACK("net.minecraft.item.ItemStack")

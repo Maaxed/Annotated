@@ -24,11 +24,13 @@ public enum DataType
 	STRING,
 	ENUM,
 	COLLECTION,
+	MAP,
 	UUID,
 	
 	// Minecraft classes
 	//NBT_COMPOUND,
 	STACK,
+	NBT_SERIALIZABLE,
 	NBT_END,
 	NBT_BYTE,
 	NBT_SHORT,
@@ -43,7 +45,6 @@ public enum DataType
 	NBT_COMPOUND,
 	NBT_ANY_NUMBER,
 	NBT_ANY,
-	//TODO [v1.0] maps, INBTSerializable
 	//TODO [v1.1] BlockPos
 	//TODO [v1.1] registry value, IByteSerialisable
 	//TODO [v1.1] Entity + EntityPlayer

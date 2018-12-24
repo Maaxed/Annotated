@@ -330,7 +330,7 @@ public class TypeHelper
 	
 	public static void visitAllMembers(TypeElement type, Consumer<Element> memberConsumer)
 	{
-		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer);
+		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer); //TODO [v1.0] check hiding
 	}
 	
 	private static enum ElementMemberVisitor implements DefaultElementVisitor<Void, Consumer<Element>>, DefaultTypeVisitor<Void, Consumer<Element>>

@@ -1,7 +1,7 @@
 package fr.max2.packeta.network.datahandler;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 public class DataHandlerUtils
 {
@@ -16,10 +16,10 @@ public class DataHandlerUtils
 		return "buf.read" + type + "()";
 	}
 	
-	public static void addBufferInstructions(String type, String saveValue, UnaryOperator<String> loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions)
+	public static void addBufferInstructions(String type, String saveValue, BiConsumer<Consumer<String>, String> loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions)
 	{
 		saveInstructions.accept(writeBuffer(type, saveValue));
-		loadInstructions.accept(loadValue.apply(readBuffer(type)));
+		loadValue.accept(loadInstructions, readBuffer(type));
 	}
 	
 	public static String writeBufferUtils(String type, String value)
@@ -32,10 +32,10 @@ public class DataHandlerUtils
 		return "ByteBufUtils.read" + type + "(buf)";
 	}
 	
-	public static void addBufferUtilsInstructions(String type, String saveValue, UnaryOperator<String> loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
+	public static void addBufferUtilsInstructions(String type, String saveValue, BiConsumer<Consumer<String>, String> loadValue, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
 		saveInstructions.accept(writeBufferUtils(type, saveValue));
-		loadInstructions.accept(loadValue.apply(readBufferUtils(type)));
+		loadValue.accept(loadInstructions, readBufferUtils(type));
 		imports.accept("net.minecraftforge.fml.common.network.ByteBufUtils");
 	}
 	

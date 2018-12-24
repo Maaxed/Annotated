@@ -53,6 +53,7 @@ import fr.max2.packeta.utils.Visibility;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {
+	//TODO [v1.0] make the API a mod
 	private DataHandlerParameters.Finder finder;
 	
 	@Override
@@ -106,6 +107,7 @@ public class PacketProcessor extends AbstractProcessor
 			}
 		}
 		
+		//TODO [v1.2] multi networks
 		if (networkAnnotations.size() == 1)
 		{
 			Element networkElement = networkAnnotations.iterator().next();
@@ -223,6 +225,7 @@ public class PacketProcessor extends AbstractProcessor
 		fields.forEach(f -> TypeHelper.addTypeImports(f.asType(), importFilter));
 		
 		Messager logs = this.processingEnv.getMessager();
+		//TODO [v1.2] use method templates, parameters map
 		dataHandlers.forEach(handler -> {
 			if (handler.annotations instanceof Element)
 			{
@@ -241,7 +244,6 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("interfaces", sides.getInterfaces());
 		replacements.put("allFields" , fields.stream().map(f -> NamingUtils.simpleTypeName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsInit", fields.stream().map(f -> "this." + f.getSimpleName() + " = " + f.getSimpleName() + ";").collect(Collectors.joining(ls + "\t\t")));
-		//TODO [v1.2] use method templates, parameters map
 		replacements.put("toBytes"	, saveInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("fromBytes", loadInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports", imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
@@ -289,7 +291,7 @@ public class PacketProcessor extends AbstractProcessor
 		catch (IOException e)
 		{
 			this.processingEnv.getMessager().printMessage(Kind.ERROR, "An error occured during the generation of the file '" + className + "' from tmplate '" + templateFile + "'");
-			throw new UncheckedIOException(e);
+			throw e;
 		}
 		
 	}

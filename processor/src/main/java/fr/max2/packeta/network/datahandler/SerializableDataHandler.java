@@ -28,10 +28,15 @@ public enum SerializableDataHandler implements INamedDataHandler
 			
 			if (!params.initStatus.isInitialised())
 			{
-				loadInstructions.accept(params.setExpr.apply("new " + NamingUtils.simpleTypeName(params.type, true) + "()"));
+				params.setLoadedValue(loadInstructions, "new " + NamingUtils.simpleTypeName(params.type, true) + "()");
 			}
 			
-			params.finder.getDataType(params.simpleName + "Data", params.saveAccessExpr + ".serializeNBT()", params.saveAccessExpr + ".serializeNBT()", value -> params.loadAccessExpr + ".deserializeNBT(" + value + ");", nbtType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.INITIALISED);
+			params.finder.getDataType(params.simpleName + "Data", params.saveAccessExpr + ".serializeNBT()", params.saveAccessExpr + ".serializeNBT()", (loadInst, value) -> loadInst.accept(params.getLoadAccessExpr() + ".deserializeNBT(" + value + ");"), nbtType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.INITIALISED);
+			
+			if (!params.initStatus.isInitialised())
+			{
+				params.setExpr.accept(loadInstructions, params.simpleName); 
+			}
 		}
 	};
 	

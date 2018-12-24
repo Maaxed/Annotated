@@ -3,7 +3,7 @@ package fr.max2.packeta.test.client.gui;
 import java.io.IOException;
 
 import fr.max2.packeta.test.ModTestPacketa;
-import fr.max2.packeta.test.network.TestDataMessage;
+import fr.max2.packeta.test.network.SimpleDataMessage;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -21,7 +21,7 @@ public class GuiTest extends GuiScreen
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException
 	{
-		TestDataMessage message = new TestDataMessage(button.id);
+		SimpleDataMessage message = new SimpleDataMessage(button.id);
 		
 		ModTestPacketa.MOD_CHANNEL.sendToServer(message);
 		

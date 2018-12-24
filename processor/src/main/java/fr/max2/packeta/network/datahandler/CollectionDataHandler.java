@@ -38,7 +38,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		if (constSize)
 		{
-			loadInstructions.accept("int " + lenghtVarName + " = " + params.loadAccessExpr + ".size();");
+			loadInstructions.accept("int " + lenghtVarName + " = " + params.getLoadAccessExpr() + ".size();");
 		}
 		else
 		{
@@ -47,21 +47,26 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		if (params.initStatus.isInitialised())
 		{
-			loadInstructions.accept(params.loadAccessExpr + ".clear();" );
+			loadInstructions.accept(params.getLoadAccessExpr() + ".clear();" );
 		}
 		else
 		{
-			loadInstructions.accept(params.setExpr.apply("new " + NamingUtils.simpleTypeName(params.type, true) + "()")); //TODO [v1.1] use parameters to use the right class
+			params.setLoadedValue(loadInstructions, "new " + NamingUtils.simpleTypeName(params.type, true) + "()"); //TODO [v1.1] use parameters to use the right class
 		}
 		
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
 		loadInstructions.accept("{");
 		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, params.loadAccessExpr + ".get(" + indexVarName + ")", value -> params.loadAccessExpr + ".add(" + value + ");", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.UNDEFINED);
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, params.getLoadAccessExpr() + ".get(" + indexVarName + ")", (loadInst, value) -> loadInst.accept(params.getLoadAccessExpr() + ".add(" + value + ");"), contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.UNDEFINED);
 		contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
 		
 		saveInstructions.accept("}");
 		loadInstructions.accept("}");
+		
+		if (!params.initStatus.isInitialised() && params.loadAccessExpr == null)
+		{
+			params.setExpr.accept(loadInstructions, params.simpleName); 
+		}
 	}
 
 	@Override

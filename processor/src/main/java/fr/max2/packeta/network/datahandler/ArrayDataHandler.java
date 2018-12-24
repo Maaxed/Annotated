@@ -41,7 +41,7 @@ public enum ArrayDataHandler implements IDataHandler
 		
 		if (constSize)
 		{
-			lenghtVarName = params.simpleName + ".length";
+			lenghtVarName = params.getLoadAccessExpr() + ".length";
 		}
 		else
 		{
@@ -52,19 +52,24 @@ public enum ArrayDataHandler implements IDataHandler
 			
 			lenghtVarName = params.simpleName + "Length";
 			loadInstructions.accept("int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";");
-			loadInstructions.accept(params.setExpr.apply("new " + arrayTypeName.substring(0, i + 1) + lenghtVarName + arrayTypeName.substring(i + 1)));
+			params.setLoadedValue(loadInstructions, "new " + arrayTypeName.substring(0, i + 1) + lenghtVarName + arrayTypeName.substring(i + 1));
 		}
 		
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");
 		loadInstructions.accept("{");
 		
-		String getLoadExpr = params.loadAccessExpr + "[" + indexVarName + "]";
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, getLoadExpr, value -> getLoadExpr + " = " + value + ";", contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.DECLARED);
+		String getLoadExpr = params.getLoadAccessExpr() + "[" + indexVarName + "]";
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, getLoadExpr, (loadInst, value) -> loadInst.accept(getLoadExpr + " = " + value + ";"), contentType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.DECLARED);
 		contentHandler.addInstructions(inst -> saveInstructions.accept("\t" + inst), inst -> loadInstructions.accept("\t" + inst), imports);
 		
 		saveInstructions.accept("}");
 		
 		loadInstructions.accept("}");
+		
+		if (!constSize && params.loadAccessExpr == null)
+		{
+			params.setExpr.accept(loadInstructions, params.simpleName); 
+		}
 	}
 
 	@Override

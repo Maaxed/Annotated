@@ -17,7 +17,7 @@ public enum NBTDataHandler implements INamedDataHandler
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
 			//Just create a new TagEnd, doesn't need to be saved
-			loadInstructions.accept(params.setExpr.apply("new TagEnd()"));
+			params.setExpr.accept(loadInstructions, "new TagEnd()");
 		}
 	},
 	BYTE("TagByte")
@@ -145,7 +145,7 @@ public enum NBTDataHandler implements INamedDataHandler
 	private static void addCustomInstructions(String type, DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 	{
 		saveInstructions.accept("NBTPacketHelper.writeNBT" + type + "(buf, " + params.saveAccessExpr + ");");
-		loadInstructions.accept(params.setExpr.apply("NBTPacketHelper.readNBT" + type + "(buf)"));
+		params.setExpr.accept(loadInstructions, "NBTPacketHelper.readNBT" + type + "(buf)");
 		imports.accept("fr.max2.packeta.network.NBTPacketHelper");
 	}
 	
