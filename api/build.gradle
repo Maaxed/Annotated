@@ -1,4 +1,4 @@
 minecraft {
 	replace "@VERSION@", project.version
-	replaceIn "fr.max2.packeta.ModPacketaLib.java"
+	replaceIn "fr.max2.packeta.lib.ModPacketaLib.java"
 }

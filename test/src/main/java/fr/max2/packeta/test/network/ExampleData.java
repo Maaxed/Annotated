@@ -3,8 +3,8 @@ package fr.max2.packeta.test.network;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import fr.max2.packeta.api.network.GeneratePacket;
-import fr.max2.packeta.api.network.IServerPacket;
+import fr.max2.packeta.api.processor.network.GeneratePacket;
+import fr.max2.packeta.api.lib.network.IServerPacket;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextComponentString;

@@ -2,7 +2,7 @@ package fr.max2.packeta.test;
 
 import static fr.max2.packeta.test.ModTestPacketa.*;
 
-import fr.max2.packeta.api.network.GenerateNetwork;
+import fr.max2.packeta.api.processor.network.GenerateNetwork;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;

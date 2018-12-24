@@ -1,6 +1,6 @@
 package ${package};
 
-import fr.max2.packeta.network.ModNetwork;
+import fr.max2.packeta.lib.network.ModNetwork;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 ${imports}
 public class ${className}

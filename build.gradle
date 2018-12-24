@@ -45,9 +45,19 @@ allprojects {
 	}
 }
 
+task deobfJar(type: Jar) {
+	from project(':api').sourceSets.main.output
+	from project(':processor').sourceSets.main.output
+
+    classifier = 'dev-deobf'
+
+}
+
 jar {
 	from project(':api').sourceSets.main.output
 	from project(':processor').sourceSets.main.output
 	
 	classifier = 'dev'
 }
+
+tasks.assemble.dependsOn('deobfJar')
