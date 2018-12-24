@@ -1,7 +1,9 @@
 package ${package};
 
+import javax.annotation.Generated;
 import io.netty.buffer.ByteBuf;
 ${imports}
+@Generated("fr.max2.packeta.processor.network.PacketProcessor")
 public class ${baseClass}Message extends ${baseClass} implements ${interfaces}
 {
 	

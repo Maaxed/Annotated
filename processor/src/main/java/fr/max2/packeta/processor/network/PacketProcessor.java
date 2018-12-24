@@ -54,7 +54,6 @@ import javax.tools.JavaFileObject;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {
-	//TODO [v1.0] add @Generated annotation
 	private DataHandlerParameters.Finder finder;
 	
 	@Override
