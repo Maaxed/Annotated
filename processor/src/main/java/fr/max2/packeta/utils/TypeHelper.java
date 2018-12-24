@@ -1,12 +1,15 @@
 package fr.max2.packeta.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -16,6 +19,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 public class TypeHelper
@@ -312,17 +316,30 @@ public class TypeHelper
 		
 	}
 	
-	public static List<Element> getAllAccessibleMembers(TypeElement type, Visibility visibility)
+	public static List<Element> getAllAccessibleMembers(TypeElement type, Elements elemUils, Visibility visibility)
 	{
-		return getAllMembers(type, visibility.filterAtLeast);
+		return getAllMembers(type, elemUils, visibility.filterAtLeast);
 	}
 	
-	public static List<Element> getAllMembers(TypeElement type, Predicate<Element> predicate)
+	public static List<Element> getAllMembers(TypeElement type, Elements elemUils, Predicate<Element> predicate)
 	{
 		List<Element> elems = new ArrayList<>();
+		Set<Name> usedNames = new HashSet<>(); //For optimization purposes
 		
 		visitAllMembers(type, elem -> {
-			if (predicate.test(elem)) elems.add(elem);
+			if (predicate.test(elem))
+			{
+				Name name = elem.getSimpleName();
+				if (usedNames.contains(name))
+				{
+					for (Element olderElem : elems)
+					{
+						if (elemUils.hides(olderElem, elem)) return;
+					}
+				}
+				elems.add(elem);
+				usedNames.add(name);
+			}
 		});
 		
 		return elems;
@@ -330,7 +347,7 @@ public class TypeHelper
 	
 	public static void visitAllMembers(TypeElement type, Consumer<Element> memberConsumer)
 	{
-		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer); //TODO [v1.0] check hiding
+		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer);
 	}
 	
 	private static enum ElementMemberVisitor implements DefaultElementVisitor<Void, Consumer<Element>>, DefaultTypeVisitor<Void, Consumer<Element>>

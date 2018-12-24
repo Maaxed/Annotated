@@ -41,6 +41,7 @@ import javax.tools.JavaFileObject;
 
 import fr.max2.packeta.api.network.GenerateNetwork;
 import fr.max2.packeta.api.network.GeneratePacket;
+import fr.max2.packeta.api.network.IgnoredData;
 import fr.max2.packeta.network.DataHandlerParameters;
 import fr.max2.packeta.utils.ClassRef;
 import fr.max2.packeta.utils.EnumSides;
@@ -53,6 +54,7 @@ import fr.max2.packeta.utils.Visibility;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {
+	//TODO [v1.0] refactor packages + add @Generated annotation
 	//TODO [v1.0] make the API a mod
 	private DataHandlerParameters.Finder finder;
 	
@@ -197,7 +199,8 @@ public class PacketProcessor extends AbstractProcessor
 	
 	private void writePacket(TypeElement packetClass, EnumSides sides) throws IOException
 	{
-		List<? extends Element> members = TypeHelper.getAllAccessibleMembers(packetClass, Visibility.PROTECTED);
+		Elements elemUtils = this.processingEnv.getElementUtils();
+		List<? extends Element> members = TypeHelper.getAllAccessibleMembers(packetClass, elemUtils, Visibility.PROTECTED);
 		String className = packetClass.getQualifiedName().toString();
 		String ls = System.lineSeparator();
 		
@@ -205,13 +208,12 @@ public class PacketProcessor extends AbstractProcessor
 		PackageElement packetPackage = TypeHelper.getPackage(packetClass);
 		
 		//TODO [v1.1] use getters and setters
-		//TODO [v1.0] add the possibility the ignore a field
-		List<VariableElement> fields = ElementFilter.fieldsIn(members).stream().filter(field -> !field.getModifiers().contains(Modifier.STATIC)).collect(Collectors.toList());
+		List<VariableElement> fields = ElementFilter.fieldsIn(members).stream().filter(field -> field.getAnnotation(IgnoredData.class) == null && !field.getModifiers().contains(Modifier.STATIC)).collect(Collectors.toList());
 		List<DataHandlerParameters> dataHandlers = fields.stream().map(f -> this.finder.getDataType(f)).collect(Collectors.toList());
 		
 		Set<String> imports = new TreeSet<>();
 		Consumer<String> importFilter = imp -> {
-			TypeElement type = this.processingEnv.getElementUtils().getTypeElement(imp);
+			TypeElement type = elemUtils.getTypeElement(imp);
 			if (!packetPackage.equals(TypeHelper.getPackage(type)))
 			{
 				imports.add(imp);

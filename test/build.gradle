@@ -3,6 +3,7 @@ plugins {
 	id "net.ltgt.apt-eclipse" version "0.19"
 }
 
+version = "1.0.0"
 group = "fr.max2.packeta.test"
 archivesBaseName = "PacketaTest"
 
@@ -18,4 +19,9 @@ eclipse {
 			genSrcDir = file('bin/apt_generated')
 		}
 	}
+}
+
+minecraft {
+    replace "@VERSION@", project.version
+    replaceIn "fr.max2.packeta.test.ModTestPacketa.java"
 }

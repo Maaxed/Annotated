@@ -9,6 +9,7 @@ import fr.max2.packeta.api.network.DataType;
 import fr.max2.packeta.api.network.GeneratePacket;
 import fr.max2.packeta.api.network.IClientPacket;
 import fr.max2.packeta.api.network.IServerPacket;
+import fr.max2.packeta.api.network.IgnoredData;
 import fr.max2.packeta.test.util.EnumTest;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -70,6 +71,9 @@ public class TestData implements IServerPacket, IClientPacket
 	public ArrayList<NBTTagCompound> myTagList;
 	
 	public HashMap<ItemStack, HashMap<NBTTagByteArray, NBTTagList[]>> stackToList;
+	
+	@IgnoredData
+	public int unusedField;
 
 	@Override
 	public void onServerReceive(EntityPlayerMP sender)

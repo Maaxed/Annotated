@@ -1,6 +1,5 @@
 package fr.max2.packeta.utils;
 
-//TODO remove, unused
 public class Holder<T>
 {
 	protected T value;
@@ -12,7 +11,6 @@ public class Holder<T>
 	{
 		this.value = value;
 	}
-	
 	
 	public T getValue()
 	{

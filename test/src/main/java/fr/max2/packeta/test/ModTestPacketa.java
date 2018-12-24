@@ -15,7 +15,7 @@ public class ModTestPacketa
 {
 	public static final String MOD_ID = "packetatest";
 	public static final String MOD_NAME = "Test Packeta Mod";
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "@VERSION@";
 
 	public static final SimpleNetworkWrapper MOD_CHANNEL = ModTestPacketaNetwork.initNetwork();
 

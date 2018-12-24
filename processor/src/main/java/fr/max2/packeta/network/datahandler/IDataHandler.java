@@ -14,4 +14,6 @@ public interface IDataHandler
 	void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports);
 	
 	Predicate<TypeMirror> getTypeValidator(Elements elemUtils, Types typeUtils);
+	
+	//TODO [v1.1] boolean isMultiline(DataHandlerParameters params);
 }
