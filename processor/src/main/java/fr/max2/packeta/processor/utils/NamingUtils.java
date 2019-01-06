@@ -16,8 +16,8 @@ public class NamingUtils
 	
 	public static String simpleName(String qualifiedName)
 	{
-		int ditIndex = qualifiedName.lastIndexOf('.') ;
-		return ditIndex < 0 ? qualifiedName : qualifiedName.substring(ditIndex + 1);
+		int dotIndex = qualifiedName.lastIndexOf('.') ;
+		return dotIndex < 0 ? qualifiedName : qualifiedName.substring(dotIndex + 1);
 	}
 	
 	public static String simpleTypeName(TypeMirror type)
