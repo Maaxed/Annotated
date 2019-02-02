@@ -24,13 +24,15 @@ import javax.lang.model.util.Types;
 
 public class TypeHelper
 {
+	private TypeHelper() { }
+	
 	
 	public static TypeElement asTypeElement(Element elem)
 	{
 		return TypeElementCaster.INSTANCE.visit(elem);
 	}
 	
-	private static enum TypeElementCaster implements DefaultElementVisitor<TypeElement, Void>
+	private enum TypeElementCaster implements DefaultElementVisitor<TypeElement, Void>
 	{
 		INSTANCE;
 		
@@ -53,7 +55,7 @@ public class TypeHelper
 		return ArrayTypeCaster.INSTANCE.visit(type);
 	}
 	
-	private static enum ArrayTypeCaster implements DefaultTypeVisitor<ArrayType, Void>
+	private enum ArrayTypeCaster implements DefaultTypeVisitor<ArrayType, Void>
 	{
 		INSTANCE;
 		
@@ -76,7 +78,7 @@ public class TypeHelper
 		return WildcardTypeCaster.INSTANCE.visit(type);
 	}
 	
-	private static enum WildcardTypeCaster implements DefaultTypeVisitor<WildcardType, Void>
+	private enum WildcardTypeCaster implements DefaultTypeVisitor<WildcardType, Void>
 	{
 		INSTANCE;
 		
@@ -99,7 +101,7 @@ public class TypeHelper
 		return VariableTypeCaster.INSTANCE.visit(type);
 	}
 	
-	private static enum VariableTypeCaster implements DefaultTypeVisitor<TypeVariable, Void>
+	private enum VariableTypeCaster implements DefaultTypeVisitor<TypeVariable, Void>
 	{
 		INSTANCE;
 		
@@ -122,7 +124,7 @@ public class TypeHelper
 		return IntersectionTypeCaster.INSTANCE.visit(type);
 	}
 	
-	private static enum IntersectionTypeCaster implements DefaultTypeVisitor<IntersectionType, Void>
+	private enum IntersectionTypeCaster implements DefaultTypeVisitor<IntersectionType, Void>
 	{
 		INSTANCE;
 		
@@ -145,7 +147,7 @@ public class TypeHelper
 		return PackageElementCaster.INSTANCE.visit(type);
 	}
 	
-	private static enum PackageElementCaster implements DefaultElementVisitor<PackageElement, Void>
+	private enum PackageElementCaster implements DefaultElementVisitor<PackageElement, Void>
 	{
 		INSTANCE;
 		
@@ -211,7 +213,7 @@ public class TypeHelper
 		TypeImporter.INSTANCE.visit(type, imports);
 	}
 	
-	private static enum TypeImporter implements DefaultTypeVisitor<Void, Consumer<String>>, DefaultElementVisitor<Void, Consumer<String>>
+	private enum TypeImporter implements DefaultTypeVisitor<Void, Consumer<String>>, DefaultElementVisitor<Void, Consumer<String>>
 	{
 		INSTANCE;
 		
@@ -350,7 +352,7 @@ public class TypeHelper
 		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer);
 	}
 	
-	private static enum ElementMemberVisitor implements DefaultElementVisitor<Void, Consumer<Element>>, DefaultTypeVisitor<Void, Consumer<Element>>
+	private enum ElementMemberVisitor implements DefaultElementVisitor<Void, Consumer<Element>>, DefaultTypeVisitor<Void, Consumer<Element>>
 	{
 		INSTANCE;
 

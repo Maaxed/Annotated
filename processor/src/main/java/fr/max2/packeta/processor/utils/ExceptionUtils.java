@@ -6,6 +6,9 @@ import java.util.function.Consumer;
 
 public class ExceptionUtils
 {
+	private ExceptionUtils() { }
+	
+	
 	public static void tryAndWrapIOExceptions(ExceptionRunnable<? extends IOException> action)
 	{
 		try

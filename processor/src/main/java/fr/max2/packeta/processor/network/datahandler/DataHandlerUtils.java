@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 public class DataHandlerUtils
 {
+	private DataHandlerUtils() { }
 	
 	public static String writeBuffer(String type, String value)
 	{

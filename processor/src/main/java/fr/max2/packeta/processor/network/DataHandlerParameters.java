@@ -36,7 +36,8 @@ import fr.max2.packeta.processor.utils.ValueInitStatus;
 
 public class DataHandlerParameters
 {
-	public final String simpleName, saveAccessExpr;
+	public final String simpleName;
+	public final String saveAccessExpr;
 	@Nullable
 	public final String loadAccessExpr;
 	public final BiConsumer<Consumer<String>, String> setExpr;
@@ -150,7 +151,7 @@ public class DataHandlerParameters
 	}
 	
 	
-	private static Map<DataType, IDataHandler> TYPE_TO_HANDLER = new EnumMap<>(DataType.class);
+	private static final Map<DataType, IDataHandler> TYPE_TO_HANDLER = new EnumMap<>(DataType.class);
 	
 	static
 	{

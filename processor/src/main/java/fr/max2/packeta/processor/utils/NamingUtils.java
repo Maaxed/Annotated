@@ -13,6 +13,8 @@ import javax.lang.model.type.WildcardType;
 
 public class NamingUtils
 {
+	private NamingUtils() { }
+	
 	
 	public static String simpleName(String qualifiedName)
 	{
@@ -38,7 +40,7 @@ public class NamingUtils
 		return builder.toString();
 	}
 	
-	private static enum TypeToString implements DefaultTypeVisitor<Void, StringBuilder>
+	private enum TypeToString implements DefaultTypeVisitor<Void, StringBuilder>
 	{
 		FULL(false),
 		SIMPLIFIED(true);

@@ -12,10 +12,10 @@ public class GuiTest extends GuiScreen
 	@Override
 	public void initGui()
 	{
-		this.addButton(new GuiButton(1, this.width / 2, this.height / 5, "Send packet"));
-		this.addButton(new GuiButton(2, this.width / 2, this.height / 5 * 2, "Send packet"));
-		this.addButton(new GuiButton(3, this.width / 2, this.height / 5 * 3, "Send packet"));
-		this.addButton(new GuiButton(4, this.width / 2, this.height / 5 * 4, "Send packet"));
+		for (int i = 1; i <= 4; i++)
+		{
+			this.addButton(new GuiButton(i, this.width / 2, this.height / 5 * i, "Send packet " + i));
+		}
 	}
 	
 	@Override

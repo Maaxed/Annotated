@@ -17,6 +17,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @EventBusSubscriber(Side.CLIENT)
 public class ModKeyBindings
 {
+	private ModKeyBindings() { }
+	
+	
 	public static final KeyBinding OPEN_GUI = new KeyBinding("key.open_test_gui", KeyConflictContext.IN_GAME, Keyboard.KEY_Y, "key.category.test_mod");
 	
 	public static void redisterKeyBindings()

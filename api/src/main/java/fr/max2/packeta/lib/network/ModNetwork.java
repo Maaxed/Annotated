@@ -1,9 +1,5 @@
 package fr.max2.packeta.lib.network;
 
-import fr.max2.packeta.lib.network.ClientMessageHandler;
-import fr.max2.packeta.lib.network.IClientMessage;
-import fr.max2.packeta.lib.network.IServerMessage;
-import fr.max2.packeta.lib.network.ServerMessageHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;

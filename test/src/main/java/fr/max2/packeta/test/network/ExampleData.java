@@ -12,10 +12,10 @@ import net.minecraft.util.text.TextComponentString;
 @GeneratePacket
 public class ExampleData implements IServerPacket
 {
-	public int someNumber;
-	public ItemStack aStack;
-	public String[] aStringArray;
-	public ArrayList<UUID> collectionOfIds;
+	protected int someNumber;
+	protected ItemStack aStack;
+	protected String[] aStringArray;
+	protected ArrayList<UUID> collectionOfIds;
 
 	@Override
 	public void onServerReceive(EntityPlayerMP sender)

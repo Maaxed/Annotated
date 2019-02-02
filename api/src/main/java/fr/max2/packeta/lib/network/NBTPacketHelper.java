@@ -23,6 +23,8 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class NBTPacketHelper
 {
+	private NBTPacketHelper() { }
+	
 	//TODO test the methods (writeNBT / readNBT)
 	
 	public static void writeNBTByteArray(ByteBuf buffer, @Nullable NBTTagByteArray nbt)
@@ -48,6 +50,13 @@ public class NBTPacketHelper
 		byte[] values = new byte[size];
 		buffer.readBytes(values);
 		return new NBTTagByteArray(values);
+	}
+	
+	@Nonnull
+	public static NBTTagByteArray readNBTByteArrayOrEmpty(ByteBuf buffer)
+	{
+		NBTTagByteArray byteArray = readNBTByteArray(buffer);
+		return byteArray == null ? new NBTTagByteArray(new byte[0]) : byteArray;
 	}
 	
 	
@@ -84,6 +93,13 @@ public class NBTPacketHelper
 		return new NBTTagIntArray(values);
 	}
 	
+	@Nonnull
+	public static NBTTagIntArray readNBTIntArrayOrEmpty(ByteBuf buffer)
+	{
+		NBTTagIntArray intArray = readNBTIntArray(buffer);
+		return intArray == null ? new NBTTagIntArray(new int[0]) : intArray;
+	}
+	
 	
 	public static void writeNBTList(ByteBuf buffer, @Nullable NBTTagList nbt)
 	{
@@ -118,14 +134,21 @@ public class NBTPacketHelper
 		
 		if (type == 0) return nbt;
 		
-        int i = buffer.readInt();
-
-        for (int j = 0; j < i; ++j)
-        {
-            nbt.appendTag(readNBTData(buffer, type));
-        }
-        
-        return nbt;
+		int i = buffer.readInt();
+		
+		for (int j = 0; j < i; ++j)
+		{
+			nbt.appendTag(readNBTData(buffer, type));
+		}
+		
+		return nbt;
+	}
+	
+	@Nonnull
+	public static NBTTagList readNBTListOrEmpty(ByteBuf buffer)
+	{
+		NBTTagList list = readNBTList(buffer);
+		return list == null ? new NBTTagList() : list;
 	}
 	
 	
@@ -157,22 +180,29 @@ public class NBTPacketHelper
 	@Nullable
 	public static NBTTagCompound readNBTCompound(ByteBuf buffer)
 	{
-        byte type = buffer.readByte();
-
-        if (type == -1) return null;
-        
+		byte type = buffer.readByte();
+		
+		if (type == -1) return null;
+		
 		NBTTagCompound nbt = new NBTTagCompound();
-        
-        while (type != 0)
-        {
-            String key = ByteBufUtils.readUTF8String(buffer);
-            NBTBase content = readNBTData(buffer, type);
-
-            nbt.setTag(key, content);
-            type = buffer.readByte();
-        }
-        
-        return nbt;
+		
+		while (type != 0)
+		{
+			String key = ByteBufUtils.readUTF8String(buffer);
+			NBTBase content = readNBTData(buffer, type);
+			
+			nbt.setTag(key, content);
+			type = buffer.readByte();
+		}
+		
+		return nbt;
+	}
+	
+	@Nonnull
+	public static NBTTagCompound readNBTCompoundOrEmpty(ByteBuf buffer)
+	{
+		NBTTagCompound compound = readNBTCompound(buffer);
+		return compound == null ? new NBTTagCompound() : compound;
 	}
 	
 	
@@ -273,7 +303,7 @@ public class NBTPacketHelper
 		case NBT.TAG_DOUBLE:
 			buffer.writeDouble(((NBTPrimitive)nbt).getDouble());
 			break;
-
+			
 		case NBT.TAG_STRING:
 			ByteBufUtils.writeUTF8String(buffer, ((NBTTagString)nbt).getString());
 			break;
@@ -313,19 +343,19 @@ public class NBTPacketHelper
 			return new NBTTagFloat(buffer.readFloat());
 		case NBT.TAG_DOUBLE:
 			return new NBTTagDouble(buffer.readDouble());
-
+			
 		case NBT.TAG_STRING:
 			return new NBTTagString(ByteBufUtils.readUTF8String(buffer));
 			
 		case NBT.TAG_BYTE_ARRAY:
-			return readNBTByteArray(buffer);
+			return readNBTByteArrayOrEmpty(buffer);
 		case NBT.TAG_INT_ARRAY:
-			return readNBTIntArray(buffer);
+			return readNBTIntArrayOrEmpty(buffer);
 			
 		case NBT.TAG_LIST:
-			return readNBTList(buffer);
+			return readNBTListOrEmpty(buffer);
 		case NBT.TAG_COMPOUND:
-			return readNBTCompound(buffer);
+			return readNBTCompoundOrEmpty(buffer);
 		default:
 			return new NBTTagEnd();
 		}

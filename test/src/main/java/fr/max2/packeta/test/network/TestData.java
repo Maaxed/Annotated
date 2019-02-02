@@ -20,60 +20,60 @@ import net.minecraft.nbt.NBTTagList;
 @GeneratePacket
 public class TestData implements IServerPacket, IClientPacket
 {
-	public byte myByte;
-	public short myShort;
-	public int myInt;
-	public long myLong;
-	public Byte myWrByte;
-	public Short myWrShort;
-	public Integer myWrInt;
-	public Long myWrLong;
+	protected byte myByte;
+	protected short myShort;
+	protected int myInt;
+	protected long myLong;
+	protected Byte myWrByte;
+	protected Short myWrShort;
+	protected Integer myWrInt;
+	protected Long myWrLong;
 	
-	public float myFloat;
-	public double myDouble;
-	public Float myWrFloat;
-	public Double myWrDouble;
+	protected float myFloat;
+	protected double myDouble;
+	protected Float myWrFloat;
+	protected Double myWrDouble;
 	
-	public boolean myBoolean;
-	public char myChar;
-	public Boolean myWrBoolean;
-	public Character myWrChar;
+	protected boolean myBoolean;
+	protected char myChar;
+	protected Boolean myWrBoolean;
+	protected Character myWrChar;
 	
-	public String myString;
-	public EnumTest myEnum;
-	public ItemStack myStack;
-	public NBTTagCompound myTag;
+	protected String myString;
+	protected EnumTest myEnum;
+	protected ItemStack myStack;
+	protected NBTTagCompound myTag;
 	
 	@CustomData(type = DataType.INT)
-	public Integer myCustomInt;
+	protected Integer myCustomInt;
 	
-	public int[] myIntArray;
-	public Integer[] myIntWrArray;
+	protected int[] myIntArray;
+	protected Integer[] myIntWrArray;
 	@ConstSize
-	public Integer[] myConstSizeIntArray = new Integer[4];
+	protected Integer[] myConstSizeIntArray = new Integer[4];
 
 	
-	public String[] myStringArray;
-	public EnumTest[] myEnumArray;
-	public ItemStack[] myStackArray;
-	public NBTTagCompound[] myTagArray;
+	protected String[] myStringArray;
+	protected EnumTest[] myEnumArray;
+	protected ItemStack[] myStackArray;
+	protected NBTTagCompound[] myTagArray;
 	
-	public int[][] myIntArrayArray;
+	protected int[][] myIntArrayArray;
 
-	public ArrayList<Integer> myIntWrList;
+	protected ArrayList<Integer> myIntWrList;
 	@ConstSize
-	public ArrayList<Integer> myConstSizeIntList = new ArrayList<>();
+	protected ArrayList<Integer> myConstSizeIntList = new ArrayList<>();
 
 	
-	public ArrayList<String> myStringList;
-	public ArrayList<EnumTest> myEnumList;
-	public ArrayList<ItemStack> myStackList;
-	public ArrayList<NBTTagCompound> myTagList;
+	protected ArrayList<String> myStringList;
+	protected ArrayList<EnumTest> myEnumList;
+	protected ArrayList<ItemStack> myStackList;
+	protected ArrayList<NBTTagCompound> myTagList;
 	
-	public HashMap<ItemStack, HashMap<NBTTagByteArray, NBTTagList[]>> stackToList;
+	protected HashMap<ItemStack, HashMap<NBTTagByteArray, NBTTagList[]>> stackToList;
 	
 	@IgnoredData
-	public int unusedField;
+	protected int unusedField;
 
 	@Override
 	public void onServerReceive(EntityPlayerMP sender)

@@ -18,6 +18,7 @@ import fr.max2.packeta.processor.network.PacketProcessor;
 
 public class TemplateHelper
 {
+	private TemplateHelper() { }
 
 	
 	public static void writeFileFromTemplate(ProcessingEnvironment env, String className, String templateFile, Map<String, String> replacements) throws IOException
@@ -39,14 +40,14 @@ public class TemplateHelper
 	private static void writeFileFromTemplateImpl(Filer filer, String className, String templateFile, Map<String, String> replacements) throws IOException
 	{
 		JavaFileObject file = filer.createSourceFile(className);
-		Writer writer = file.openWriter();
-		
-		try (InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile))
+		try (Writer writer = file.openWriter())
 		{
-			new BufferedReader(new InputStreamReader(fileStream)).lines().map(line -> mapKeys(line, replacements) + System.lineSeparator()).forEach(ExceptionUtils.wrapIOExceptions(writer::write));
+			try (InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile))
+			{
+				BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream));
+				reader.lines().map(line -> mapKeys(line, replacements) + System.lineSeparator()).forEach(ExceptionUtils.wrapIOExceptions(writer::write));
+			}
 		}
-		
-		writer.close();
 		
 	}
 	

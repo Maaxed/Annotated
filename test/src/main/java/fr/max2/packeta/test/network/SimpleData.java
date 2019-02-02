@@ -8,7 +8,7 @@ import net.minecraft.util.text.TextComponentString;
 @GeneratePacket
 public class SimpleData implements IServerPacket
 {
-	public int myInt;
+	protected int myInt;
 
 	@Override
 	public void onServerReceive(EntityPlayerMP sender)

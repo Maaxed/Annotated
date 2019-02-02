@@ -3,6 +3,9 @@ package fr.max2.packeta.processor.utils;
 
 public class ClassRef
 {
+	private ClassRef() { }
+	
+	
 	public static final String MAIN_PACKAGE = "fr.max2.packeta";
 	
 	public static final String NETWORK_ANNOTATION = MAIN_PACKAGE + ".api.processor.network.GenerateNetwork";
