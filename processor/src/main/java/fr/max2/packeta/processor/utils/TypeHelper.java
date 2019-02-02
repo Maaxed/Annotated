@@ -387,13 +387,23 @@ public class TypeHelper
 		}
 	}
 
-	public static PackageElement getPackage(TypeElement packetClass)
+	public static PackageElement getPackage(Element element)
 	{
-		Element parent = packetClass;
+		Element parent = element;
 		while (parent != null && parent.getKind() != ElementKind.PACKAGE)
 		{
 			parent = parent.getEnclosingElement();
 		}
 		return asPackage(parent);
+	}
+
+	public static Element getEnclosingClass(Element element)
+	{
+		Element parent = element;
+		while (parent.getEnclosingElement() != null && parent.getEnclosingElement().getKind() != ElementKind.PACKAGE)
+		{
+			parent = parent.getEnclosingElement();
+		}
+		return parent;
 	}
 }

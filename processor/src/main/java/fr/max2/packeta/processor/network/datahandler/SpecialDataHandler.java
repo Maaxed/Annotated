@@ -23,7 +23,7 @@ public enum SpecialDataHandler implements IDataHandler
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
 			WildcardType wildcardType = TypeHelper.asWildcardType(params.type);
-			if (wildcardType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a wildcard type");
+			if (wildcardType == null) throwIncompatibleType("wildcard", params.type);
 			
 			TypeMirror extendsBound = wildcardType.getExtendsBound();
 			
@@ -44,7 +44,7 @@ public enum SpecialDataHandler implements IDataHandler
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
 			TypeVariable wildcardType = TypeHelper.asVariableType(params.type);
-			if (wildcardType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a wildcard type");
+			if (wildcardType == null) throwIncompatibleType("variable", params.type);
 			
 			TypeMirror extendsBound = wildcardType.getUpperBound();
 			
@@ -63,7 +63,7 @@ public enum SpecialDataHandler implements IDataHandler
 		public void addInstructions(DataHandlerParameters params, Consumer<String> saveInstructions, Consumer<String> loadInstructions, Consumer<String> imports)
 		{
 			IntersectionType intersectionType = TypeHelper.asIntersectionType(params.type);
-			if (intersectionType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not an intersection type");
+			if (intersectionType == null) throwIncompatibleType("intersection", params.type);
 			
 			ValueInitStatus initStatus = params.initStatus;
 			boolean success = false;
@@ -114,6 +114,11 @@ public enum SpecialDataHandler implements IDataHandler
 	public Predicate<TypeMirror> getTypeValidator(Elements elemUtils, Types typeUtils)
 	{
 		return type -> false;
+	}
+	
+	private static void throwIncompatibleType(String expected, TypeMirror actual)
+	{
+		throw new IllegalArgumentException("The type '" + actual + "' is not a " + expected + " type");
 	}
 	
 }

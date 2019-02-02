@@ -15,6 +15,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.packeta.processor.network.PacketProcessor;
+import fr.max2.packeta.processor.utils.exceptions.ExceptionUtils;
+import fr.max2.packeta.processor.utils.exceptions.TemplateException;
 
 public class TemplateHelper
 {
@@ -51,9 +53,15 @@ public class TemplateHelper
 		
 	}
 	
+	/**
+	 * Search the pattern '${key}' in the content string and replace it with the corresponding replacement
+	 * @param content the content to search in
+	 * @param replacements the map used to find the replacements
+	 * @return the generated string
+	 */
 	private static String mapKeys(String content, Map<String, String> replacements)
 	{
-		Pattern p = Pattern.compile("\\$\\{(.+?)\\}"); //	${key}
+		Pattern p = Pattern.compile("\\$\\{(.+?)\\}");
 		Matcher m = p.matcher(content);
 		
 		StringBuffer sb = new StringBuffer();
@@ -68,7 +76,7 @@ public class TemplateHelper
 			}
 			catch (RuntimeException e)
 			{
-				throw new RuntimeException("Unable tu replace the value of '" + key + "' in line '" + content + "' with '" + rep + "'", e);
+				throw new TemplateException("Unable tu replace the value of '" + key + "' in line '" + content + "' with '" + rep + "'", e);
 			}
 		}
 		m.appendTail(sb);

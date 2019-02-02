@@ -1,4 +1,4 @@
-package fr.max2.packeta.processor.utils;
+package fr.max2.packeta.processor.utils.exceptions;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

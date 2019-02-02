@@ -41,6 +41,7 @@ import fr.max2.packeta.processor.utils.NamingUtils;
 import fr.max2.packeta.processor.utils.TemplateHelper;
 import fr.max2.packeta.processor.utils.TypeHelper;
 import fr.max2.packeta.processor.utils.Visibility;
+import fr.max2.packeta.processor.utils.exceptions.AnnotationStructureException;
 
 @SupportedAnnotationTypes({ClassRef.NETWORK_ANNOTATION, ClassRef.PACKET_ANNOTATION})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -67,7 +68,7 @@ public class PacketProcessor extends AbstractProcessor
 		{
 			logs.printMessage(Kind.ERROR, "Multiple '" + GenerateNetwork.class.getCanonicalName() + "' annotations have been detected. The processor only suport one network currently.");
 			
-			throw new RuntimeException("The annotation '" + ClassRef.NETWORK_ANNOTATION + "' cannot be used twice.");
+			throw new AnnotationStructureException("The annotation '" + ClassRef.NETWORK_ANNOTATION + "' cannot be used twice.");
 		}
 		
 		Map<EnumSides, Collection<String>> packetsToRegister = new EnumMap<>(EnumSides.class);
@@ -77,27 +78,7 @@ public class PacketProcessor extends AbstractProcessor
 			packetsToRegister.put(sides, new ArrayList<>());
 		}
 		
-		for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(GeneratePacket.class)))
-		{
-			if (elem.getKind() == ElementKind.CLASS)
-			{
-				logs.printMessage(Kind.NOTE, "Processing packet class generation", elem);
-				
-				EnumSides sides = sidesFromClass(elem);
-				try
-				{
-					this.writePacket(elem, sides);
-					
-					packetsToRegister.get(sides).add(elem.getQualifiedName() + "Message");
-				}
-				catch (IOException e)
-				{
-					logs.printMessage(Kind.ERROR, "An error has occured during the generation of the packet class", elem);
-					
-					throw new UncheckedIOException(e);
-				}
-			}
-		}
+		handleAllPackets(roundEnv, packetsToRegister);
 		
 		//TODO [v1.2] multi networks
 		if (networkAnnotations.size() == 1)
@@ -105,54 +86,7 @@ public class PacketProcessor extends AbstractProcessor
 			Element networkElement = networkAnnotations.iterator().next();
 			logs.printMessage(Kind.NOTE, "Processing network class generation", networkElement);
 			
-			GenerateNetwork networkAnnotation = networkElement.getAnnotation(GenerateNetwork.class);
-			
-			String networkClass = networkAnnotation.className();
-			String networkName = networkAnnotation.value();
-			
-			if (networkName.isEmpty())
-			{
-				Types typeUtils = this.processingEnv.getTypeUtils();
-				
-				TypeMirror modAnnotationType = this.processingEnv.getElementUtils().getTypeElement(ClassRef.FORGE_MOD_ANNOTATION).asType();
-				
-				networkName = networkElement.getAnnotationMirrors().stream()						// all annotations
-					.filter(a -> typeUtils.isSameType(a.getAnnotationType(), modAnnotationType))	// mod annotation
-					.flatMap(a -> a.getElementValues().entrySet().stream())							// mod annotation values
-					.filter(e -> e.getKey().getSimpleName().contentEquals("modid"))					// modid value
-					.map(entry -> entry.getValue().getValue().toString())							// modid string
-					.findAny().orElse(networkElement.getSimpleName().toString());
-				
-			}
-			
-			if (networkClass.isEmpty())
-			{
-				Element parent = networkElement;
-				while (parent.getEnclosingElement() != null && parent.getEnclosingElement().getKind() != ElementKind.PACKAGE)
-				{
-					parent = parent.getEnclosingElement();
-				}
-				
-				/*if (parent.getKind() == ElementKind.PACKAGE)
-				{
-					networkClass = ((QualifiedNameable)parent).getQualifiedName() + "." + parent.getSimpleName() + "Network";
-				}
-				else */
-				if (parent.getKind().isClass() || parent.getKind().isInterface())
-				{
-					networkClass = TypeHelper.asTypeElement(parent).getQualifiedName() + "Network";
-				}
-			}
-			
-			try
-			{
-				this.writeNetwork(networkClass, networkName, packetsToRegister);
-			}
-			catch (IOException e)
-			{
-				logs.printMessage(Kind.ERROR, "Error writing the network class (class name : " + networkClass + ", network name : " + networkName + ")", networkElement);
-				throw new UncheckedIOException(e);
-			}
+			handleNetwork(packetsToRegister, networkElement);
 		}
 		
 		logs.printMessage(Kind.NOTE, "End of the " + this.getClass().getCanonicalName() + " annotation processos !");
@@ -184,6 +118,81 @@ public class PacketProcessor extends AbstractProcessor
 		{
 			this.processingEnv.getMessager().printMessage(Kind.ERROR, "The packet data class diesn't implement any of the requested interfaces", elem);
 			throw new IllegalArgumentException();
+		}
+	}
+	
+	private void handleAllPackets(RoundEnvironment roundEnv, Map<EnumSides, Collection<String>> packetsToRegister)
+	{
+		Messager logs = this.processingEnv.getMessager();
+		
+		for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(GeneratePacket.class)))
+		{
+			if (elem.getKind() == ElementKind.CLASS)
+			{
+				logs.printMessage(Kind.NOTE, "Processing packet class generation", elem);
+				
+				EnumSides sides = sidesFromClass(elem);
+				try
+				{
+					this.writePacket(elem, sides);
+					
+					packetsToRegister.get(sides).add(elem.getQualifiedName() + "Message");
+				}
+				catch (IOException e)
+				{
+					logs.printMessage(Kind.ERROR, "An error has occured during the generation of the packet class", elem);
+					
+					throw new UncheckedIOException(e);
+				}
+			}
+		}
+	}
+
+	private void handleNetwork(Map<EnumSides, Collection<String>> packetsToRegister, Element networkElement)
+	{
+		GenerateNetwork networkAnnotation = networkElement.getAnnotation(GenerateNetwork.class);
+		
+		String networkClass = networkAnnotation.className();
+		String networkName = networkAnnotation.value();
+		
+		if (networkName.isEmpty())
+		{
+			Types typeUtils = this.processingEnv.getTypeUtils();
+			
+			TypeMirror modAnnotationType = this.processingEnv.getElementUtils().getTypeElement(ClassRef.FORGE_MOD_ANNOTATION).asType();
+			
+			networkName = networkElement.getAnnotationMirrors().stream()						// all annotations
+				.filter(a -> typeUtils.isSameType(a.getAnnotationType(), modAnnotationType))	// mod annotation
+				.flatMap(a -> a.getElementValues().entrySet().stream())							// mod annotation values
+				.filter(e -> e.getKey().getSimpleName().contentEquals("modid"))					// modid value
+				.map(entry -> entry.getValue().getValue().toString())							// modid string
+				.findAny().orElse(networkElement.getSimpleName().toString());
+			
+		}
+		
+		if (networkClass.isEmpty())
+		{
+			Element parent = TypeHelper.getEnclosingClass(networkElement);
+			
+			/*if (parent.getKind() == ElementKind.PACKAGE)
+			{
+				networkClass = ((QualifiedNameable)parent).getQualifiedName() + "." + parent.getSimpleName() + "Network";
+			}
+			else */
+			if (parent.getKind().isClass() || parent.getKind().isInterface())
+			{
+				networkClass = TypeHelper.asTypeElement(parent).getQualifiedName() + "Network";
+			}
+		}
+		
+		try
+		{
+			this.writeNetwork(networkClass, networkName, packetsToRegister);
+		}
+		catch (IOException e)
+		{
+			this.processingEnv.getMessager().printMessage(Kind.ERROR, "Error writing the network class (class name : " + networkClass + ", network name : " + networkName + ")", networkElement);
+			throw new UncheckedIOException(e);
 		}
 	}
 	
