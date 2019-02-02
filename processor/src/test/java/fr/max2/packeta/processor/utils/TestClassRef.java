@@ -1,8 +1,8 @@
 package fr.max2.packeta.processor.utils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.max2.packeta.api.processor.network.ConstSize;
 import fr.max2.packeta.api.processor.network.GenerateNetwork;
@@ -10,11 +10,11 @@ import fr.max2.packeta.api.processor.network.GeneratePacket;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
 
-class TestClassRef
+public class TestClassRef
 {
 	
 	@Test
-	void testValues()
+	public void testValues()
 	{
 		assertEquals(GenerateNetwork.class.getCanonicalName(), ClassRef.NETWORK_ANNOTATION);
 		assertEquals(GeneratePacket.class.getCanonicalName(), ClassRef.PACKET_ANNOTATION);
