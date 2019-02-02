@@ -10,7 +10,7 @@ archivesBaseName = "PacketaTest"
 dependencies {
 	compile project(':api')
 	compile project(':processor')
-	annotationProcessor project(':processor')
+	annotationProcessor rootProject
 }
 
 eclipse {

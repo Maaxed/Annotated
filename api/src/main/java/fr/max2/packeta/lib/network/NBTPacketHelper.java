@@ -23,6 +23,8 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public class NBTPacketHelper
 {
+	//TODO test the methods (writeNBT / readNBT)
+	
 	public static void writeNBTByteArray(ByteBuf buffer, @Nullable NBTTagByteArray nbt)
 	{
 		if (nbt == null)

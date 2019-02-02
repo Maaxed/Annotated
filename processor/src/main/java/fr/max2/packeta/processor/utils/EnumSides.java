@@ -8,6 +8,7 @@ public enum EnumSides //Logical side
 	SERVER,
 	BOTH;
 	
+	//TODO test enum sides
 	public boolean isClient()
 	{
 		return this == CLIENT || this == BOTH;
