@@ -11,7 +11,7 @@ import fr.max2.packeta.api.processor.network.ConstSize;
 import fr.max2.packeta.api.processor.network.CustomData;
 
 
-public class TestEmptyAnnotationConstruct
+public class EmptyAnnotationConstructTest
 {
 	private static final Class<?>[] TEST_ANNOTATIONS = {CustomData.class, ConstSize.class, Override.class};
 	

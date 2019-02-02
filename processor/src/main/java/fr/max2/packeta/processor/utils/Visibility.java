@@ -13,8 +13,6 @@ public enum Visibility
 	PACKAGE,
 	PRIVATE;
 	
-	//TODO test enum Visibility
-	
 	public final Predicate<Element> filterAtLeast = elem -> Visibility.getElementVisibility(elem).isAtLeast(this);
 	public final Predicate<Element> filterAtMost = elem -> Visibility.getElementVisibility(elem).isAtMost(this);
 	

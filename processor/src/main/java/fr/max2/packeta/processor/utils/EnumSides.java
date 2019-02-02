@@ -2,13 +2,15 @@ package fr.max2.packeta.processor.utils;
 
 import java.util.function.Consumer;
 
-public enum EnumSides //Logical side
+/**
+ * The Enum represent the logical sides a packet can be send to
+ */
+public enum EnumSides
 {
 	CLIENT,
 	SERVER,
 	BOTH;
 	
-	//TODO test enum sides
 	public boolean isClient()
 	{
 		return this == CLIENT || this == BOTH;

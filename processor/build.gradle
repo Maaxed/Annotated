@@ -3,4 +3,5 @@ group = "fr.max2.packeta.processor"
 archivesBaseName = "PacketaProcessor"
 
 dependencies {
+	testCompile project(':api')
 }
