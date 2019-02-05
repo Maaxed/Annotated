@@ -24,7 +24,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		if (collectionType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror contentType = collectionType.getTypeArguments().get(0);
-		String typeName = NamingUtils.simpleTypeName(contentType);
+		String typeName = NamingUtils.simplifiedTypeName(contentType);
 		
 		boolean constSize = params.annotations.getAnnotation(ConstSize.class) != null || params.type.getAnnotation(ConstSize.class) != null;
 		

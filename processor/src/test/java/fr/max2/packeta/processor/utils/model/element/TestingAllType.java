@@ -1,4 +1,4 @@
-package fr.max2.packeta.processor.utils;
+package fr.max2.packeta.processor.utils.model.element;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -22,7 +22,7 @@ import javax.lang.model.type.WildcardType;
 import org.junit.Assert;
 
 
-public class TestingType implements PrimitiveType, NullType, ArrayType, ErrorType, TypeVariable, WildcardType, ExecutableType, NoType, UnionType, IntersectionType
+public class TestingAllType implements PrimitiveType, NullType, ArrayType, ErrorType, TypeVariable, WildcardType, ExecutableType, NoType, UnionType, IntersectionType
 {
 
 	@Override

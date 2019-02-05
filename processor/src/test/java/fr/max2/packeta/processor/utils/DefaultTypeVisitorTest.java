@@ -8,22 +8,24 @@ import javax.lang.model.type.TypeVisitor;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.max2.packeta.processor.utils.model.element.TestingAllType;
+
 
 public class DefaultTypeVisitorTest
 {
-	private TestingType passedType;
+	private TestingAllType passedType;
 	
 	@Before
 	public void setUp()
 	{
-		passedType = new TestingType();
+		passedType = new TestingAllType();
 	}
 	
 	@Test
 	public void testVisit()
 	{
 		TestingVisitor visitor = new TestingVisitor();
-		passedType = new TestingType()
+		passedType = new TestingAllType()
 		{
 			@Override
 			public <R, P> R accept(TypeVisitor<R, P> v, P p)

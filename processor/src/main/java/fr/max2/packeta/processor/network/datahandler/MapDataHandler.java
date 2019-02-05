@@ -24,8 +24,8 @@ public enum MapDataHandler implements INamedDataHandler
 		
 		TypeMirror keyType = mapType.getTypeArguments().get(0);
 		TypeMirror valueType = mapType.getTypeArguments().get(1);
-		String keyTypeName = NamingUtils.simpleTypeName(keyType);
-		String valueTypeName = NamingUtils.simpleTypeName(valueType);
+		String keyTypeName = NamingUtils.simplifiedTypeName(keyType);
+		String valueTypeName = NamingUtils.simplifiedTypeName(valueType);
 		
 		String keyVarName = params.simpleName + "Key";
 		String valueVarName = params.simpleName + "Element";

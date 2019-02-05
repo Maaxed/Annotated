@@ -22,11 +22,6 @@ public class NamingUtils
 		return dotIndex < 0 ? qualifiedName : qualifiedName.substring(dotIndex + 1);
 	}
 	
-	public static String simpleTypeName(TypeMirror type)
-	{
-		return simpleTypeName(type, false);
-	}
-	
 	public static String simplifiedTypeName(TypeMirror type)
 	{
 		return simpleTypeName(type, false);
@@ -40,7 +35,7 @@ public class NamingUtils
 		return builder.toString();
 	}
 	
-	private enum TypeToString implements DefaultTypeVisitor<Void, StringBuilder>
+	public enum TypeToString implements DefaultTypeVisitor<Void, StringBuilder>
 	{
 		FULL(false),
 		SIMPLIFIED(true);

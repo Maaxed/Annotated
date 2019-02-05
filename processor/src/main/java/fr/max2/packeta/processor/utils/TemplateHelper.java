@@ -23,23 +23,23 @@ public class TemplateHelper
 	private TemplateHelper() { }
 
 	
-	public static void writeFileFromTemplate(ProcessingEnvironment env, String className, String templateFile, Map<String, String> replacements) throws IOException
+	public static void writeFileFromTemplateWithLog(ProcessingEnvironment env, String className, String templateFile, Map<String, String> replacements) throws IOException
 	{
 		try
 		{
 			env.getMessager().printMessage(Kind.NOTE, "Generation file '" + className + "' from tmplate '" + templateFile + "'");
 			
-			writeFileFromTemplateImpl(env.getFiler(), className, templateFile, replacements);
+			writeFileFromTemplate(env.getFiler(), className, templateFile, replacements);
 		}
 		catch (IOException e)
 		{
-			env.getMessager().printMessage(Kind.ERROR, "An error occured during the generation of the file '" + className + "' from tmplate '" + templateFile + "'");
+			env.getMessager().printMessage(Kind.ERROR, "An error occured during the generation of the file '" + className + "' from template '" + templateFile + "'");
 			throw e;
 		}
 		
 	}
 	
-	private static void writeFileFromTemplateImpl(Filer filer, String className, String templateFile, Map<String, String> replacements) throws IOException
+	public static void writeFileFromTemplate(Filer filer, String className, String templateFile, Map<String, String> replacements) throws IOException
 	{
 		JavaFileObject file = filer.createSourceFile(className);
 		try (Writer writer = file.openWriter())
@@ -59,7 +59,7 @@ public class TemplateHelper
 	 * @param replacements the map used to find the replacements
 	 * @return the generated string
 	 */
-	private static String mapKeys(String content, Map<String, String> replacements)
+	public static String mapKeys(String content, Map<String, String> replacements)
 	{
 		Pattern p = Pattern.compile("\\$\\{(.+?)\\}");
 		Matcher m = p.matcher(content);
@@ -68,7 +68,7 @@ public class TemplateHelper
 		while (m.find())
 		{
 			String key = m.group(1);
-			String rep = replacements.get(key);
+			String rep = replacements.get(key.trim());
 			
 			try
 			{

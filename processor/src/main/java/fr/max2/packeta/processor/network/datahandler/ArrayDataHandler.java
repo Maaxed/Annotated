@@ -27,7 +27,7 @@ public enum ArrayDataHandler implements IDataHandler
 		if (arrayType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not an array");
 		
 		TypeMirror contentType = arrayType.getComponentType();
-		String typeName = NamingUtils.simpleTypeName(contentType);
+		String typeName = NamingUtils.simplifiedTypeName(contentType);
 		
 		boolean constSize = params.annotations.getAnnotation(ConstSize.class) != null || params.type.getAnnotation(ConstSize.class) != null;
 		

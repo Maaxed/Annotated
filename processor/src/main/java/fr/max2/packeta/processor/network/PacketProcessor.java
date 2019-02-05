@@ -243,13 +243,13 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("package", className.substring(0, packageSeparator));
 		replacements.put("baseClass", className.substring(packageSeparator + 1));
 		replacements.put("interfaces", sides.getInterfaces());
-		replacements.put("allFields" , fields.stream().map(f -> NamingUtils.simpleTypeName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
+		replacements.put("allFields" , fields.stream().map(f -> NamingUtils.simplifiedTypeName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsInit", fields.stream().map(f -> "this." + f.getSimpleName() + " = " + f.getSimpleName() + ";").collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("toBytes"	, saveInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("fromBytes", loadInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports", imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 
-		TemplateHelper.writeFileFromTemplate(this.processingEnv, className + "Message", "templates/TemplatePacket.jvtp", replacements);
+		TemplateHelper.writeFileFromTemplateWithLog(this.processingEnv, className + "Message", "templates/TemplatePacket.jvtp", replacements);
 	}
 	
 	private void writeNetwork(String networkClass, String networkName, Map<EnumSides, Collection<String>> packetsToRegister) throws IOException
@@ -265,7 +265,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("registerPackets", packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(packetName -> registerPacketInstruction(entry.getKey(), NamingUtils.simpleName(packetName)))).collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("imports"		  , packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream()).map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		
-		TemplateHelper.writeFileFromTemplate(this.processingEnv, networkClass, "templates/TemplateNetwork.jvtp", replacements);
+		TemplateHelper.writeFileFromTemplateWithLog(this.processingEnv, networkClass, "templates/TemplateNetwork.jvtp", replacements);
 	}
 	
 	private static String registerPacketInstruction(EnumSides sides, String packetClass)

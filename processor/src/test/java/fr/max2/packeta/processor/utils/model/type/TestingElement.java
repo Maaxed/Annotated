@@ -1,4 +1,4 @@
-package fr.max2.packeta.processor.utils;
+package fr.max2.packeta.processor.utils.model.type;
 
 import java.lang.annotation.Annotation;
 import java.util.List;

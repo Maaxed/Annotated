@@ -8,6 +8,8 @@ import javax.lang.model.element.ElementVisitor;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.max2.packeta.processor.utils.model.type.TestingElement;
+
 
 public class DefaultElementVisitorTest
 {

@@ -15,6 +15,8 @@ import static fr.max2.packeta.processor.utils.Visibility.*;
 
 import org.junit.Test;
 
+import fr.max2.packeta.processor.utils.model.type.TestingElement;
+
 
 public class VisibilityTest
 {
