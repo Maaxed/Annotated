@@ -15,7 +15,7 @@ import static fr.max2.packeta.processor.utils.Visibility.*;
 
 import org.junit.Test;
 
-import fr.max2.packeta.processor.utils.model.type.TestingElement;
+import fr.max2.packeta.processor.utils.model.element.TestingAllElement;
 
 
 public class VisibilityTest
@@ -84,7 +84,7 @@ public class VisibilityTest
 		assertEquals(expected, getElementVisibility(new VisibilityTestingElement(modifiers)));
 	}
 	
-	private static class VisibilityTestingElement extends TestingElement
+	private static class VisibilityTestingElement extends TestingAllElement
 	{
 		private final Set<Modifier> modifiers;
 

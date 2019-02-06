@@ -1,4 +1,4 @@
-package fr.max2.packeta.processor.utils.model.element;
+package fr.max2.packeta.processor.utils.model.type;
 
 import java.util.Arrays;
 import java.util.List;

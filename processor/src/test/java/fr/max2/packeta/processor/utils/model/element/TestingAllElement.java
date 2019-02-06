@@ -1,4 +1,4 @@
-package fr.max2.packeta.processor.utils.model.type;
+package fr.max2.packeta.processor.utils.model.element;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -21,7 +21,7 @@ import javax.lang.model.type.TypeMirror;
 
 import org.junit.Assert;
 
-public class TestingElement implements PackageElement, TypeElement, VariableElement, ExecutableElement, TypeParameterElement
+public class TestingAllElement implements PackageElement, TypeElement, VariableElement, ExecutableElement, TypeParameterElement
 {
 
 	@Override

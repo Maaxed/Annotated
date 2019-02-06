@@ -8,24 +8,24 @@ import javax.lang.model.element.ElementVisitor;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.max2.packeta.processor.utils.model.type.TestingElement;
+import fr.max2.packeta.processor.utils.model.element.TestingAllElement;
 
 
 public class DefaultElementVisitorTest
 {
-	private TestingElement passedElement;
+	private TestingAllElement passedElement;
 	
 	@Before
 	public void setUp()
 	{
-		passedElement = new TestingElement();
+		passedElement = new TestingAllElement();
 	}
 	
 	@Test
 	public void testVisit()
 	{
 		TestingVisitor visitor = new TestingVisitor();
-		passedElement = new TestingElement()
+		passedElement = new TestingAllElement()
 		{
 			@Override
 			public <R, P> R accept(ElementVisitor<R, P> v, P p)

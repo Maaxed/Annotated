@@ -8,7 +8,7 @@ import javax.lang.model.type.TypeVisitor;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.max2.packeta.processor.utils.model.element.TestingAllType;
+import fr.max2.packeta.processor.utils.model.type.TestingAllType;
 
 
 public class DefaultTypeVisitorTest
