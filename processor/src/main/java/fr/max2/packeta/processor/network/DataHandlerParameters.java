@@ -76,7 +76,7 @@ public class DataHandlerParameters
 	{
 		if (this.loadAccessExpr == null)
 		{
-			loadInstructions.accept(NamingUtils.simplifiedTypeName(this.type) + " " + this.simpleName + " = " + value + ";");
+			loadInstructions.accept(NamingUtils.computeFullName(this.type) + " " + this.simpleName + " = " + value + ";");
 		}
 		else
 		{

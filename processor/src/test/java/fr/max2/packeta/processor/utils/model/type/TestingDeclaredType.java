@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -11,22 +12,27 @@ import javax.lang.model.type.TypeVisitor;
 
 import org.junit.Assert;
 
+import fr.max2.packeta.processor.utils.model.element.TestingTypeElement;
+
 
 public class TestingDeclaredType extends TestingType implements DeclaredType
 {
+	public static final TestingDeclaredType OBJECT = new TestingDeclaredType(new TestingTypeElement(ElementKind.CLASS, "java.lang.Object"));
+	
 	private final List<TypeMirror> typeArgs;
 	private final Element thisElement;
 	
-	public TestingDeclaredType(Element thisElement, TypeMirror... typeArgs)
+	protected TestingDeclaredType(TypeKind kind, TestingTypeElement thisElement, TypeMirror... typeArgs)
 	{
-		super(TypeKind.DECLARED);
+		super(kind);
 		this.thisElement = thisElement;
 		this.typeArgs = Arrays.asList(typeArgs);
+		thisElement.setElementType(this);
 	}
 	
-	public TestingDeclaredType(TypeMirror... typeArgs)
+	public TestingDeclaredType(TestingTypeElement thisElement, TypeMirror... typeArgs)
 	{
-		this(null, typeArgs);
+		this(TypeKind.DECLARED, thisElement, typeArgs);
 	}
 	
 	@Override

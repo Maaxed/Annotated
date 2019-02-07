@@ -1,22 +1,19 @@
 package fr.max2.packeta.processor.utils.model.type;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.type.ErrorType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
+
+import fr.max2.packeta.processor.utils.model.element.TestingTypeElement;
 
 
 public class TestingErrorType extends TestingDeclaredType implements ErrorType
 {
 	
-	public TestingErrorType(Element thisElement, TypeMirror... typeArgs)
+	public TestingErrorType(TestingTypeElement thisElement, TypeMirror... typeArgs)
 	{
-		super(thisElement, typeArgs);
-	}
-	
-	public TestingErrorType(TypeMirror... typeArgs)
-	{
-		super(typeArgs);
+		super(TypeKind.ERROR, thisElement, typeArgs);
 	}
 	
 	@Override

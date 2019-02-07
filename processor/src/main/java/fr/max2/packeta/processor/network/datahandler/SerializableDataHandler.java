@@ -28,7 +28,7 @@ public enum SerializableDataHandler implements INamedDataHandler
 			
 			if (!params.initStatus.isInitialised())
 			{
-				params.setLoadedValue(loadInstructions, "new " + NamingUtils.simpleTypeName(params.type, true) + "()");
+				params.setLoadedValue(loadInstructions, "new " + NamingUtils.computeSimplifiedName(params.type) + "()");
 			}
 			
 			params.finder.getDataType(params.simpleName + "Data", params.saveAccessExpr + ".serializeNBT()", params.saveAccessExpr + ".serializeNBT()", (loadInst, value) -> loadInst.accept(params.getLoadAccessExpr() + ".deserializeNBT(" + value + ");"), nbtType, EmptyAnnotationConstruct.INSTANCE, ValueInitStatus.INITIALISED);

@@ -13,6 +13,8 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.packeta.processor.utils.model.type.TestingNoType;
+
 
 public class TestingExecutableElement extends TestingElement implements ExecutableElement
 {
@@ -30,6 +32,11 @@ public class TestingExecutableElement extends TestingElement implements Executab
 		this.receiverType = receiverType;
 		this.returnType = returnType;
 		this.parameters = Arrays.asList(parameters);
+	}
+	
+	public TestingExecutableElement(ElementKind kind, TypeMirror correspondingType, String name, TypeMirror returnType, VariableElement... parameters)
+	{
+		this(kind, correspondingType, name, TestingNoType.INSTANCE, returnType, parameters);
 	}
 	
 	public TestingExecutableElement withWarArgs()

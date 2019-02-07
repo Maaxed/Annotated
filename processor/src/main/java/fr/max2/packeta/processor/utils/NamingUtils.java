@@ -22,17 +22,14 @@ public class NamingUtils
 		return dotIndex < 0 ? qualifiedName : qualifiedName.substring(dotIndex + 1);
 	}
 	
-	public static String simplifiedTypeName(TypeMirror type)
+	public static String computeSimplifiedName(TypeMirror type)
 	{
-		return simpleTypeName(type, false);
+		return TypeToString.SIMPLIFIED.computeName(type);
 	}
 	
-	public static String simpleTypeName(TypeMirror type, boolean simplifyGenerics)
+	public static String computeFullName(TypeMirror type)
 	{
-		StringBuilder builder = new StringBuilder();
-		TypeToString visitor = simplifyGenerics ? TypeToString.SIMPLIFIED : TypeToString.FULL;
-		visitor.visit(type, builder);
-		return builder.toString();
+		return TypeToString.FULL.computeName(type);
 	}
 	
 	public enum TypeToString implements DefaultTypeVisitor<Void, StringBuilder>
@@ -45,6 +42,13 @@ public class NamingUtils
 		private TypeToString(boolean simplifyGenerics)
 		{
 			this.simplifyGenerics = simplifyGenerics;
+		}
+		
+		public String computeName(TypeMirror type)
+		{
+			StringBuilder builder = new StringBuilder();
+			this.visit(type, builder);
+			return builder.toString();
 		}
 		
 		@Override
@@ -96,20 +100,7 @@ public class NamingUtils
 		@Override
 		public Void visitTypeVariable(TypeVariable t, StringBuilder builder)
 		{
-			TypeMirror extendsBound = t.getUpperBound();
-			TypeMirror superBound = t.getLowerBound();
-			
 			builder.append(t.asElement().getSimpleName());
-			if (extendsBound != null)
-			{
-				builder.append(" extends ");
-				this.visit(extendsBound, builder);
-			}
-			if (superBound != null)
-			{
-				builder.append(" super ");
-				this.visit(superBound, builder);
-			}
 			
 			return null;
 		}

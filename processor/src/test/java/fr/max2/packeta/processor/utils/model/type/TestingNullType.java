@@ -20,4 +20,10 @@ public class TestingNullType extends TestingType implements NullType
 		return v.visitNull(this, p);
 	}
 	
+	@Override
+	public String toString()
+	{
+		return "Null";
+	}
+	
 }

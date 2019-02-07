@@ -21,9 +21,9 @@ import fr.max2.packeta.processor.utils.model.SimpleName;
 
 public class TestingElement implements Element
 {
-	private final ElementKind kind;
-	private final TypeMirror correspondingType;
-	private final Name name;
+	protected ElementKind kind;
+	protected TypeMirror correspondingType;
+	protected Name name;
 	private final List<Element> enclosedElements = new ArrayList<>();
 	private final Set<Modifier> modifiers = new HashSet<>();
 	
@@ -47,6 +47,7 @@ public class TestingElement implements Element
 	@Override
 	public TypeMirror asType()
 	{
+		if (this.correspondingType == null) Assert.fail("Illegal method call");
 		return this.correspondingType;
 	}
 

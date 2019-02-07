@@ -23,7 +23,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 		{
 			saveInstructions.accept(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".ordinal()"));
 			
-			params.setExpr.accept(loadInstructions, NamingUtils.simplifiedTypeName(params.type) + ".values()[buf.readInt()]");
+			params.setExpr.accept(loadInstructions, NamingUtils.computeFullName(params.type) + ".values()[buf.readInt()]");
 		}
 	},
 	UUID(UUID.class)

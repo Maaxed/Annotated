@@ -243,7 +243,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("package", className.substring(0, packageSeparator));
 		replacements.put("baseClass", className.substring(packageSeparator + 1));
 		replacements.put("interfaces", sides.getInterfaces());
-		replacements.put("allFields" , fields.stream().map(f -> NamingUtils.simplifiedTypeName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
+		replacements.put("allFields" , fields.stream().map(f -> NamingUtils.computeFullName(f.asType()) + " " + f.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsInit", fields.stream().map(f -> "this." + f.getSimpleName() + " = " + f.getSimpleName() + ";").collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("toBytes"	, saveInstructions.stream().collect(Collectors.joining(ls + "\t\t")));
 		replacements.put("fromBytes", loadInstructions.stream().collect(Collectors.joining(ls + "\t\t")));

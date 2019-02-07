@@ -13,10 +13,15 @@ public class TestingIntersectionType extends TestingType implements Intersection
 {
 	private final List<TypeMirror> bounds;
 	
-	public TestingIntersectionType(TypeMirror... bounds)
+	public TestingIntersectionType(List<TypeMirror> bounds)
 	{
 		super(TypeKind.INTERSECTION);
-		this.bounds = Arrays.asList(bounds);
+		this.bounds = bounds;
+	}
+	
+	public TestingIntersectionType(TypeMirror... bounds)
+	{
+		this(Arrays.asList(bounds));
 	}
 	
 	@Override

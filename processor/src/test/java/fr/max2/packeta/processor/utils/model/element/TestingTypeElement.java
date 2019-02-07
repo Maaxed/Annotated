@@ -1,6 +1,7 @@
 package fr.max2.packeta.processor.utils.model.element;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.ElementKind;
@@ -10,35 +11,49 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.packeta.processor.utils.model.type.TestingDeclaredType;
 import fr.max2.packeta.processor.utils.model.type.TestingNoType;
 
 
 public class TestingTypeElement extends TestingQualifiedNameable implements TypeElement
 {
-	private final NestingKind nesting;
+	private NestingKind nesting = NestingKind.TOP_LEVEL;
 	private final List<TypeMirror> interfaces = new ArrayList<>();
 	private final List<TypeParameterElement> typeParameters = new ArrayList<>();
 	private TypeMirror superClass = TestingNoType.INSTANCE;
 	
-	public TestingTypeElement(ElementKind kind, NestingKind nesting, TypeMirror correspondingType, String qualifiedName)
+	public TestingTypeElement(ElementKind kind, String qualifiedName)
 	{
-		super(kind, correspondingType, qualifiedName);
-		this.nesting = nesting;
+		super(kind, null, qualifiedName);
 	}
 	
-	public void setSuperClass(TypeMirror superClass)
+	public TestingTypeElement withSuperClass(TypeMirror superClass)
 	{
 		this.superClass = superClass;
+		return this;
 	}
 	
-	public void addInterface(TypeMirror newInterface)
+	public TestingTypeElement withInterfaces(TypeMirror... newInterfaces)
 	{
-		this.interfaces.add(newInterface);
+		this.interfaces.addAll(Arrays.asList(newInterfaces));
+		return this;
 	}
 	
-	public void addTypeParameter(TypeParameterElement parameter)
+	public TestingTypeElement withNestingKind(NestingKind kind)
 	{
-		this.typeParameters.add(parameter);
+		this.nesting = kind;
+		return this;
+	}
+	
+	public TestingTypeElement withNewTypeParameter(String name, TypeMirror... bounds)
+	{
+		this.typeParameters.add(new TestingTypeParameterElement(name, this, bounds));
+		return this;
+	}
+	
+	public void setElementType(TestingDeclaredType type)
+	{
+		this.correspondingType = type;
 	}
 	
 	@Override

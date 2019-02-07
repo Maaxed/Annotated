@@ -24,8 +24,8 @@ public enum MapDataHandler implements INamedDataHandler
 		
 		TypeMirror keyType = mapType.getTypeArguments().get(0);
 		TypeMirror valueType = mapType.getTypeArguments().get(1);
-		String keyTypeName = NamingUtils.simplifiedTypeName(keyType);
-		String valueTypeName = NamingUtils.simplifiedTypeName(valueType);
+		String keyTypeName = NamingUtils.computeFullName(keyType);
+		String valueTypeName = NamingUtils.computeFullName(valueType);
 		
 		String keyVarName = params.simpleName + "Key";
 		String valueVarName = params.simpleName + "Element";
@@ -49,7 +49,7 @@ public enum MapDataHandler implements INamedDataHandler
 		}
 		else
 		{
-			params.setLoadedValue(loadInstructions, "new " + NamingUtils.simpleTypeName(params.type, true) + "()"); //TODO [v1.1] use parameters to use the right class
+			params.setLoadedValue(loadInstructions, "new " + NamingUtils.computeSimplifiedName(params.type) + "()"); //TODO [v1.1] use parameters to use the right class
 		}
 		
 		loadInstructions.accept("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)");

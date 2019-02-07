@@ -9,9 +9,9 @@ import javax.lang.model.type.TypeMirror;
 public class TestingPackageElement extends TestingQualifiedNameable implements PackageElement
 {
 	
-	public TestingPackageElement(ElementKind kind, TypeMirror correspondingType, String qualifiedName)
+	public TestingPackageElement(TypeMirror correspondingType, String qualifiedName)
 	{
-		super(kind, correspondingType, qualifiedName);
+		super(ElementKind.PACKAGE, correspondingType, qualifiedName);
 	}
 	
 	@Override
