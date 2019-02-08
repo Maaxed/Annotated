@@ -20,7 +20,7 @@ public class TestingTypeElement extends TestingQualifiedNameable implements Type
 	private NestingKind nesting = NestingKind.TOP_LEVEL;
 	private final List<TypeMirror> interfaces = new ArrayList<>();
 	private final List<TypeParameterElement> typeParameters = new ArrayList<>();
-	private TypeMirror superClass = TestingNoType.INSTANCE;
+	private TypeMirror superClass = TestingNoType.NONE;
 	
 	public TestingTypeElement(ElementKind kind, String qualifiedName)
 	{

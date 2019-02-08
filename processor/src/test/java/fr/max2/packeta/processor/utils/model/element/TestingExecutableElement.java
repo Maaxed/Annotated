@@ -36,7 +36,7 @@ public class TestingExecutableElement extends TestingElement implements Executab
 	
 	public TestingExecutableElement(ElementKind kind, TypeMirror correspondingType, String name, TypeMirror returnType, VariableElement... parameters)
 	{
-		this(kind, correspondingType, name, TestingNoType.INSTANCE, returnType, parameters);
+		this(kind, correspondingType, name, TestingNoType.NONE, returnType, parameters);
 	}
 	
 	public TestingExecutableElement withWarArgs()

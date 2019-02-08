@@ -7,11 +7,13 @@ import javax.lang.model.type.TypeVisitor;
 
 public class TestingNoType extends TestingType implements NoType
 {
-	public static final TestingNoType INSTANCE = new TestingNoType();
+	public static final TestingNoType NONE = new TestingNoType(TypeKind.NONE);
+	public static final TestingNoType VOID = new TestingNoType(TypeKind.VOID);
+	public static final TestingNoType PACKAGE = new TestingNoType(TypeKind.PACKAGE);
 	
-	private TestingNoType()
+	private TestingNoType(TypeKind kind)
 	{
-		super(TypeKind.NONE);
+		super(kind);
 	}
 	
 	@Override
