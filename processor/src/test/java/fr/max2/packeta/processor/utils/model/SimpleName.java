@@ -36,4 +36,10 @@ public class SimpleName implements Name
 		return this.value.contentEquals(cs);
 	}
 	
+	@Override
+	public String toString()
+	{
+		return this.value;
+	}
+	
 }

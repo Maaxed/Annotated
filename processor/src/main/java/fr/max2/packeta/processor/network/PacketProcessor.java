@@ -223,7 +223,7 @@ public class PacketProcessor extends AbstractProcessor
 		
 		sides.addImports(importFilter);
 		
-		fields.forEach(f -> TypeHelper.addTypeImports(f.asType(), importFilter));
+		fields.forEach(f -> TypeHelper.provideTypeImports(f.asType(), importFilter));
 		
 		Messager logs = this.processingEnv.getMessager();
 		//TODO [v1.2] use method templates, parameters map

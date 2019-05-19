@@ -72,7 +72,7 @@ public class TemplateHelper
 			
 			try
 			{
-				m.appendReplacement(sb, rep == null ? key : rep);
+				m.appendReplacement(sb, Matcher.quoteReplacement(rep == null ? key : rep));
 			}
 			catch (RuntimeException e)
 			{

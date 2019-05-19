@@ -208,7 +208,7 @@ public class TypeHelper
 		}
 	}
 	
-	public static void addTypeImports(TypeMirror type,  Consumer<String> imports)
+	public static void provideTypeImports(TypeMirror type, Consumer<String> imports)
 	{
 		TypeImporter.INSTANCE.visit(type, imports);
 	}
@@ -265,7 +265,7 @@ public class TypeHelper
 		{
 			for (TypeMirror subType : t.getAlternatives())
 			{
-				addTypeImports(subType, imports);
+				provideTypeImports(subType, imports);
 			}
 			return null;
 		}
@@ -275,7 +275,7 @@ public class TypeHelper
 		{
 			for (TypeMirror subType : t.getBounds())
 			{
-				addTypeImports(subType, imports);
+				provideTypeImports(subType, imports);
 			}
 			return null;
 		}
@@ -286,7 +286,7 @@ public class TypeHelper
 			return null;
 		}
 		
-		//ElementVisitor
+		// ElementVisitor
 		@Override
 		public Void visit(Element e, Consumer<String> imports)
 		{
@@ -326,7 +326,7 @@ public class TypeHelper
 	public static List<Element> getAllMembers(TypeElement type, Elements elemUils, Predicate<Element> predicate)
 	{
 		List<Element> elems = new ArrayList<>();
-		Set<Name> usedNames = new HashSet<>(); //For optimization purposes
+		Set<Name> usedNames = new HashSet<>(); // For optimization purposes
 		
 		visitAllMembers(type, elem -> {
 			if (predicate.test(elem))
@@ -372,7 +372,7 @@ public class TypeHelper
 			return null;
 		}
 
-		//ElementVisitor
+		// ElementVisitor
 		@Override
 		public Void visitDeclared(DeclaredType t, Consumer<Element> p)
 		{

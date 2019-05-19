@@ -24,7 +24,7 @@ public enum SerializableDataHandler implements INamedDataHandler
 			
 			TypeMirror nbtType = serialisableType.getTypeArguments().get(0);
 			
-			TypeHelper.addTypeImports(nbtType, imports);
+			TypeHelper.provideTypeImports(nbtType, imports);
 			
 			if (!params.initStatus.isInitialised())
 			{
