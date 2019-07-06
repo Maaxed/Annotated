@@ -1,10 +1,10 @@
 package ${package};
 
 import javax.annotation.Generated;
-import fr.max2.packeta.lib.network.ModNetwork;
+import fr.max2.annotated.lib.network.ModNetwork;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 ${imports}
-@Generated("fr.max2.packeta.processor.network.PacketProcessor")
+@Generated("fr.max2.annotated.processor.network.PacketProcessor")
 public class ${className}
 {
 	public static ModNetwork NETWORK = new ModNetwork("${networkName}");
