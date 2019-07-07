@@ -262,7 +262,7 @@ public class PacketProcessor extends AbstractProcessor
 		replacements.put("package", networkClass.substring(0, packageSeparator));
 		replacements.put("className", networkClass.substring(packageSeparator + 1));
 		replacements.put("networkName", networkName);
-		replacements.put("registerPackets", packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(packetName -> registerPacketInstruction(entry.getKey(), NamingUtils.simpleName(packetName)))).collect(Collectors.joining(ls + "\t\t")));
+		replacements.put("registerPackets", packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream().map(packetName -> registerPacketInstruction(entry.getKey(), NamingUtils.simpleName(packetName)))).collect(Collectors.joining(ls + "\t\t\t")));
 		replacements.put("imports"		  , packetsToRegister.entrySet().stream().flatMap(entry -> entry.getValue().stream()).map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		
 		TemplateHelper.writeFileFromTemplateWithLog(this.processingEnv, networkClass, "templates/TemplateNetwork.jvtp", replacements);

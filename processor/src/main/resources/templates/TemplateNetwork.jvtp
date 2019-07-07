@@ -7,11 +7,16 @@ ${imports}
 @Generated("fr.max2.annotated.processor.network.PacketProcessor")
 public class ${className}
 {
-	public static ModNetwork NETWORK = new ModNetwork("${networkName}");
+	public static final ModNetwork NETWORK = new ModNetwork("${networkName}");
+	private static boolean init = false;
 	
 	public static SimpleNetworkWrapper initNetwork()
 	{
-		${registerPackets}
+		if (!init)
+		{
+			${registerPackets}
+			init = true;
+		}
 		
 		return NETWORK.modChannel;
 	}

@@ -3,7 +3,7 @@ plugins {
 	id "net.ltgt.apt-eclipse" version "0.19"
 }
 
-version = "1.0"
+version = "$mcVersion-1.0"
 group = "fr.max2.annotated.test"
 archivesBaseName = "AnnotatedTest"
 
