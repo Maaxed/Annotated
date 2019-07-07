@@ -15,3 +15,31 @@ Then just add the ``@GeneratePacket`` annotation to your class and Annotated wil
 
 Adding the ``@GenerateNetwork`` on your main class will generate a network with all your generated packets already registered.
 You can init and access the generated network using ``public static final SimpleNetworkWrapper MOD_CHANNEL = ModTestAnnotatedNetwork.initNetwork();``.
+
+## Gradle setup :
+
+* Add the CurseForge repository in out build.gradle :
+```
+repositories {
+    maven {
+        name = "CurseForge"
+        url = "https://minecraft.curseforge.com/api/maven/"
+    }
+}
+```
+
+* Add Annotated to your dependencies :
+```
+compile "annotated:Annotated-1.11:release:dev"
+annotationProcessor "annotated:Annotated-1.11:release:dev"
+```
+
+* It is also recomanded to use the plugin ``net.ltgt.apt`` to automtically configure gradle :
+```
+plugins {
+
+    id 'net.ltgt.apt' version '0.19'
+
+}
+```
+You can also add ``net.ltgt.apt-eclipse`` or ``net.ltgt.apt-idea`` to configure your IDE.
