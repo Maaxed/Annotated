@@ -8,7 +8,7 @@ The tool includes an annotation processor that can generate code for you.
 * Generate packet class :
 
 Annotated can generate a packet class from a "data" class (a class with fields for the data)
-You can implement the ``IClientPacket`` interface to define what happens when the packet is received on the client and / or ``IServeurPacket`` for the server.
+You can implement the ``IClientPacket`` interface to define what happens when the packet is received on the client and / or ``IServerPacket`` for the server.
 Then just add the ``@GeneratePacket`` annotation to your class and Annotated will automatically generate a packet class with the correct constructor, the fromBytes and the toByte methods.
 
 * Generate a network class and register the packets :
