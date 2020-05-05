@@ -1,0 +1,44 @@
+plugins {
+	id 'net.ltgt.apt' version '0.19'
+	id 'net.ltgt.apt-eclipse' version '0.19'
+}
+
+version = "$rootProject.mcVersion-1.0"
+group = 'fr.max2.annotated.example'
+archivesBaseName = 'AnnotatedExample'
+
+dependencies {
+	implementation rootProject.sourceSets.lib.output
+	compileOnly rootProject.sourceSets.main.output
+	annotationProcessor rootProject.sourceSets.main.output
+}
+
+eclipse {
+	jdt {
+		apt {
+			genSrcDir = file('src/generated/java')
+		}
+	}
+}
+
+processResources {
+	from(sourceSets.main.java.srcDirs) {
+		include 'fr/max2/annotated/test/ModTestAnnotated.java'
+		expand '@VERSION@': project.version
+	}
+}
+
+
+jar {
+	manifest {
+		attributes([
+			'Specification-Title': 'AnnotatedExample',
+			'Specification-Vendor': 'LeBossMax2',
+			'Specification-Version': '1',
+			'Implementation-Title': project.name,
+			'Implementation-Version': "${version}",
+			'Implementation-Vendor' :'LeBossMax2',
+			'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+}

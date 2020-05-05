@@ -1,69 +1,98 @@
 buildscript {
 	repositories {
+		maven { url = 'https://files.minecraftforge.net/maven' }
 		jcenter()
-		maven { url = "http://files.minecraftforge.net/maven" }
 		mavenCentral()
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 	}
 }
 
 plugins {
-  id "jacoco"
-  id "org.sonarqube" version "2.6"
-}
-
-sonarqube {
-    properties {
-        property "sonar.projectKey", "annotated"
-        property "sonar.projectName", "Annotated"
-    }
+	id 'jacoco'
+	id 'org.sonarqube' version '2.6'
 }
 
 allprojects {
-	apply plugin: 'net.minecraftforge.gradle.forge'
-	apply plugin: 'jacoco'
+	apply plugin: 'net.minecraftforge.gradle'
+}
 
-	jacoco {
-		toolVersion = "0.8.3"
-	}
+jacoco {
+	toolVersion = '0.8.3'
+}
 
-	ext {
-		mcVersion = "1.11.2"
-		libVersion = "$mcVersion-1.0"
-		processorVersion = "$libVersion-1.0"
+sonarqube {
+	properties {
+		property 'sonar.projectKey', 'annotated'
+		property 'sonar.projectName', 'Annotated'
 	}
+}
+
+ext {
+	mcVersion = '1.15.2'
+	libVersion = "$mcVersion-2.0"
+	processorVersion = "$libVersion-2.0"
+}
+
+version = processorVersion
+group = 'fr.max2.annotated'
+archivesBaseName = 'Annotated'
+
+project(':AnnotatedExample') {
+	version = "$mcVersion-1.0"
+	group = 'fr.max2.annotated.example'
+	archivesBaseName = 'AnnotatedExample'
+}
+
+allprojects {
+	apply plugin: 'eclipse'
 	
-	version = processorVersion
-	group = "fr.max2.annotated"
-	archivesBaseName = "Annotated"
-	
-	sourceCompatibility = targetCompatibility = "1.8"
-	compileJava {
-		sourceCompatibility = targetCompatibility = "1.8"
-	}
+	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 	
 	minecraft {
-		version = "1.11.2-13.20.0.2228"
-		runDir = "run"
-		
-		mappings = "snapshot_20170610"
+		mappings channel: 'snapshot', version: '20200425-1.15.1'
+		runs {
+			client {
+				workingDirectory project.file('run/client')
+
+				property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+				property 'forge.logging.console.level', 'debug'
+
+				mods {
+					annotated {
+						source sourceSets.main
+					}
+				}
+			}
+
+			server {
+				workingDirectory project.file('run/server')
+
+				property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+				property 'forge.logging.console.level', 'debug'
+
+				mods {
+					annotated {
+						source sourceSets.main
+					}
+				}
+			}
+		}
 	}
 	
-	
 	processResources {
-		inputs.property "version", project.version
-		inputs.property "mcversion", project.minecraft.version
+		inputs.property 'version', project.version
+		inputs.property 'mcversion', rootProject.mcVersion
 		
 		from(sourceSets.main.resources.srcDirs) {
-			include 'mcmod.info'
+			include 'META-INF/mods.toml'
 			
-			expand 'version':project.version, 'mcversion':project.minecraft.version
+			expand 'version': project.version, 'mcversion': rootProject.mcVersion
 		}
-		
+
 		from(sourceSets.main.resources.srcDirs) {
-			exclude 'mcmod.info'
+			exclude 'META-INF/mods.toml'
 		}
 	}
 	
@@ -72,37 +101,70 @@ allprojects {
 	}
 
 	dependencies {
+		minecraft 'net.minecraftforge:forge:1.15.2-31.1.0'
 		testCompile 'junit:junit:4.12'
 	}
 }
 
-task deobfJar(type: Jar) {
-	from project(':lib').sourceSets.main.output
-	from project(':processor').sourceSets.main.output
+sourceSets {
+	lib {
+ 		java {
+ 			compileClasspath += main.compileClasspath
+            runtimeClasspath += main.runtimeClasspath
+ 		}
+ 	}
+ 	test {
+ 		java {
+ 			compileClasspath += lib.output
+            runtimeClasspath += lib.output
+ 		}
+ 	}
+}
 
-    classifier = 'dev-deobf'
+/*configurations {
+    libMinecraft.extendsFrom minecraft
+}
 
+dependencies {
+	libMinecraft 'net.minecraftforge:forge:1.15.2-31.1.0'
+}*/
+
+processResources {
+	from(sourceSets.main.java.srcDirs) {
+		include 'fr/max2/annotated/lib/ModAnnotatedLib.java'
+		expand '@VERSION@': project.libVersion
+	}
 }
 
 jar {
-	from project(':lib').sourceSets.main.output
-	from project(':processor').sourceSets.main.output
-	
+	manifest {
+		attributes([
+			'Specification-Title': 'TextureCombiner',
+			'Specification-Vendor': 'LeBossMax2',
+			'Specification-Version': '1',
+			'Implementation-Title': project.name,
+			'Implementation-Version': "${version}",
+			'Implementation-Vendor' :'LeBossMax2',
+			'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
 	classifier = 'dev'
 }
 
-sourceJar {
-	includeEmptyDirs = false
-	from (project(':lib').sourceSets.main.allSource) {
-		include '**/api/**'
-	}
-	from (project(':processor').sourceSets.main.allSource) {
-		include '**/api/**'
-	}
+task deobfJar(type: Jar) {
+	from sourceSets.main.output
+	classifier = 'dev-deobf'
 }
 
-tasks.assemble.dependsOn('deobfJar')
+task sourcesJar(type: Jar, dependsOn: classes) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+tasks.assemble.dependsOn 'deobfJar'
+tasks.assemble.dependsOn 'sourcesJar'
 
 artifacts {
-    archives deobfJar
+	archives deobfJar
+	archives sourcesJar
 }

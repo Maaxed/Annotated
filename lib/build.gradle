@@ -1,6 +1,0 @@
-version = ext.libVersion
-	
-minecraft {
-	replace "@VERSION@", project.version
-	replaceIn "fr.max2.annotated.lib.ModAnnotatedLib.java"
-}

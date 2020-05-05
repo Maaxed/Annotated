@@ -1,5 +1,0 @@
-archivesBaseName = "AnnotatedProcessor"
-
-dependencies {
-	testCompile project(':lib')
-}
