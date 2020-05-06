@@ -26,9 +26,16 @@ public enum DataType
 	COLLECTION,
 	MAP,
 	UUID,
+	TIME,
 	
 	// Minecraft classes
-	STACK,
+	BLOCK_POS,
+	RESOURCE_LOCATION,
+	ITEM_STACK,
+	FLUID_STACK,
+	TEXT_COMPONENT,
+	BLOCK_RAY_TRACE,
+	REGISTRY_ENTRY,
 	NBT_SERIALIZABLE,
 	NBT_END,
 	NBT_BYTE,
@@ -44,10 +51,9 @@ public enum DataType
 	NBT_COMPOUND,
 	NBT_ANY_NUMBER,
 	NBT_ANY,
-	//TODO [v1.1] BlockPos
-	//TODO [v1.1] registry value, IByteSerialisable
 	//TODO [v1.1] Entity + EntityPlayer
 	//TODO [v1.2] other data/packet class
+	//TODO [v1.2] IDynamicSerializable, JsonDeserializer + JsonSerializer
 	
 	// Special types
 	WILDCARD,

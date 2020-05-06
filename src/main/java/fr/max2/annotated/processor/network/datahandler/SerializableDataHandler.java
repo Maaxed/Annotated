@@ -17,6 +17,7 @@ public enum SerializableDataHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
+			//TODO [v1.0] check if params.type has a default constructor or throw an error
 			DeclaredType serialisableType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
 			if (serialisableType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 			
@@ -24,11 +25,16 @@ public enum SerializableDataHandler implements INamedDataHandler
 			
 			TypeHelper.provideTypeImports(nbtType, builder::addImport);
 			
-			params.setLoadedValue(builder.load(), "new " + NamingUtils.computeSimplifiedName(params.type) + "()");
+			String dataVarName = params.uniqueName + "Data";
 			
-			params.finder.getDataType(params.simpleName + "Data", params.saveAccessExpr + ".serializeNBT()", params.saveAccessExpr + ".serializeNBT()", (loadInst, value) -> loadInst.add(params.getLoadAccessExpr() + ".deserializeNBT(" + value + ");"), nbtType, EmptyAnnotationConstruct.INSTANCE);
+			builder.encoder().add(NamingUtils.computeFullName(nbtType) + " " + dataVarName + " = " + params.saveAccessExpr + ".serializeNBT()" + ";");
 			
-			params.setExpr.accept(builder.load(), params.simpleName); 
+			builder.decoder().add(NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();");
+			
+			DataHandlerParameters handler = params.finder.getDataType(dataVarName, dataVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".deserializeNBT(" + value + ");"), nbtType, EmptyAnnotationConstruct.INSTANCE);
+			handler.addInstructions(builder);
+			
+			params.setExpr.accept(builder.decoder(), params.uniqueName); 
 		}
 	};
 	

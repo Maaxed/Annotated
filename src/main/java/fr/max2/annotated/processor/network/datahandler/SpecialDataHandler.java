@@ -28,7 +28,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			if (extendsBound == null) throw new IllegalArgumentException("The wildcard type '" + params.type + "' has no extends bound");
 			
-			params.finder.getDataType(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, extendsBound, params.annotations).addInstructions(builder);
+			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.annotations).addInstructions(builder);
 		}
 
 		@Override
@@ -47,7 +47,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			TypeMirror extendsBound = wildcardType.getUpperBound();
 			
-			params.finder.getDataType(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, extendsBound, params.annotations).addInstructions(builder);
+			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.annotations).addInstructions(builder);
 		}
 
 		@Override
@@ -68,7 +68,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			for (TypeMirror type : intersectionType.getBounds())
 			{
-				DataHandlerParameters newParams = params.finder.getDataTypeOrNull(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, type, params.annotations);
+				DataHandlerParameters newParams = params.finder.getDataTypeOrNull(params.uniqueName, params.saveAccessExpr, params.setExpr, type, params.annotations);
 				if (newParams != null)
 				{
 					newParams.addInstructions(builder);
@@ -93,7 +93,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			DataHandlerParameters handler = new DataHandlerParameters(params.simpleName, params.saveAccessExpr, params.loadAccessExpr, params.setExpr, params.type, params.annotations, params.finder.getDefaultDataType(params.type), params.finder, params.parameters);
+			DataHandlerParameters handler = new DataHandlerParameters(params.uniqueName, params.saveAccessExpr, params.setExpr, params.type, params.annotations, params.finder.getDefaultDataType(params.type), params.finder, params.parameters);
 			handler.addInstructions(builder);
 		}
 	},

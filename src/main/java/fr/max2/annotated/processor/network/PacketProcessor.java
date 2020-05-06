@@ -187,11 +187,11 @@ public class PacketProcessor extends AbstractProcessor
 		dataHandlers.forEach(handler -> {
 			if (handler.annotations instanceof Element)
 			{
-				logs.printMessage(Kind.NOTE, "Processing field '" + handler.simpleName + "' with DataHandler '" + handler.typeHandler + "'", (Element)handler.annotations);
+				logs.printMessage(Kind.NOTE, "Processing field '" + handler.uniqueName + "' with DataHandler '" + handler.typeHandler + "'", (Element)handler.annotations);
 			}
 			else
 			{
-				logs.printMessage(Kind.NOTE, "Processing field '" + handler.simpleName + "' with DataHandler '" + handler.typeHandler + "'");
+				logs.printMessage(Kind.NOTE, "Processing field '" + handler.uniqueName + "' with DataHandler '" + handler.typeHandler + "'");
 			}
 			handler.addInstructions(builder);
 		});

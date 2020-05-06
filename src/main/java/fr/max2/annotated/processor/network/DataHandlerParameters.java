@@ -10,7 +10,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.Element;
@@ -27,19 +26,17 @@ import fr.max2.annotated.processor.network.datahandler.IDataHandler;
 import fr.max2.annotated.processor.network.datahandler.MapDataHandler;
 import fr.max2.annotated.processor.network.datahandler.NBTDataHandler;
 import fr.max2.annotated.processor.network.datahandler.PrimitiveDataHandler;
+import fr.max2.annotated.processor.network.datahandler.RegistryEntryDataHandler;
 import fr.max2.annotated.processor.network.datahandler.SerializableDataHandler;
 import fr.max2.annotated.processor.network.datahandler.SimpleClassHandler;
 import fr.max2.annotated.processor.network.datahandler.SpecialDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.NamingUtils;
 
 public class DataHandlerParameters
 {
-	public final String simpleName;
+	public final String uniqueName;
 	public final String saveAccessExpr;
-	@Nullable
-	public final String loadAccessExpr;
 	public final BiConsumer<IFunctionBuilder, String> setExpr;
 	public final TypeMirror type;
 	public final AnnotatedConstruct annotations;
@@ -47,11 +44,10 @@ public class DataHandlerParameters
 	public final Finder finder;
 	public final String[] parameters;
 	
-	public DataHandlerParameters(String simpleName, String saveGetExpr, String loadGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations, IDataHandler typeHandler, Finder finder, String... parameters)
+	public DataHandlerParameters(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations, IDataHandler typeHandler, Finder finder, String... parameters)
 	{
-		this.simpleName = simpleName;
+		this.uniqueName = uniqueName;
 		this.saveAccessExpr = saveGetExpr;
-		this.loadAccessExpr = loadGetExpr;
 		this.setExpr = setExpr;
 		this.type = type;
 		this.annotations = annotations;
@@ -60,33 +56,15 @@ public class DataHandlerParameters
 		this.parameters = parameters;
 	}
 	
-	public DataHandlerParameters(String simpleName, String saveGetExpr, String loadGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, Finder finder)
+	public DataHandlerParameters(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, Finder finder)
 	{
-		this(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations, dataTypeToHandler(data.type()), finder, data.value());
+		this(uniqueName, saveGetExpr, setExpr, type, annotations, dataTypeToHandler(data.type()), finder, data.value());
 	}
 	
 	public void addInstructions(IPacketBuilder builder)
 	{
 		this.typeHandler.addInstructions(this, builder);
 	}
-
-	public void setLoadedValue(IFunctionBuilder loadFunction, String value)
-	{
-		if (this.loadAccessExpr == null)
-		{
-			loadFunction.add(NamingUtils.computeFullName(this.type) + " " + this.simpleName + " = " + value + ";");
-		}
-		else
-		{
-			this.setExpr.accept(loadFunction, value);
-		}
-	}
-	
-	public String getLoadAccessExpr()
-	{
-		return this.loadAccessExpr == null ? this.simpleName : this.loadAccessExpr;
-	}
-	
 	
 	
 	public static class Finder
@@ -106,17 +84,17 @@ public class DataHandlerParameters
 		public DataHandlerParameters getDataType(Element field)
 		{
 			String setExpr = "msg." + field.getSimpleName() + " = ";
-			return this.getDataType(field.getSimpleName().toString(), "msg." + field.getSimpleName(), "msg." + field.getSimpleName(), (loadInst, value) -> loadInst.add(setExpr + value + ";"), field.asType(), field);
+			return this.getDataType(field.getSimpleName().toString(), "msg." + field.getSimpleName(), (loadInst, value) -> loadInst.add(setExpr + value + ";"), field.asType(), field);
 		}
 		
-		public DataHandlerParameters getDataType(String simpleName, String saveGetExpr, @Nullable String loadGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
+		public DataHandlerParameters getDataType(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
 		{
-			DataHandlerParameters params = this.getDataTypeOrNull(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations);
+			DataHandlerParameters params = this.getDataTypeOrNull(uniqueName, saveGetExpr, setExpr, type, annotations);
 			if (params == null) throw new InvalidParameterException("Unknown default DataHandler for type '" + type + "'");
 			return params;
 		}
 		
-		public DataHandlerParameters getDataTypeOrNull(String simpleName, String saveGetExpr, @Nullable String loadGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
+		public DataHandlerParameters getDataTypeOrNull(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
 		{
 			CustomData customData = annotations.getAnnotation(CustomData.class);
 			if (customData == null) customData = type.getAnnotation(CustomData.class);
@@ -124,14 +102,14 @@ public class DataHandlerParameters
 			
 			if (customData != null)
 			{
-				return new DataHandlerParameters(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations, customData, this);
+				return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, annotations, customData, this);
 			}
 			
 			IDataHandler defaultHandler = this.getDefaultDataType(type);
 			
 			if (defaultHandler == SpecialDataHandler.CUSTOM) return null;
 			
-			return new DataHandlerParameters(simpleName, saveGetExpr, loadGetExpr, setExpr, type, annotations, defaultHandler, this);
+			return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, annotations, defaultHandler, this);
 		}
 		
 		public IDataHandler getDefaultDataType(TypeMirror type)
@@ -169,9 +147,15 @@ public class DataHandlerParameters
 		TYPE_TO_HANDLER.put(DataType.COLLECTION, CollectionDataHandler.INSTANCE);
 		TYPE_TO_HANDLER.put(DataType.MAP, MapDataHandler.INSTANCE);
 		TYPE_TO_HANDLER.put(DataType.UUID, SimpleClassHandler.UUID);
+		TYPE_TO_HANDLER.put(DataType.TIME, SimpleClassHandler.DATE);
 		
-		TYPE_TO_HANDLER.put(DataType.STACK, SimpleClassHandler.STACK);
-		
+		TYPE_TO_HANDLER.put(DataType.BLOCK_POS, SimpleClassHandler.BLOCK_POS);
+		TYPE_TO_HANDLER.put(DataType.RESOURCE_LOCATION, SimpleClassHandler.RESOURCE_LOCATION);
+		TYPE_TO_HANDLER.put(DataType.ITEM_STACK, SimpleClassHandler.ITEM_STACK);
+		TYPE_TO_HANDLER.put(DataType.FLUID_STACK, SimpleClassHandler.FLUID_STACK);
+		TYPE_TO_HANDLER.put(DataType.TEXT_COMPONENT, SimpleClassHandler.TEXT_COMPONENT);
+		TYPE_TO_HANDLER.put(DataType.BLOCK_RAY_TRACE, SimpleClassHandler.BLOCK_RAY_TRACE);
+		TYPE_TO_HANDLER.put(DataType.REGISTRY_ENTRY, RegistryEntryDataHandler.INSTANCE);
 		TYPE_TO_HANDLER.put(DataType.NBT_SERIALIZABLE, SerializableDataHandler.NBT_SERIALISABLE);
 		
 		TYPE_TO_HANDLER.put(DataType.NBT_END, NBTDataHandler.END);

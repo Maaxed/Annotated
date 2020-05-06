@@ -24,38 +24,33 @@ public enum CollectionDataHandler implements INamedDataHandler
 		TypeMirror contentType = collectionType.getTypeArguments().get(0);
 		String typeName = NamingUtils.computeFullName(contentType);
 		
-		String elementVarName = params.simpleName + "Element";
-		builder.save()
+		String elementVarName = params.uniqueName + "Element";
+		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))
 			.add("for (" + typeName + " " + elementVarName + " : " + params.saveAccessExpr + ")")
 			.add("{");
 		
-		String lenghtVarName = params.simpleName + "Length";
-		String indexVarName = params.simpleName + "Index";
+		String lenghtVarName = params.uniqueName + "Length";
+		String indexVarName = params.uniqueName + "Index";
 		
-		builder.load().add("int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";");
+		builder.decoder().add(
+			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
+			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v1.1] use parameters to use the right class
+			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
+			"{");
 		
-		params.setLoadedValue(builder.load(), "new " + NamingUtils.computeSimplifiedName(params.type) + "()"); //TODO [v1.1] use parameters to use the right class
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".add(" + value + ");"), contentType, EmptyAnnotationConstruct.INSTANCE);
 		
-		builder.load()
-			.add("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)")
-			.add("{");
-		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, params.getLoadAccessExpr() + ".get(" + indexVarName + ")", (loadInst, value) -> loadInst.add(params.getLoadAccessExpr() + ".add(" + value + ");"), contentType, EmptyAnnotationConstruct.INSTANCE);
-		
-		builder.save().indent(1);
-		builder.load().indent(1);
+		builder.encoder().indent(1);
+		builder.decoder().indent(1);
 		contentHandler.addInstructions(builder);
-		builder.save().indent(-1);
-		builder.load().indent(-1);
+		builder.encoder().indent(-1);
+		builder.decoder().indent(-1);
 		
-		builder.save().add("}");
-		builder.load().add("}");
+		builder.encoder().add("}");
+		builder.decoder().add("}");
 		
-		if (params.loadAccessExpr == null)
-		{
-			params.setExpr.accept(builder.load(), params.simpleName); 
-		}
+		params.setExpr.accept(builder.decoder(), params.uniqueName);
 	}
 
 	@Override

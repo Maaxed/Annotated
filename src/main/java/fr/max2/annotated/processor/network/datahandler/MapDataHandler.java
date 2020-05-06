@@ -26,47 +26,42 @@ public enum MapDataHandler implements INamedDataHandler
 		String keyTypeName = NamingUtils.computeFullName(keyType);
 		String valueTypeName = NamingUtils.computeFullName(valueType);
 		
-		String keyVarName = params.simpleName + "Key";
-		String valueVarName = params.simpleName + "Element";
-		String entryVarName = params.simpleName + "Entry";
+		String keyVarName = params.uniqueName + "Key";
+		String valueVarName = params.uniqueName + "Element";
+		String entryVarName = params.uniqueName + "Entry";
 		
-		String lenghtVarName = params.simpleName + "Length";
-		String indexVarName = params.simpleName + "Index";
+		String lenghtVarName = params.uniqueName + "Length";
+		String indexVarName = params.uniqueName + "Index";
 		
 		builder.addImport(this.getTypeName());
 		
-		builder.save()
+		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))
 			.add("for (Map.Entry<" + keyTypeName + ", " + valueTypeName + "> " + entryVarName + " : " + params.saveAccessExpr + ".entrySet())")
 			.add("{");
 		
 		
-		builder.load().add("int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";");
-		
-		params.setLoadedValue(builder.load(), "new " + NamingUtils.computeSimplifiedName(params.type) + "()"); //TODO [v1.1] use parameters to use the right class
-		
-		builder.load()
-			.add("for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)")
-			.add("{");
+		builder.decoder().add(
+			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
+			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v1.1] use parameters to use the right class
+			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
+			"{");
 		
 
-		builder.save().indent(1);
-		builder.load().indent(1);
-		DataHandlerParameters keyHandler = params.finder.getDataType(keyVarName, entryVarName + ".getKey()", keyVarName, (loadInst, key) -> loadInst.add(keyTypeName + " " + keyVarName + " = " + key + ";"), keyType, EmptyAnnotationConstruct.INSTANCE);
+		builder.encoder().indent(1);
+		builder.decoder().indent(1);
+		DataHandlerParameters keyHandler = params.finder.getDataType(keyVarName, entryVarName + ".getKey()", (loadInst, key) -> loadInst.add(keyTypeName + " " + keyVarName + " = " + key + ";"), keyType, EmptyAnnotationConstruct.INSTANCE);
 		keyHandler.addInstructions(builder);
 		
-		DataHandlerParameters valueHandler = params.finder.getDataType(valueVarName, entryVarName + ".getValue()", null, (loadInst, value) -> loadInst.add(params.getLoadAccessExpr() + ".put(" + keyVarName + ", " + value + ");"), valueType, EmptyAnnotationConstruct.INSTANCE);
+		DataHandlerParameters valueHandler = params.finder.getDataType(valueVarName, entryVarName + ".getValue()", (loadInst, value) -> loadInst.add(params.uniqueName + ".put(" + keyVarName + ", " + value + ");"), valueType, EmptyAnnotationConstruct.INSTANCE);
 		valueHandler.addInstructions(builder);
-		builder.save().indent(-1);
-		builder.load().indent(-1);
+		builder.encoder().indent(-1);
+		builder.decoder().indent(-1);
 		
-		builder.save().add("}");
-		builder.load().add("}");
+		builder.encoder().add("}");
+		builder.decoder().add("}");
 		
-		if (params.loadAccessExpr == null)
-		{
-			params.setExpr.accept(builder.load(), params.simpleName);
-		}
+		params.setExpr.accept(builder.decoder(), params.uniqueName);
 	}
 
 	@Override

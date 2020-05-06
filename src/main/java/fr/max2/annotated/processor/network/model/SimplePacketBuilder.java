@@ -40,13 +40,13 @@ public class SimplePacketBuilder implements IPacketBuilder
 	}
 
 	@Override
-	public IFunctionBuilder save()
+	public IFunctionBuilder encoder()
 	{
 		return this.saveFunction;
 	}
 
 	@Override
-	public IFunctionBuilder load()
+	public IFunctionBuilder decoder()
 	{
 		return this.loadFunction;
 	}

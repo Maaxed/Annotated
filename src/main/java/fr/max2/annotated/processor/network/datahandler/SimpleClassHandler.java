@@ -1,5 +1,6 @@
 package fr.max2.annotated.processor.network.datahandler;
 
+import java.util.Date;
 import java.util.UUID;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
@@ -21,9 +22,9 @@ public enum SimpleClassHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			builder.save().add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".ordinal()"));
+			builder.encoder().add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".ordinal()"));
 			
-			params.setExpr.accept(builder.load(), NamingUtils.computeFullName(params.type) + ".values()[buf.readInt()]");
+			params.setExpr.accept(builder.decoder(), NamingUtils.computeFullName(params.type) + ".values()[buf.readInt()]");
 		}
 	},
 	UUID(UUID.class)
@@ -34,12 +35,60 @@ public enum SimpleClassHandler implements INamedDataHandler
 			DataHandlerUtils.addBufferInstructions("UniqueId", params.saveAccessExpr, params.setExpr, builder);
 		}
 	},
-	STACK("net.minecraft.item.ItemStack")
+	DATE(Date.class)
+	{
+		@Override
+		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
+		{
+			DataHandlerUtils.addBufferInstructions("Time", params.saveAccessExpr, params.setExpr, builder);
+		}
+	},
+	BLOCK_POS("net.minecraft.util.math.BlockPos")
+	{
+		@Override
+		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
+		{
+			DataHandlerUtils.addBufferInstructions("BlockPos", params.saveAccessExpr, params.setExpr, builder);
+		}
+	},
+	RESOURCE_LOCATION("net.minecraft.util.ResourceLocation")
+	{
+		@Override
+		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
+		{
+			DataHandlerUtils.addBufferInstructions("ResourceLocation", params.saveAccessExpr, params.setExpr, builder);
+		}
+	},
+	ITEM_STACK("net.minecraft.item.ItemStack")
 	{
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
 			DataHandlerUtils.addBufferInstructions("ItemStack", params.saveAccessExpr, params.setExpr, builder);
+		}
+	},
+	FLUID_STACK("net.minecraftforge.fluids.FluidStack")
+	{
+		@Override
+		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
+		{
+			DataHandlerUtils.addBufferInstructions("FluidStack", params.saveAccessExpr, params.setExpr, builder);
+		}
+	},
+	TEXT_COMPONENT("net.minecraft.util.text.ITextComponent")
+	{
+		@Override
+		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
+		{
+			DataHandlerUtils.addBufferInstructions("TextComponent", params.saveAccessExpr, params.setExpr, builder);
+		}
+	},
+	BLOCK_RAY_TRACE("net.minecraft.util.math.BlockRayTraceResult")
+	{
+		@Override
+		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
+		{
+			DataHandlerUtils.addBufferInstructions("BlockRay", params.saveAccessExpr, params.setExpr, builder);
 		}
 	};
 	

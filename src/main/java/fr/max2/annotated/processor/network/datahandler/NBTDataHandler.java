@@ -18,7 +18,7 @@ public enum NBTDataHandler implements INamedDataHandler
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
 			//Just create a new TagEnd, doesn't need to be saved
-			params.setExpr.accept(builder.load(), "EndNBT.INSTANCE");
+			params.setExpr.accept(builder.decoder(), "EndNBT.INSTANCE");
 		}
 	},
 	BYTE("Byte")
@@ -140,8 +140,8 @@ public enum NBTDataHandler implements INamedDataHandler
 	
 	private static void addCustomInstructions(String type, DataHandlerParameters params, IPacketBuilder builder)
 	{
-		builder.save().add("NBTPacketHelper.writeNBT(buf, " + params.saveAccessExpr + ");");
-		params.setExpr.accept(builder.load(), "NBTPacketHelper.read" + type + "(buf)");
+		builder.encoder().add("NBTPacketHelper.writeNBT(buf, " + params.saveAccessExpr + ");");
+		params.setExpr.accept(builder.decoder(), "NBTPacketHelper.read" + type + "(buf)");
 		builder.addImport(ClassRef.NBT_HELPER);
 	}
 	

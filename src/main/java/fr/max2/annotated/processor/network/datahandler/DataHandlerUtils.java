@@ -21,8 +21,8 @@ public class DataHandlerUtils
 	
 	public static void addBufferInstructions(String type, String saveValue, BiConsumer<IFunctionBuilder, String> loadValue, IPacketBuilder builder)
 	{
-		builder.save().add(writeBuffer(type, saveValue));
-		loadValue.accept(builder.load(), readBuffer(type));
+		builder.encoder().add(writeBuffer(type, saveValue));
+		loadValue.accept(builder.decoder(), readBuffer(type));
 	}
 	
 }

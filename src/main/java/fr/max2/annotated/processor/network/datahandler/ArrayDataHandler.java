@@ -27,8 +27,8 @@ public enum ArrayDataHandler implements IDataHandler
 		TypeMirror contentType = arrayType.getComponentType();
 		String typeName = NamingUtils.computeFullName(contentType);
 		
-		String elementVarName = params.simpleName + "Element";
-		builder.save().add(
+		String elementVarName = params.uniqueName + "Element";
+		builder.encoder().add(
 			DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".length"),
 			"for (" + typeName + " " + elementVarName + " : " + params.saveAccessExpr + ")",
 			"{");
@@ -39,32 +39,25 @@ public enum ArrayDataHandler implements IDataHandler
 		int firstBrackets;
 		for (firstBrackets = arrayTypeName.length() - 2; firstBrackets >= 2 && arrayTypeName.substring(firstBrackets - 2, firstBrackets).equals("[]"); firstBrackets-=2);
 
-		String indexVarName = params.simpleName + "Index";
-		String lenghtVarName = params.simpleName + "Length";
-		builder.load().add("int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";");
-		params.setLoadedValue(builder.load(), "new " + arrayTypeName.substring(0, firstBrackets + 1) + lenghtVarName + arrayTypeName.substring(firstBrackets + 1));
-		
-		builder.load().add(
-			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
+		String indexVarName = params.uniqueName + "Index";
+		builder.decoder().add(
+			arrayTypeName + " " + params.uniqueName + " = new " + arrayTypeName.substring(0, firstBrackets + 1) + DataHandlerUtils.readBuffer("Int") + arrayTypeName.substring(firstBrackets + 1) + ";",
+			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + params.uniqueName + ".length; " + indexVarName + "++)",
 			"{");
 		
-		String getLoadExpr = params.getLoadAccessExpr() + "[" + indexVarName + "]";
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, getLoadExpr, (loadInst, value) -> loadInst.add(getLoadExpr + " = " + value + ";"), contentType, EmptyAnnotationConstruct.INSTANCE);
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + "[" + indexVarName + "] = " + value + ";"), contentType, EmptyAnnotationConstruct.INSTANCE);
 		
-		builder.save().indent(1);
-		builder.load().indent(1);
+		builder.encoder().indent(1);
+		builder.decoder().indent(1);
 		contentHandler.addInstructions(builder);
-		builder.save().indent(-1);
-		builder.load().indent(-1);
+		builder.encoder().indent(-1);
+		builder.decoder().indent(-1);
 		
-		builder.save().add("}");
+		builder.encoder().add("}");
 		
-		builder.load().add("}");
+		builder.decoder().add("}");
 		
-		if (params.loadAccessExpr == null)
-		{
-			params.setExpr.accept(builder.load(), params.simpleName); 
-		}
+		params.setExpr.accept(builder.decoder(), params.uniqueName); 
 	}
 
 	@Override
