@@ -124,7 +124,7 @@ public class NamingUtils
 			TypeMirror extendsBound = t.getExtendsBound();
 			TypeMirror superBound = t.getSuperBound();
 			
-			builder.append('*');
+			builder.append('?');
 			if (extendsBound != null)
 			{
 				builder.append(" extends ");

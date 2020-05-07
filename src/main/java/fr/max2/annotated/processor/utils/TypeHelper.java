@@ -24,7 +24,7 @@ import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-public class TypeHelper
+public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 {
 	private TypeHelper() { }
 	
@@ -199,6 +199,31 @@ public class TypeHelper
 				{
 					return result;
 				}
+			}
+			return null;
+		}
+		
+		@Override
+		public DeclaredType visitTypeVariable(TypeVariable t, TypeMirror p)
+		{
+			return this.visit(t.getUpperBound(), p);
+		}
+		
+		@Override
+		public DeclaredType visitWildcard(WildcardType t, TypeMirror p)
+		{
+			TypeMirror extendsBound = t.getExtendsBound();
+			return extendsBound == null ? null : this.visit(extendsBound, p);
+		}
+		
+		@Override
+		public DeclaredType visitIntersection(IntersectionType t, TypeMirror p)
+		{
+			for (TypeMirror subType : t.getBounds())
+			{
+				DeclaredType res = this.visit(subType, p);
+				if (res != null)
+					return res;
 			}
 			return null;
 		}
@@ -407,5 +432,53 @@ public class TypeHelper
 	public static Optional<? extends AnnotationValue> getAnnotationValue(Types typeUtils, Element elem, CharSequence annotationType, CharSequence propertyName)
 	{
 		return getAnnotationValue(getAnnotationMirror(typeUtils, elem, annotationType), propertyName);
+	}
+
+
+	public static DeclaredType replaceTypeArgument(DeclaredType type, TypeMirror fromArg, TypeMirror toArg, Types typeUtils)
+	{
+		if (typeUtils.isSameType(fromArg, toArg))
+			return type; // No replacement needed
+		
+		List<? extends TypeMirror> prevArgs = type.getTypeArguments();
+		
+		TypeMirror[] newArgs = new TypeMirror[prevArgs.size()];
+		
+		for (int i = 0; i < prevArgs.size(); i++)
+		{
+			newArgs[i] = prevArgs.get(i).equals(fromArg) ? toArg : prevArgs.get(i);
+		}
+		
+		return typeUtils.getDeclaredType(TypeHelper.asTypeElement(typeUtils.asElement(type)), newArgs);
+	}
+	
+	public static TypeMirror shallowErasure(TypeMirror type, Elements elemUtils)
+	{
+		return type == null ? null : ShallowEraser.INSTANCE.visit(type, elemUtils);
+	}
+	
+	private static enum ShallowEraser implements DefaultTypeVisitor<TypeMirror, Elements>
+	{
+		INSTANCE;
+		
+		@Override
+		public TypeMirror visitTypeVariable(TypeVariable t, Elements p)
+		{
+			return this.visit(t.getUpperBound(), p);
+		}
+		
+		@Override
+		public TypeMirror visitWildcard(WildcardType t, Elements p)
+		{
+			TypeMirror extendsBound = t.getExtendsBound();
+			return extendsBound == null ? p.getTypeElement(Object.class.getCanonicalName()).asType() : this.visit(extendsBound, p);
+		}
+
+		@Override
+		public TypeMirror visitDefault(TypeMirror t, Elements p)
+		{
+			return t;
+		}
+		
 	}
 }

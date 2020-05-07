@@ -21,9 +21,9 @@ public class NamingUtilsTest extends TestModelProvider
 		assertEquals("double", computeSimplifiedName(primitive));
 		assertEquals("Integer[]", computeSimplifiedName(array));
 		assertEquals("E", computeSimplifiedName(simpleTypeVariable));
-		assertEquals("*", computeSimplifiedName(simpleWildcard));
-		assertEquals("* extends Integer", computeSimplifiedName(extendsWildcard));
-		assertEquals("* super NamingUtils.TypeToString", computeSimplifiedName(superWildcard));
+		assertEquals("?", computeSimplifiedName(simpleWildcard));
+		assertEquals("? extends Integer", computeSimplifiedName(extendsWildcard));
+		assertEquals("? super NamingUtils.TypeToString", computeSimplifiedName(superWildcard));
 		assertEquals("Integer | NamingUtils.TypeToString", computeSimplifiedName(union));
 		assertEquals("Integer & NamingUtils.TypeToString", computeSimplifiedName(intersaction));
 		assertEquals("Null", computeSimplifiedName(TestingNullType.INSTANCE));
@@ -40,9 +40,9 @@ public class NamingUtilsTest extends TestModelProvider
 		assertEquals("double", computeFullName(primitive));
 		assertEquals("Integer[]", computeFullName(array));
 		assertEquals("E", computeFullName(simpleTypeVariable));
-		assertEquals("*", computeFullName(simpleWildcard));
-		assertEquals("* extends Integer", computeFullName(extendsWildcard));
-		assertEquals("* super NamingUtils.TypeToString", computeFullName(superWildcard));
+		assertEquals("?", computeFullName(simpleWildcard));
+		assertEquals("? extends Integer", computeFullName(extendsWildcard));
+		assertEquals("? super NamingUtils.TypeToString", computeFullName(superWildcard));
 		assertEquals("Integer | NamingUtils.TypeToString", computeFullName(union));
 		assertEquals("Integer & NamingUtils.TypeToString", computeFullName(intersaction));
 		assertEquals("Null", computeFullName(TestingNullType.INSTANCE));

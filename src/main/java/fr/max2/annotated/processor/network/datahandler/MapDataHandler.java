@@ -21,11 +21,13 @@ public enum MapDataHandler implements INamedDataHandler
 	{
 		DeclaredType mapType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
 		if (mapType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+		DataHandlerUtils.requireDefaultConstructor(params.finder.typeUtils, params.type);
 		
-		TypeMirror keyType = mapType.getTypeArguments().get(0);
-		TypeMirror valueType = mapType.getTypeArguments().get(1);
-		String keyTypeName = NamingUtils.computeFullName(keyType);
-		String valueTypeName = NamingUtils.computeFullName(valueType);
+		TypeMirror keyFullType = mapType.getTypeArguments().get(0);
+		TypeMirror valueFullType = mapType.getTypeArguments().get(1);
+		TypeMirror keyType = TypeHelper.shallowErasure(keyFullType, params.finder.elemUtils);
+		TypeMirror valueType = TypeHelper.shallowErasure(valueFullType, params.finder.elemUtils);
+		DeclaredType type = TypeHelper.replaceTypeArgument(TypeHelper.replaceTypeArgument((DeclaredType)params.type, keyFullType, keyType, params.finder.typeUtils), valueFullType, valueType, params.finder.typeUtils);
 		
 		String keyVarName = params.uniqueName + "Key";
 		String valueVarName = params.uniqueName + "Element";
@@ -38,18 +40,18 @@ public enum MapDataHandler implements INamedDataHandler
 		
 		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))
-			.add("for (Map.Entry<" + keyTypeName + ", " + valueTypeName + "> " + entryVarName + " : " + params.saveAccessExpr + ".entrySet())")
+			.add("for (Map.Entry<" + NamingUtils.computeFullName(keyFullType) + ", " + NamingUtils.computeFullName(valueFullType) + "> " + entryVarName + " : " + params.saveAccessExpr + ".entrySet())")
 			.add("{");
 		
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v2.1] use parameters to use the right class
+			NamingUtils.computeFullName(type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(type) + "();", //TODO [v2.1] use parameters to use the right class
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
 
-		DataHandlerParameters keyHandler = params.finder.getDataType(keyVarName, entryVarName + ".getKey()", (loadInst, key) -> loadInst.add(keyTypeName + " " + keyVarName + " = " + key + ";"), keyType, EmptyAnnotationConstruct.INSTANCE);
+		DataHandlerParameters keyHandler = params.finder.getDataType(keyVarName, entryVarName + ".getKey()", (loadInst, key) -> loadInst.add(NamingUtils.computeFullName(keyType) + " " + keyVarName + " = " + key + ";"), keyType, EmptyAnnotationConstruct.INSTANCE);
 		keyHandler.addInstructions(1, builder);
 		
 		DataHandlerParameters valueHandler = params.finder.getDataType(valueVarName, entryVarName + ".getValue()", (loadInst, value) -> loadInst.add(params.uniqueName + ".put(" + keyVarName + ", " + value + ");"), valueType, EmptyAnnotationConstruct.INSTANCE);

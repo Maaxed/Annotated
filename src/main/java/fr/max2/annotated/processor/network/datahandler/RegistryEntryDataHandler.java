@@ -29,7 +29,7 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 		Element typeElement = params.finder.typeUtils.asElement(contentType);
 		Name typeName = typeElement.getSimpleName();
 		
-		String forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)";
+		String forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)"; //TODO [v2.0] use ForgeRegistries for common types
 		
 		builder.addImport(TypeHelper.asTypeElement(typeElement).getQualifiedName());
 		builder.addImport("net.minecraftforge.registries.RegistryManager");

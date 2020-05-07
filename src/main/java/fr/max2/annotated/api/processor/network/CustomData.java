@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.FIELD, ElementType.TYPE, ElementType.TYPE_USE, ElementType.PARAMETER})
+@Target({ElementType.TYPE, ElementType.PARAMETER})
 public @interface CustomData
 {
 	/**
@@ -20,5 +20,5 @@ public @interface CustomData
 	 * The parameters for the DataHandler
 	 * @return the parameters in a string array
 	 */
-	String[] value() default { };
+	String[] value() default { }; //TODO [v2.0] create a property system
 }

@@ -9,14 +9,13 @@ import fr.max2.annotated.api.processor.network.CustomData;
 import fr.max2.annotated.api.processor.network.DataType;
 import fr.max2.annotated.api.processor.network.GenerateChannel;
 import fr.max2.annotated.api.processor.network.ServerPacket;
+import fr.max2.annotated.test.ModTestAnnotated;
 import fr.max2.annotated.test.util.EnumTest;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -24,7 +23,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.ItemStackHandler;
 
-@GenerateChannel(protocolVersion = "1")
+@GenerateChannel(protocolVersion = "1", channelName = ModTestAnnotated.MOD_ID + ":testdata")
 public class TestData
 {
 	@ServerPacket
@@ -129,10 +128,30 @@ public class TestData
 		
 	}
 	
-	/*@ClientPacket
-	public static void complexMap(HashMap<ItemStack, HashMap<@CustomData(type = DataType.NBT_BYTE_ARRAY) ByteArrayNBT, @CustomData(type = DataType.NBT_LIST) ListNBT[]>> stackToList)
+	@ClientPacket
+	public static void simpleMap(HashMap<ItemStack, HashMap<Integer, String[]>> stackToList)
 	{
 		
-	}*/
+	}
+	
+	@ClientPacket
+	public static void specialTypes(ArrayList<? extends Item> items, HashMap<? extends Item, ? extends Block> map)
+	{
+		
+	}
+	
+	public static class CustomList<A, B> extends ArrayList<A>
+	{
+		public B unused;
+		
+		public CustomList()
+		{ }
+	}
+	
+	@ClientPacket
+	public static void strangeTypes(CustomList<? extends Item, ? extends Item> items)
+	{
+		
+	}
 	
 }

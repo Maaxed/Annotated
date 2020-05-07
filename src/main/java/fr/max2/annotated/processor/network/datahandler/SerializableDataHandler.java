@@ -18,9 +18,9 @@ public enum SerializableDataHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			//TODO [v2.0] check if params.type has a default constructor or throw an error
 			DeclaredType serialisableType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
 			if (serialisableType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+			DataHandlerUtils.requireDefaultConstructor(params.finder.typeUtils, params.type);
 			
 			TypeMirror nbtType = serialisableType.getTypeArguments().get(0);
 			

@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
+import fr.max2.annotated.processor.utils.ClassRef;
+
 public class SimplePacketBuilder implements IPacketBuilder
 {
 	public Set<String> imports = new TreeSet<>();
@@ -29,7 +31,7 @@ public class SimplePacketBuilder implements IPacketBuilder
 	public IPacketBuilder addImport(String className)
 	{
 		TypeElement type = elemUtils.getTypeElement(className);
-		if (!elemUtils.getPackageOf(type).getQualifiedName().contentEquals(packageName))
+		if (className.startsWith(ClassRef.MAIN_PACKAGE) || !elemUtils.getPackageOf(type).getQualifiedName().contentEquals(packageName))
 		{
 			imports.add(className);
 		}

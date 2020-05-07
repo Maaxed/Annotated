@@ -5,8 +5,6 @@ import fr.max2.annotated.api.processor.network.ServerPacket;
 
 import java.lang.annotation.Annotation;
 
-import javax.lang.model.element.Element;
-
 /**
  * Represents the logical sides a packet can be sent to
  */
@@ -32,19 +30,6 @@ public enum EnumSide
 			return SERVER;
 		case SERVER:
 			return CLIENT;
-		default:
-			throw new IllegalStateException("Unknown side '" + this.toString() + "'");
-		}
-	}
-	
-	public boolean isSheduled(Element annotatedElement)
-	{
-		switch (this)
-		{
-		case CLIENT:
-			return annotatedElement.getAnnotation(ClientPacket.class).runInClientThread();
-		case SERVER:
-			return annotatedElement.getAnnotation(ServerPacket.class).runInServerThread();
 		default:
 			throw new IllegalStateException("Unknown side '" + this.toString() + "'");
 		}

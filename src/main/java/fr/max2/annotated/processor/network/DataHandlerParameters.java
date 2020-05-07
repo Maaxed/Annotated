@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -106,8 +105,12 @@ public class DataHandlerParameters
 		public DataHandlerParameters getDataTypeOrNull(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
 		{
 			CustomData customData = annotations.getAnnotation(CustomData.class);
-			if (customData == null) customData = type.getAnnotation(CustomData.class);
-			if (customData == null && type instanceof DeclaredType) customData = ((DeclaredType)type).asElement().getAnnotation(CustomData.class);
+			if (customData == null)
+			{
+				Element elem = typeUtils.asElement(type);
+				if (elem != null)
+					customData = elem.getAnnotation(CustomData.class);
+			}
 			
 			if (customData != null)
 			{

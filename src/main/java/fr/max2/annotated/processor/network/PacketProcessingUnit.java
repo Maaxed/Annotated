@@ -41,8 +41,23 @@ public class PacketProcessingUnit
 		this.method = packetMethod;
 		this.side = side;
 		this.annotation = TypeHelper.getAnnotationMirror(processor.typeUtils(), packetMethod, this.side.getAnnotationClass().getCanonicalName());
-
-		this.messageClassName = new ClassName(context.enclosingClassName.packageName(), context.enclosingClassName.shortName().replace('.', '_') + "_" + this.method.getSimpleName().toString());
+		
+		String className = TypeHelper.getAnnotationValue(this.annotation, "className").map(anno -> anno.toString()).orElse("");
+		
+		int sep = className.lastIndexOf('.');
+		
+		String packageName = sep == -1 ? context.enclosingClassName.packageName() : className.substring(0, sep);
+		
+		if (sep != -1)
+		{
+			className = className.substring(sep);
+		}
+		else if (className.isEmpty())
+		{
+			className = context.enclosingClassName.shortName().replace('.', '_') + "_" + this.method.getSimpleName().toString();
+		}
+		
+		this.messageClassName = new ClassName(packageName, className);
 	}
 	
 	public boolean processPacket()
@@ -57,7 +72,7 @@ public class PacketProcessingUnit
         }
 		catch (Exception e)
 		{
-			this.processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getMessage(), this.method, this.annotation);
+			this.processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.method, this.annotation);
 		}
 		return false;
 	}
@@ -94,7 +109,7 @@ public class PacketProcessingUnit
 			}
 			catch (Exception e)
 			{
-				this.processor.log(Kind.ERROR, "An unexpected exception occured during the processing of the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.processor.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
 				return false;
 			}
 		}
@@ -117,7 +132,7 @@ public class PacketProcessingUnit
 		replacements.put("serverPacket", Boolean.toString(this.side.isServer()));
 		replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
 		replacements.put("receiveSide", this.side.getSimpleName());
-		replacements.put("sheduled", Boolean.toString(this.side.isSheduled(this.method)));
+		replacements.put("sheduled", TypeHelper.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.toString()).orElse("true"));
 
 		return TemplateHelper.writeFileFromTemplateWithLog(this.processor, this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);
 	}

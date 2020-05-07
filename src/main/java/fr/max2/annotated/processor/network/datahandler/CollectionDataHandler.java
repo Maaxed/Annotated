@@ -21,8 +21,13 @@ public enum CollectionDataHandler implements INamedDataHandler
 	{
 		DeclaredType collectionType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
 		if (collectionType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+		DataHandlerUtils.requireDefaultConstructor(params.finder.typeUtils, params.type);
 		
-		TypeMirror contentType = collectionType.getTypeArguments().get(0);
+		TypeMirror contentFullType = collectionType.getTypeArguments().get(0);
+		TypeMirror contentType = TypeHelper.shallowErasure(contentFullType, params.finder.elemUtils);
+		DeclaredType type = TypeHelper.replaceTypeArgument((DeclaredType)params.type, contentFullType, contentType, params.finder.typeUtils);
+		
+		
 		String typeName = NamingUtils.computeFullName(contentType);
 		
 		String elementVarName = params.uniqueName + "Element";
@@ -36,7 +41,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v2.1] use parameters to use the right class
+			NamingUtils.computeFullName(type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(type) + "();", //TODO [v2.1] use parameters to use the right class
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		

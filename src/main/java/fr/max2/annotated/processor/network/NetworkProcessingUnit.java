@@ -66,7 +66,7 @@ public class NetworkProcessingUnit
 	    }
 		catch (Exception e)
 		{
-			this.processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.networkClassName.qualifiedName() + "' class: " + e.getMessage(), this.enclosingClass, this.annotation);
+			this.processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.networkClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.enclosingClass, this.annotation);
 		}
 	}
 	
