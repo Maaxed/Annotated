@@ -3,12 +3,14 @@ package fr.max2.annotated.processor.utils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
@@ -29,7 +31,7 @@ public class TypeHelper
 	
 	public static TypeElement asTypeElement(Element elem)
 	{
-		return TypeElementCaster.INSTANCE.visit(elem);
+		return elem == null ? null : TypeElementCaster.INSTANCE.visit(elem);
 	}
 	
 	private enum TypeElementCaster implements DefaultElementVisitor<TypeElement, Void>
@@ -52,7 +54,7 @@ public class TypeHelper
 	
 	public static ArrayType asArrayType(TypeMirror type)
 	{
-		return ArrayTypeCaster.INSTANCE.visit(type);
+		return type == null ? null : ArrayTypeCaster.INSTANCE.visit(type);
 	}
 	
 	private enum ArrayTypeCaster implements DefaultTypeVisitor<ArrayType, Void>
@@ -75,7 +77,7 @@ public class TypeHelper
 	
 	public static WildcardType asWildcardType(TypeMirror type)
 	{
-		return WildcardTypeCaster.INSTANCE.visit(type);
+		return type == null ? null : WildcardTypeCaster.INSTANCE.visit(type);
 	}
 	
 	private enum WildcardTypeCaster implements DefaultTypeVisitor<WildcardType, Void>
@@ -98,7 +100,7 @@ public class TypeHelper
 	
 	public static TypeVariable asVariableType(TypeMirror type)
 	{
-		return VariableTypeCaster.INSTANCE.visit(type);
+		return type == null ? null : VariableTypeCaster.INSTANCE.visit(type);
 	}
 	
 	private enum VariableTypeCaster implements DefaultTypeVisitor<TypeVariable, Void>
@@ -121,7 +123,7 @@ public class TypeHelper
 	
 	public static IntersectionType asIntersectionType(TypeMirror type)
 	{
-		return IntersectionTypeCaster.INSTANCE.visit(type);
+		return type == null ? null : IntersectionTypeCaster.INSTANCE.visit(type);
 	}
 	
 	private enum IntersectionTypeCaster implements DefaultTypeVisitor<IntersectionType, Void>
@@ -387,23 +389,23 @@ public class TypeHelper
 		}
 	}
 
-	public static PackageElement getPackage(Element element)
+	public static Optional<? extends AnnotationMirror> getAnnotationMirror(Types typeUtils, Element elem, CharSequence annotationType)
 	{
-		Element parent = element;
-		while (parent != null && parent.getKind() != ElementKind.PACKAGE)
-		{
-			parent = parent.getEnclosingElement();
-		}
-		return asPackage(parent);
+		return elem.getAnnotationMirrors().stream().filter(a -> asTypeElement(a.getAnnotationType().asElement()).getQualifiedName().contentEquals(annotationType)).findAny();
 	}
 
-	public static Element getEnclosingClass(Element element)
+	public static Optional<? extends AnnotationValue> getAnnotationValue(Optional<? extends AnnotationMirror> annotation, CharSequence propertyName)
 	{
-		Element parent = element;
-		while (parent.getEnclosingElement() != null && parent.getEnclosingElement().getKind() != ElementKind.PACKAGE)
-		{
-			parent = parent.getEnclosingElement();
-		}
-		return parent;
+		return annotation
+			.flatMap(an ->
+				an.getElementValues().entrySet().stream()
+				.filter(entry -> entry.getKey().getSimpleName().contentEquals(propertyName))
+				.findAny()
+				).map(entry -> entry.getValue());
+	}
+
+	public static Optional<? extends AnnotationValue> getAnnotationValue(Types typeUtils, Element elem, CharSequence annotationType, CharSequence propertyName)
+	{
+		return getAnnotationValue(getAnnotationMirror(typeUtils, elem, annotationType), propertyName);
 	}
 }

@@ -6,11 +6,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-
-import fr.max2.annotated.processor.utils.TypeHelper;
 
 public class SimplePacketBuilder implements IPacketBuilder
 {
@@ -20,19 +17,19 @@ public class SimplePacketBuilder implements IPacketBuilder
 	private SimpleFunctionBuilder loadFunction = new SimpleFunctionBuilder();
 	
 	private Elements elemUtils;
-	private PackageElement packetPackage;
+	private CharSequence packageName;
 	
-	public SimplePacketBuilder(Elements elemUtils, PackageElement packetPackage)
+	public SimplePacketBuilder(Elements elemUtils, CharSequence packageName)
 	{
 		this.elemUtils = elemUtils;
-		this.packetPackage = packetPackage;
+		this.packageName = packageName;
 	}
 
 	@Override
 	public IPacketBuilder addImport(String className)
 	{
 		TypeElement type = elemUtils.getTypeElement(className);
-		if (!packetPackage.equals(TypeHelper.getPackage(type)))
+		if (!elemUtils.getPackageOf(type).getQualifiedName().contentEquals(packageName))
 		{
 			imports.add(className);
 		}

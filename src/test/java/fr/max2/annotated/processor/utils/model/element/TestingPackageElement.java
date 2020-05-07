@@ -12,7 +12,7 @@ public class TestingPackageElement extends TestingQualifiedNameable implements P
 	
 	public TestingPackageElement(String qualifiedName)
 	{
-		super(ElementKind.PACKAGE, TestingNoType.PACKAGE, qualifiedName);
+		super(ElementKind.PACKAGE, TestingNoType.PACKAGE, qualifiedName, simpleName(qualifiedName));
 	}
 	
 	@Override
@@ -25,6 +25,12 @@ public class TestingPackageElement extends TestingQualifiedNameable implements P
 	public <R, P> R accept(ElementVisitor<R, P> v, P p)
 	{
 		return v.visitPackage(this, p);
+	}
+	
+	private static String simpleName(String qualifiedName)
+	{
+		int separator = qualifiedName.lastIndexOf('.');
+		return separator == -1 ? qualifiedName : qualifiedName.substring(separator);
 	}
 	
 }

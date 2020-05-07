@@ -11,18 +11,6 @@ public class NamingUtilsTest extends TestModelProvider
 {
 	
 	@Test
-	public void testSimpleName()
-	{
-		assertEquals("int", simpleName("int"));
-		assertEquals("boolean", simpleName("boolean"));
-		
-		assertEquals("Integer", simpleName("java.lang.Integer"));
-		assertEquals("Boolean", simpleName("java.lang.Boolean"));
-
-		assertEquals("Inner", simpleName("net.thing.Outer.Inner"));
-	}
-	
-	@Test
 	public void testComputeSimplifiedName()
 	{
 		this.setUpModel();
@@ -35,9 +23,9 @@ public class NamingUtilsTest extends TestModelProvider
 		assertEquals("E", computeSimplifiedName(simpleTypeVariable));
 		assertEquals("*", computeSimplifiedName(simpleWildcard));
 		assertEquals("* extends Integer", computeSimplifiedName(extendsWildcard));
-		assertEquals("* super TypeToString", computeSimplifiedName(superWildcard));
-		assertEquals("Integer | TypeToString", computeSimplifiedName(union));
-		assertEquals("Integer & TypeToString", computeSimplifiedName(intersaction));
+		assertEquals("* super NamingUtils.TypeToString", computeSimplifiedName(superWildcard));
+		assertEquals("Integer | NamingUtils.TypeToString", computeSimplifiedName(union));
+		assertEquals("Integer & NamingUtils.TypeToString", computeSimplifiedName(intersaction));
 		assertEquals("Null", computeSimplifiedName(TestingNullType.INSTANCE));
 	}
 	
@@ -54,9 +42,9 @@ public class NamingUtilsTest extends TestModelProvider
 		assertEquals("E", computeFullName(simpleTypeVariable));
 		assertEquals("*", computeFullName(simpleWildcard));
 		assertEquals("* extends Integer", computeFullName(extendsWildcard));
-		assertEquals("* super TypeToString", computeFullName(superWildcard));
-		assertEquals("Integer | TypeToString", computeFullName(union));
-		assertEquals("Integer & TypeToString", computeFullName(intersaction));
+		assertEquals("* super NamingUtils.TypeToString", computeFullName(superWildcard));
+		assertEquals("Integer | NamingUtils.TypeToString", computeFullName(union));
+		assertEquals("Integer & NamingUtils.TypeToString", computeFullName(intersaction));
 		assertEquals("Null", computeFullName(TestingNullType.INSTANCE));
 	}
 	

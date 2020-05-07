@@ -17,7 +17,7 @@ import fr.max2.annotated.processor.utils.model.element.TestingTypeElement;
 
 public class TestingDeclaredType extends TestingType implements DeclaredType
 {
-	public static final TestingDeclaredType OBJECT = new TestingDeclaredType(new TestingTypeElement(ElementKind.CLASS, "java.lang.Object"));
+	public static final TestingDeclaredType OBJECT = new TestingDeclaredType(new TestingTypeElement(ElementKind.CLASS, "java.lang", "Object"));
 	
 	private final List<TypeMirror> typeArgs;
 	private final Element thisElement;

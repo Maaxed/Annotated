@@ -27,6 +27,7 @@ import javax.tools.JavaFileObject;
 import org.junit.Assert;
 import org.junit.Test;
 
+import fr.max2.annotated.processor.utils.exceptions.TemplateException;
 import fr.max2.annotated.processor.utils.template.ITemplateControl;
 
 
@@ -39,35 +40,14 @@ public class TemplateHelperTest
 		FakeFiler filer1 = new FakeFiler("Output");
 		Map<String, String> replacements = new HashMap<>();
 		
-		try
-		{
-			writeFileFromTemplate(filer1, "Output", "templates/TemplateTest.jvtp", replacements);
-			assertArrayEquals(new Object[] {"This is a test template.",
-											"The value of \"red\" is red.",
-											"The value of \"blue\" is blue."}, filer1.getOutput().split("\\R"));
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			fail();
-		}
+		assertThrows(TemplateException.class, () ->
+			writeFileFromTemplate(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer2 = new FakeFiler("Output2");
 		replacements.put("blue", "violets");
 		
-		try
-		{
-			writeFileFromTemplate(filer2, "Output2", "templates/TemplateTest.jvtp", replacements);
-			assertArrayEquals(new Object[] {"This is a test template.",
-											"The value of \"red\" is red.",
-											"The value of \"blue\" is violets."},
-							  filer2.getOutput().split("\\R"));
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			fail();
-		}
+		assertThrows(TemplateException.class, () ->
+			writeFileFromTemplate(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer3 = new FakeFiler("Output3");
 		replacements.put("red", "roses");
@@ -97,9 +77,9 @@ public class TemplateHelperTest
 		assertEquals("test", mapKeys(controls, "test", 0, replacements));
 		assertEquals("$test", mapKeys(controls, "$test", 0, replacements));
 		assertEquals("$}test{", mapKeys(controls, "$}test{", 0, replacements));
-		assertEquals("test", mapKeys(controls, "${test}", 0, replacements));
-		//assertEquals("${test}", mapKeys(controls, "${${test}}", replacements));
-		assertEquals("test1atest2", mapKeys(controls, "${test1}a${test2}", 0, replacements));
+		assertThrows(TemplateException.class, () -> mapKeys(controls, "${test}", 0, replacements));
+		//assertThrows(TemplateException.class, () -> mapKeys(controls, "${${test}}", 0, replacements));
+		assertThrows(TemplateException.class, () -> mapKeys(controls, "${test1}a${test2}", 0, replacements));
 		
 		replacements.put("test", "value");
 
@@ -108,7 +88,7 @@ public class TemplateHelperTest
 		assertEquals("$}test{", mapKeys(controls, "$}test{", 0, replacements));
 		assertEquals("value", mapKeys(controls, "${test}", 0, replacements));
 		assertEquals("value", mapKeys(controls, "${  test	}", 0, replacements));
-		//assertEquals("${test}", mapKeys("${${test}}", replacements));
+		//assertEquals("${test}", mapKeys("${${test}}", 0, replacements));
 		assertEquals("valueavalue", mapKeys(controls, "${test}a${test}", 0, replacements));
 		
 		replacements.put("test1", "VALUE");

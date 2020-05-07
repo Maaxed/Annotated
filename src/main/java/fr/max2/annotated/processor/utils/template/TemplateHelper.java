@@ -8,13 +8,14 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.tools.JavaFileObject;
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic.Kind;
 
@@ -26,17 +27,17 @@ public class TemplateHelper
 	private TemplateHelper() { }
 
 	
-	public static void writeFileFromTemplateWithLog(ProcessingEnvironment env, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException
+	public static void writeFileFromTemplateWithLog(PacketProcessor processor, String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws IOException
 	{
 		try
 		{
-			env.getMessager().printMessage(Kind.NOTE, "Generation file '" + className + "' from tmplate '" + templateFile + "'");
+			processor.log(Kind.NOTE, "Generation file '" + className + "' from tmplate '" + templateFile + "'", originatingElement, annotation);
 			
-			writeFileFromTemplate(env.getFiler(), className, templateFile, replacements, originatingElements);
+			writeFileFromTemplate(processor.filer(), className, templateFile, replacements, originatingElement);
 		}
 		catch (IOException e)
 		{
-			env.getMessager().printMessage(Kind.ERROR, "An error occured during the generation of the file '" + className + "' from template '" + templateFile + "'");
+			processor.log(Kind.ERROR, "An error occured during the generation of the file '" + className + "' from template '" + templateFile + "'", originatingElement, annotation);
 			throw e;
 		}
 		

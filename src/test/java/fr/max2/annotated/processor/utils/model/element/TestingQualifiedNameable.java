@@ -5,17 +5,16 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.model.SimpleName;
 
 public class TestingQualifiedNameable extends TestingElement implements QualifiedNameable
 {
 	private final Name qualifiedName;
 	
-	public TestingQualifiedNameable(ElementKind kind, TypeMirror correspondingType, String qualifiedName)
+	public TestingQualifiedNameable(ElementKind kind, TypeMirror correspondingType, String fullName, String simpleName)
 	{
-		super(kind, correspondingType, NamingUtils.simpleName(qualifiedName));
-		this.qualifiedName = new SimpleName(qualifiedName);
+		super(kind, correspondingType, simpleName);
+		this.qualifiedName = new SimpleName(fullName);
 	}
 
 	@Override

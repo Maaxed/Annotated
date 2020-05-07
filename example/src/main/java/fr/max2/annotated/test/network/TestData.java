@@ -7,7 +7,7 @@ import java.util.UUID;
 import fr.max2.annotated.api.processor.network.ClientPacket;
 import fr.max2.annotated.api.processor.network.CustomData;
 import fr.max2.annotated.api.processor.network.DataType;
-import fr.max2.annotated.api.processor.network.PacketGenerator;
+import fr.max2.annotated.api.processor.network.GenerateChannel;
 import fr.max2.annotated.api.processor.network.ServerPacket;
 import fr.max2.annotated.test.util.EnumTest;
 import net.minecraft.block.Block;
@@ -24,7 +24,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.ItemStackHandler;
 
-@PacketGenerator(protocolVersion = "1")
+@GenerateChannel(protocolVersion = "1")
 public class TestData
 {
 	@ServerPacket

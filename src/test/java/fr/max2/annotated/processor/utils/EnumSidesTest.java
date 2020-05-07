@@ -3,19 +3,34 @@ package fr.max2.annotated.processor.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static fr.max2.annotated.processor.utils.EnumSides.*;
+import static fr.max2.annotated.processor.utils.EnumSide.*;
 
 import org.junit.Test;
+
+import fr.max2.annotated.api.processor.network.ClientPacket;
+import fr.max2.annotated.api.processor.network.ServerPacket;
 
 public class EnumSidesTest
 {
 	
 	@Test
+	public void testOpposite()
+	{
+		assertEquals(SERVER, CLIENT.opposite());
+		assertEquals(CLIENT, SERVER.opposite());
+	}
+	
+	@Test
+	public void testAnnotationClass()
+	{
+		assertEquals(ClientPacket.class, CLIENT.getAnnotationClass());
+		assertEquals(ServerPacket.class, SERVER.getAnnotationClass());
+	}
+	
+	@Test
 	public void testIsClient()
 	{
 		assertTrue(CLIENT.isClient());
-		assertTrue(BOTH.isClient());
-		
 		assertFalse(SERVER.isClient());
 	}
 	
@@ -23,8 +38,6 @@ public class EnumSidesTest
 	public void testIsServer()
 	{
 		assertFalse(CLIENT.isServer());
-		
-		assertTrue(BOTH.isServer());
 		assertTrue(SERVER.isServer());
 	}
 	
@@ -33,7 +46,6 @@ public class EnumSidesTest
 	{
 		assertEquals("Client", CLIENT.getSimpleName());
 		assertEquals("Server", SERVER.getSimpleName());
-		assertEquals("Common", BOTH.getSimpleName());
 	}
 	
 }

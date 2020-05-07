@@ -2,6 +2,8 @@ package fr.max2.annotated.processor.utils;
 
 import java.util.List;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
@@ -10,16 +12,27 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.Elements;
 
 public class NamingUtils
 {
 	private NamingUtils() { }
 	
 	
-	public static String simpleName(String qualifiedName)
+	public static ClassName buildClassName(Elements elemUtils, Element type)
 	{
-		int dotIndex = qualifiedName.lastIndexOf('.') ;
-		return dotIndex < 0 ? qualifiedName : qualifiedName.substring(dotIndex + 1);
+		StringBuilder builder = new StringBuilder();
+		do
+		{
+			if (builder.length() > 0)
+				builder.append('.');
+			builder.append(type.getSimpleName());
+			type = type.getEnclosingElement();
+		}
+		while (type != null && type.getKind() != ElementKind.PACKAGE);
+
+		String packageName = elemUtils.getPackageOf(type).getQualifiedName().toString();
+		return new ClassName(packageName, builder.toString());
 	}
 	
 	public static String computeSimplifiedName(TypeMirror type)

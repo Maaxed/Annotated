@@ -22,9 +22,9 @@ public class TestingTypeElement extends TestingQualifiedNameable implements Type
 	private final List<TypeParameterElement> typeParameters = new ArrayList<>();
 	private TypeMirror superClass = TestingNoType.NONE;
 	
-	public TestingTypeElement(ElementKind kind, String qualifiedName)
+	public TestingTypeElement(ElementKind kind, String packageName, String className)
 	{
-		super(kind, null, qualifiedName);
+		super(kind, null, packageName + "." + className, className);
 	}
 	
 	public TestingTypeElement withSuperClass(TypeMirror superClass)

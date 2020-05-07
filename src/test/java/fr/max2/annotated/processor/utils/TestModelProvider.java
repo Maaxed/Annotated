@@ -27,13 +27,13 @@ public class TestModelProvider
 	
 	protected void setUpModel()
 	{
-		this.intElement = new TestingTypeElement(ElementKind.CLASS, "java.lang.Integer");
+		this.intElement = new TestingTypeElement(ElementKind.CLASS, "java.lang", "Integer");
 		this.integer = new TestingDeclaredType(this.intElement);
 		
-		TestingTypeElement genericTypeElement = new TestingTypeElement(ElementKind.INTERFACE, "java.util.List").withNewTypeParameter("E");
+		TestingTypeElement genericTypeElement = new TestingTypeElement(ElementKind.INTERFACE, "java.util", "List").withNewTypeParameter("E");
 		this.list = new TestingDeclaredType(genericTypeElement, integer);
 		
-		TestingTypeElement complexTypeElement = new TestingTypeElement(ElementKind.INTERFACE, "java.util.Map").withNewTypeParameter("K").withNewTypeParameter("V");
+		TestingTypeElement complexTypeElement = new TestingTypeElement(ElementKind.INTERFACE, "java.util", "Map").withNewTypeParameter("K").withNewTypeParameter("V");
 		this.map = new TestingDeclaredType(complexTypeElement, integer, list);
 
 		this.primitive = new TestingPrimitiveType(TypeKind.DOUBLE);
@@ -41,7 +41,7 @@ public class TestModelProvider
 		
 		this.simpleTypeVariable = genericTypeElement.getTypeParameters().get(0).asType();
 		
-		TypeMirror enumType = new TestingDeclaredType(new TestingTypeElement(ElementKind.ENUM, "fr.max2.annotated.processor.utils.NamingUtils.TypeToString"));
+		TypeMirror enumType = new TestingDeclaredType(new TestingTypeElement(ElementKind.ENUM, "fr.max2.annotated.processor.utils", "NamingUtils.TypeToString"));
 		
 		this.simpleWildcard = new TestingWildcardType(null, null);
 		this.extendsWildcard = new TestingWildcardType(this.integer, null);
