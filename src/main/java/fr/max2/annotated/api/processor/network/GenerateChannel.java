@@ -20,5 +20,5 @@ public @interface GenerateChannel
 	 * @return the version of the channel
 	 */
 	String protocolVersion();
-	// TODO [2.0] delegated packet network
+	// TODO [v2.0] delegated packet network
 }

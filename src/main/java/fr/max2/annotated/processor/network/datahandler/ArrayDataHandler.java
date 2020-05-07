@@ -13,6 +13,7 @@ import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.EmptyAnnotationConstruct;
 import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.TypeHelper;
+import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum ArrayDataHandler implements IDataHandler
 {
@@ -22,7 +23,7 @@ public enum ArrayDataHandler implements IDataHandler
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
 		ArrayType arrayType = TypeHelper.asArrayType(params.type);
-		if (arrayType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not an array");
+		if (arrayType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not an array");
 		
 		TypeMirror contentType = arrayType.getComponentType();
 		String typeName = NamingUtils.computeFullName(contentType);
@@ -47,11 +48,7 @@ public enum ArrayDataHandler implements IDataHandler
 		
 		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + "[" + indexVarName + "] = " + value + ";"), contentType, EmptyAnnotationConstruct.INSTANCE);
 		
-		builder.encoder().indent(1);
-		builder.decoder().indent(1);
-		contentHandler.addInstructions(builder);
-		builder.encoder().indent(-1);
-		builder.decoder().indent(-1);
+		contentHandler.addInstructions(1, builder);
 		
 		builder.encoder().add("}");
 		

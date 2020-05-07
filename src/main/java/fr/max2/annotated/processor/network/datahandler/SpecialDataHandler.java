@@ -13,6 +13,7 @@ import javax.lang.model.util.Types;
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.TypeHelper;
+import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum SpecialDataHandler implements IDataHandler
 {
@@ -26,7 +27,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			TypeMirror extendsBound = wildcardType.getExtendsBound();
 			
-			if (extendsBound == null) throw new IllegalArgumentException("The wildcard type '" + params.type + "' has no extends bound");
+			if (extendsBound == null) throw new IncompatibleTypeException("The wildcard type '" + params.type + "' has no extends bound");
 			
 			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.annotations).addInstructions(builder);
 		}
@@ -78,7 +79,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			if (!success)
 			{
-				throw new IllegalArgumentException("None of the bounds of the interaction type '" + params.type + "' is serializable");
+				throw new IncompatibleTypeException("None of the bounds of the interaction type '" + params.type + "' is serializable");
 			}
 		}
 
@@ -102,7 +103,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			//TODO [v1.2] custom handler
+			//TODO [v2.2] custom handler
 			
 		}
 	};
@@ -115,7 +116,7 @@ public enum SpecialDataHandler implements IDataHandler
 	
 	private static RuntimeException incompatibleType(String expected, TypeMirror actual)
 	{
-		throw new IllegalArgumentException("The type '" + actual + "' is not a " + expected + " type");
+		throw new IncompatibleTypeException("The type '" + actual + "' is not a " + expected + " type");
 	}
 	
 }

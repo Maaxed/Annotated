@@ -10,6 +10,7 @@ import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.EmptyAnnotationConstruct;
 import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.TypeHelper;
+import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum CollectionDataHandler implements INamedDataHandler
 {
@@ -19,7 +20,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
 		DeclaredType collectionType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
-		if (collectionType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+		if (collectionType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror contentType = collectionType.getTypeArguments().get(0);
 		String typeName = NamingUtils.computeFullName(contentType);
@@ -35,17 +36,13 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v1.1] use parameters to use the right class
+			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v2.1] use parameters to use the right class
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
 		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".add(" + value + ");"), contentType, EmptyAnnotationConstruct.INSTANCE);
 		
-		builder.encoder().indent(1);
-		builder.decoder().indent(1);
-		contentHandler.addInstructions(builder);
-		builder.encoder().indent(-1);
-		builder.decoder().indent(-1);
+		contentHandler.addInstructions(1, builder);
 		
 		builder.encoder().add("}");
 		builder.decoder().add("}");

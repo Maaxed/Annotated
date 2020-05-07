@@ -1,7 +1,6 @@
 package fr.max2.annotated.processor.network;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,6 @@ import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.EnumSide;
 import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.TypeHelper;
-import fr.max2.annotated.processor.utils.exceptions.AnnotationStructureException;
 import fr.max2.annotated.processor.utils.template.TemplateHelper;
 
 public class NetworkProcessingUnit
@@ -51,8 +49,6 @@ public class NetworkProcessingUnit
 	
 	public void processNetwork()
 	{
-		this.processor.log(Kind.NOTE, "Processing packet class generation", this.enclosingClass, this.annotation);
-		
 		// Generate each packet class
 		for (PacketProcessingUnit packet : this.packets)
 		{
@@ -66,17 +62,15 @@ public class NetworkProcessingUnit
 	    }
 	    catch (IOException e)
 	    {
-	    	this.processor.log(Kind.ERROR, "An exception has occured during the generation of the network class", this.enclosingClass, this.annotation);
-	        throw new UncheckedIOException("An exception has occured during the generation of the network class from '" + this.enclosingClassName.qualifiedName() + "'", e);
+	    	this.processor.log(Kind.ERROR, "An IOException occured during the generation of the '" + this.networkClassName.qualifiedName() + "' class: " + e.getMessage(), this.enclosingClass, this.annotation);
 	    }
 		catch (Exception e)
 		{
-			this.processor.log(Kind.ERROR, "An unexpected exception has occured during the generation of the network class", this.enclosingClass, this.annotation);
-	        throw new RuntimeException("An unexpected exception has occured during the generation of the network class from '" + this.enclosingClassName.qualifiedName() + "'", e);
+			this.processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.networkClassName.qualifiedName() + "' class: " + e.getMessage(), this.enclosingClass, this.annotation);
 		}
 	}
 	
-	private void writeNetwork() throws IOException
+	private boolean writeNetwork() throws IOException
 	{
 		GenerateChannel generatorData = enclosingClass.getAnnotation(GenerateChannel.class);
 		
@@ -85,8 +79,8 @@ public class NetworkProcessingUnit
 		{
 			if (this.modId == null)
 			{
-				processor.log(Kind.ERROR, "Couldn't find @Mod annotation in the package '" + this.enclosingClassName.packageName() + "'", this.enclosingClass, this.annotation);
-				throw new AnnotationStructureException("Couldn't find @Mod annotation in the package '" + this.enclosingClassName.packageName() + "'");
+				this.processor.log(Kind.ERROR, "Couldn't find @Mod annotation in the package '" + this.enclosingClassName.packageName() + "'", this.enclosingClass, this.annotation);
+				return false;
 			}
 			if (channelName.isEmpty())
 				channelName = this.enclosingClassName.shortName().toLowerCase();
@@ -96,7 +90,7 @@ public class NetworkProcessingUnit
 		
 		if (!channelName.toLowerCase().equals(channelName))
 		{
-			processor.log(Kind.WARNING, "The channel name '" + channelName + "' chould be in lower case, lower case is enforced", this.enclosingClass, this.annotation, "channelName");
+			this.processor.log(Kind.WARNING, "The channel name '" + channelName + "' chould be in lower case, lower case is enforced", this.enclosingClass, this.annotation, "channelName");
 			channelName = channelName.toLowerCase();	
 		}
 
@@ -114,7 +108,7 @@ public class NetworkProcessingUnit
 		replacements.put("protocolVersion", generatorData.protocolVersion());
 		replacements.put("registerPackets", registerPackets.stream().collect(Collectors.joining(System.lineSeparator())));
 
-		TemplateHelper.writeFileFromTemplateWithLog(this.processor, this.networkClassName.qualifiedName(), "templates/TemplateNetwork.jvtp", replacements, this.enclosingClass, this.annotation);
+		return TemplateHelper.writeFileFromTemplateWithLog(this.processor, this.networkClassName.qualifiedName(), "templates/TemplateNetwork.jvtp", replacements, this.enclosingClass, this.annotation);
 	}
 
 	

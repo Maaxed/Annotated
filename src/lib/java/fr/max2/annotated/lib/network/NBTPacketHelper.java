@@ -28,7 +28,7 @@ public class NBTPacketHelper
 {
 	private NBTPacketHelper() { }
 	
-	//TODO [v1.0] test the methods (writeNBT / readNBT)
+	//TODO [v2.0] test the methods (writeNBT / readNBT)
 	
 	@Nullable
 	public static ByteArrayNBT readByteArray(PacketBuffer buffer)

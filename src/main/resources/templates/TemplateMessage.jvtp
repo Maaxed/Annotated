@@ -53,15 +53,15 @@ ${decode}
 	{
 		${generatorClass}.CHANNEL.send(target, new ${className}(${messageParameters}));
 	}
-	
 	${if serverPacket}
+	
 	public static void sendToServer(${allFields})
 	{
 		send(PacketDistributor.SERVER.noArg()${if allFields}, ${end}${messageParameters});
 	}
 	${end}
-	
 	${if clientPacket}
+	
 	public static void sendTo(ServerPlayerEntity player${if allFields}, ${end}${allFields})
 	{
 		send(PacketDistributor.PLAYER.with(() -> player)${if allFields}, ${end}${messageParameters});

@@ -9,6 +9,7 @@ import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.EmptyAnnotationConstruct;
 import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.TypeHelper;
+import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum SerializableDataHandler implements INamedDataHandler
 {
@@ -17,9 +18,9 @@ public enum SerializableDataHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			//TODO [v1.0] check if params.type has a default constructor or throw an error
+			//TODO [v2.0] check if params.type has a default constructor or throw an error
 			DeclaredType serialisableType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
-			if (serialisableType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+			if (serialisableType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 			
 			TypeMirror nbtType = serialisableType.getTypeArguments().get(0);
 			

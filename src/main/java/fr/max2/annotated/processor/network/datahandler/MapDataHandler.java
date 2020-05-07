@@ -10,6 +10,7 @@ import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.EmptyAnnotationConstruct;
 import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.TypeHelper;
+import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum MapDataHandler implements INamedDataHandler
 {
@@ -19,7 +20,7 @@ public enum MapDataHandler implements INamedDataHandler
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
 		DeclaredType mapType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
-		if (mapType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+		if (mapType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror keyType = mapType.getTypeArguments().get(0);
 		TypeMirror valueType = mapType.getTypeArguments().get(1);
@@ -43,20 +44,16 @@ public enum MapDataHandler implements INamedDataHandler
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v1.1] use parameters to use the right class
+			NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();", //TODO [v2.1] use parameters to use the right class
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
 
-		builder.encoder().indent(1);
-		builder.decoder().indent(1);
 		DataHandlerParameters keyHandler = params.finder.getDataType(keyVarName, entryVarName + ".getKey()", (loadInst, key) -> loadInst.add(keyTypeName + " " + keyVarName + " = " + key + ";"), keyType, EmptyAnnotationConstruct.INSTANCE);
-		keyHandler.addInstructions(builder);
+		keyHandler.addInstructions(1, builder);
 		
 		DataHandlerParameters valueHandler = params.finder.getDataType(valueVarName, entryVarName + ".getValue()", (loadInst, value) -> loadInst.add(params.uniqueName + ".put(" + keyVarName + ", " + value + ");"), valueType, EmptyAnnotationConstruct.INSTANCE);
-		valueHandler.addInstructions(builder);
-		builder.encoder().indent(-1);
-		builder.decoder().indent(-1);
+		valueHandler.addInstructions(1, builder);
 		
 		builder.encoder().add("}");
 		builder.decoder().add("}");

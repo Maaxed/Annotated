@@ -27,20 +27,22 @@ public class TemplateHelper
 	private TemplateHelper() { }
 
 	
-	public static void writeFileFromTemplateWithLog(PacketProcessor processor, String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws IOException
+	public static boolean writeFileFromTemplateWithLog(PacketProcessor processor, String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws IOException
 	{
 		try
 		{
-			processor.log(Kind.NOTE, "Generation file '" + className + "' from tmplate '" + templateFile + "'", originatingElement, annotation);
-			
 			writeFileFromTemplate(processor.filer(), className, templateFile, replacements, originatingElement);
+			return true;
 		}
 		catch (IOException e)
 		{
-			processor.log(Kind.ERROR, "An error occured during the generation of the file '" + className + "' from template '" + templateFile + "'", originatingElement, annotation);
-			throw e;
+			processor.log(Kind.ERROR, "An IOException occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
 		}
-		
+		catch (Exception e)
+		{
+			processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
+		}
+		return false;
 	}
 	
 	public static void writeFileFromTemplate(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException

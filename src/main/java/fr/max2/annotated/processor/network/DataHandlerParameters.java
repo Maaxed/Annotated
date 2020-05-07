@@ -61,6 +61,15 @@ public class DataHandlerParameters
 		this(uniqueName, saveGetExpr, setExpr, type, annotations, dataTypeToHandler(data.type()), finder, data.value());
 	}
 	
+	public void addInstructions(int indent, IPacketBuilder builder)
+	{
+		builder.encoder().indent(indent);
+		builder.decoder().indent(indent);
+		addInstructions(builder);
+		builder.encoder().indent(-indent);
+		builder.decoder().indent(-indent);
+	}
+
 	public void addInstructions(IPacketBuilder builder)
 	{
 		this.typeHandler.addInstructions(this, builder);
@@ -131,6 +140,8 @@ public class DataHandlerParameters
 	
 	static
 	{
+		//TODO [v2.0] add priority / prioritizeOver
+		
 		TYPE_TO_HANDLER.put(DataType.BYTE, PrimitiveDataHandler.BYTE);
 		TYPE_TO_HANDLER.put(DataType.SHORT, PrimitiveDataHandler.SHORT);
 		TYPE_TO_HANDLER.put(DataType.INT, PrimitiveDataHandler.INT);

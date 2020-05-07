@@ -1,5 +1,5 @@
 package fr.max2.annotated.processor.utils.exceptions;
-/*
+
 import static fr.max2.annotated.processor.utils.exceptions.ExceptionUtils.*;
 import static org.junit.Assert.*;
 
@@ -8,11 +8,11 @@ import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 
 import org.junit.Test;
-*/
+
 
 public class ExceptionUtilsTest
 {
-	/*@Test
+	@Test
 	public void testTryAndWrapIOExceptions()
 	{
 		tryAndWrapIOExceptions(() ->
@@ -62,6 +62,6 @@ public class ExceptionUtilsTest
 		throwException.accept("NothingSpecial");
 		
 		assertThrows(UncheckedIOException.class, () -> throwException.accept("Throw"));
-	}*/
+	}
 	
 }

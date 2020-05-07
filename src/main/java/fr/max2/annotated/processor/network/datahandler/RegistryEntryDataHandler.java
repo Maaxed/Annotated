@@ -9,6 +9,7 @@ import javax.lang.model.type.TypeMirror;
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.TypeHelper;
+import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum RegistryEntryDataHandler implements INamedDataHandler
 {
@@ -18,12 +19,12 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
 		DeclaredType collectionType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
-		if (collectionType == null) throw new IllegalArgumentException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
+		if (collectionType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror contentType = collectionType.getTypeArguments().get(0);
 		if (contentType.getKind() != TypeKind.DECLARED)
 		{
-			throw new IllegalArgumentException("The registry type is invalid");
+			throw new IncompatibleTypeException("The registry type is invalid");
 		}
 		Element typeElement = params.finder.typeUtils.asElement(contentType);
 		Name typeName = typeElement.getSimpleName();

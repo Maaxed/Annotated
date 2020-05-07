@@ -3,8 +3,6 @@ package fr.max2.annotated.api.processor.network;
 
 public enum DataType
 {
-	//TODO [all] test everything
-	
 	// Integers
 	BYTE,
 	SHORT,
@@ -51,10 +49,11 @@ public enum DataType
 	NBT_COMPOUND,
 	NBT_ANY_NUMBER,
 	NBT_ANY,
-	//TODO [v1.1] Entity + EntityPlayer
-	//TODO [v1.2] other data/packet class
-	//TODO [v1.2] IDynamicSerializable, JsonDeserializer + JsonSerializer
-	
+	//TODO [v2.1] Entity + EntityPlayer
+	//TODO [v2.2] other data/packet class
+	//TODO [v2.2] IDynamicSerializable, JsonDeserializer + JsonSerializer
+
+	//TODO [V2.0] test special types
 	// Special types
 	WILDCARD,
 	TYPE_VARIABLE,

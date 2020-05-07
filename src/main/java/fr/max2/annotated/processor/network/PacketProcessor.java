@@ -10,7 +10,6 @@ import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -66,22 +65,18 @@ public class PacketProcessor extends AbstractProcessor
 	{
 		if (roundEnv.processingOver()) return true;
 		
-		Messager logs = this.processingEnv.getMessager();
 		Collection<NetworkProcessingUnit> networks;
-		
 		try
 		{
 			networks = buildProcessingUnits(roundEnv);
 		}
 		catch (Exception e)
 		{
-			logs.printMessage(Kind.ERROR, "An exception occured during the processing units building phase");
-			throw e;
+			this.processingEnv.getMessager().printMessage(Kind.ERROR, "An exception occured during the processing units building phase: " + e.getMessage());
+			return true;
 		}
 		
 		networks.forEach(NetworkProcessingUnit::processNetwork);
-		
-		logs.printMessage(Kind.NOTE, "End of the " + this.getClass().getCanonicalName() + " annotation processos !");
 		
 		return true;
 	}
@@ -89,9 +84,6 @@ public class PacketProcessor extends AbstractProcessor
 	private Collection<NetworkProcessingUnit> buildProcessingUnits(RoundEnvironment roundEnv)
 	{
 		Map<TypeElement, NetworkProcessingUnit> networks = new HashMap<>();
-		Messager logs = this.processingEnv.getMessager();
-		
-		logs.printMessage(Kind.NOTE, "Building processing units");
 		
 		for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(GenerateChannel.class)))
 		{
@@ -104,7 +96,7 @@ public class PacketProcessor extends AbstractProcessor
 			{
 				if (method.getAnnotation(side.opposite().getAnnotationClass()) != null)
 				{
-					logs.printMessage(Kind.ERROR, "Packets can only be send to a single logical side", method, TypeHelper.getAnnotationMirror(this.processingEnv.getTypeUtils(), method, side.getAnnotationClass().getCanonicalName()).get());
+					log(Kind.ERROR, "Packets can only be send to a single logical side", method, TypeHelper.getAnnotationMirror(this.processingEnv.getTypeUtils(), method, side.getAnnotationClass().getCanonicalName()));
 					continue; // Skip this packet
 				}
 				
@@ -118,7 +110,7 @@ public class PacketProcessor extends AbstractProcessor
 				
 				if (enclosingClass == null)
 				{
-					logs.printMessage(Kind.ERROR, "Couldn't find the enclosing class of the method", method, TypeHelper.getAnnotationMirror(this.processingEnv.getTypeUtils(), method, side.getAnnotationClass().getCanonicalName()).get());
+					log(Kind.ERROR, "Couldn't find the enclosing class of the method", method, TypeHelper.getAnnotationMirror(this.processingEnv.getTypeUtils(), method, side.getAnnotationClass().getCanonicalName()));
 					continue; // Skip this packet
 				}
 				
@@ -132,7 +124,7 @@ public class PacketProcessor extends AbstractProcessor
 	
 	public String findModAnnotationId(Element elem)
 	{
-		Elements elemUtils =  this.processingEnv.getElementUtils();
+		Elements elemUtils =  this.elementUtils();
 		PackageElement pkg = elemUtils.getPackageOf(elem);
 		String packageName = pkg.getQualifiedName().toString();
 		
@@ -158,7 +150,9 @@ public class PacketProcessor extends AbstractProcessor
 	
 	private String extractModId(Element elem)
 	{
-		return TypeHelper.getAnnotationValue(this.processingEnv.getTypeUtils(), elem, ClassRef.FORGE_MOD_ANNOTATION, "value").map(an -> an.getValue().toString()).orElse(null);
+		return TypeHelper.getAnnotationValue(this.processingEnv.getTypeUtils(), elem, ClassRef.FORGE_MOD_ANNOTATION, "value")
+						 .map(an -> an.getValue().toString())
+						 .orElse(null);
 	}
 	
 	public void log(Diagnostic.Kind kind, CharSequence msg, Element e)
