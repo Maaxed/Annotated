@@ -2,6 +2,7 @@ package fr.max2.annotated.processor.network.datahandler;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -29,13 +30,39 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 		Element typeElement = params.finder.typeUtils.asElement(contentType);
 		Name typeName = typeElement.getSimpleName();
 		
-		String forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)"; //TODO [v2.0] use ForgeRegistries for common types
+		String registryName = getForgeRegistry(TypeHelper.asTypeElement(typeElement));
+		String forgeRegistry;
 		
-		builder.addImport(TypeHelper.asTypeElement(typeElement).getQualifiedName());
-		builder.addImport("net.minecraftforge.registries.RegistryManager");
+		if (registryName == null)
+		{
+			forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)";
+			builder.addImport(TypeHelper.asTypeElement(typeElement).getQualifiedName());
+			builder.addImport("net.minecraftforge.registries.RegistryManager");
+		}
+		else
+		{
+			forgeRegistry = "ForgeRegistries." + registryName;
+			builder.addImport("net.minecraftforge.registries.ForgeRegistries");
+		}
 
 		builder.encoder().add("buf.writeRegistryIdUnsafe(" + forgeRegistry + ", " + params.saveAccessExpr + ");");
 		params.setExpr.accept(builder.decoder(), "buf.readRegistryIdUnsafe(" + forgeRegistry + ")");
+	}
+	
+	public static String getForgeRegistry(TypeElement typeElement)
+	{
+		switch (typeElement.getQualifiedName().toString())
+		{
+		case "net.minecraft.block.Block": return "BLOCKS";
+		case "net.minecraft.fluid.Fluid": return "FLUIDS";
+		case "net.minecraft.item.Item": return "ITEMS";
+		case "net.minecraft.entity.EntityType": return "ENTITIES";
+		case "net.minecraft.tileentity.TileEntityType": return "TILE_ENTITIES";
+		
+		case "net.minecraft.util.SoundEvent": return "SOUND_EVENTS";
+		case "net.minecraft.particles.ParticleType": return "PARTICLE_TYPES";
+		default: return null;
+		}
 	}
 
 	@Override

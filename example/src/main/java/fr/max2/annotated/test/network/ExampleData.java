@@ -13,7 +13,7 @@ import net.minecraft.util.text.StringTextComponent;
 @GenerateChannel(protocolVersion = "1", channelName = ModTestAnnotated.MOD_ID + ":exampledata")
 public class ExampleData
 {
-	@ServerPacket
+	@ServerPacket(className = "ExampleMessage")
 	public static void doExampleData(int someNumber, ItemStack aStack, String[] aStringArray, ArrayList<UUID> collectionOfIds, ServerPlayerEntity sender)
 	{
 		sender.sendMessage(new StringTextComponent("The number is " + someNumber));

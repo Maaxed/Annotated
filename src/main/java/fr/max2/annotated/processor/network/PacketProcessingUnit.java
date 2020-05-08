@@ -42,7 +42,7 @@ public class PacketProcessingUnit
 		this.side = side;
 		this.annotation = TypeHelper.getAnnotationMirror(processor.typeUtils(), packetMethod, this.side.getAnnotationClass().getCanonicalName());
 		
-		String className = TypeHelper.getAnnotationValue(this.annotation, "className").map(anno -> anno.toString()).orElse("");
+		String className = TypeHelper.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
 		
 		int sep = className.lastIndexOf('.');
 		
@@ -50,7 +50,7 @@ public class PacketProcessingUnit
 		
 		if (sep != -1)
 		{
-			className = className.substring(sep);
+			className = className.substring(sep + 1);
 		}
 		else if (className.isEmpty())
 		{
@@ -132,8 +132,8 @@ public class PacketProcessingUnit
 		replacements.put("serverPacket", Boolean.toString(this.side.isServer()));
 		replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
 		replacements.put("receiveSide", this.side.getSimpleName());
-		replacements.put("sheduled", TypeHelper.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.toString()).orElse("true"));
-
+		replacements.put("sheduled", TypeHelper.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
+		
 		return TemplateHelper.writeFileFromTemplateWithLog(this.processor, this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);
 	}
 	

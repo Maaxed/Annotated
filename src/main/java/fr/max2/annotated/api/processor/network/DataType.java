@@ -53,7 +53,7 @@ public enum DataType
 	//TODO [v2.2] other data/packet class
 	//TODO [v2.2] IDynamicSerializable, JsonDeserializer + JsonSerializer
 
-	//TODO [V2.0] test special types
+	//TODO [v2.0] test special types
 	// Special types
 	WILDCARD,
 	TYPE_VARIABLE,
