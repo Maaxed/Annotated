@@ -24,6 +24,7 @@ import fr.max2.annotated.processor.utils.exceptions.TemplateException;
 
 public class TemplateHelper
 {
+	//TODO [v2.2] improve templates : method templates, for loop
 	private TemplateHelper() { }
 
 	

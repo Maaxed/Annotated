@@ -103,7 +103,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			//TODO [v2.2] custom handler
+			//TODO [v2.1] custom handler
 			
 		}
 	};

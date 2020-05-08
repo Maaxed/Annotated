@@ -37,6 +37,8 @@ public enum MapDataHandler implements INamedDataHandler
 		String indexVarName = params.uniqueName + "Index";
 		
 		builder.addImport(this.getTypeName());
+		TypeHelper.provideTypeImports(keyType, builder::addImport);
+		TypeHelper.provideTypeImports(valueType, builder::addImport);
 		
 		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))
@@ -46,7 +48,7 @@ public enum MapDataHandler implements INamedDataHandler
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(type) + "();", //TODO [v2.1] use parameters to use the right class
+			NamingUtils.computeFullName(type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(type) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		

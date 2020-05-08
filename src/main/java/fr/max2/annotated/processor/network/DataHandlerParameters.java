@@ -1,6 +1,5 @@
 package fr.max2.annotated.processor.network;
 
-import java.security.InvalidParameterException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import fr.max2.annotated.processor.network.datahandler.SimpleClassHandler;
 import fr.max2.annotated.processor.network.datahandler.SpecialDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
+import fr.max2.annotated.processor.utils.PriorityManager;
 
 public class DataHandlerParameters
 {
@@ -98,7 +98,7 @@ public class DataHandlerParameters
 		public DataHandlerParameters getDataType(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
 		{
 			DataHandlerParameters params = this.getDataTypeOrNull(uniqueName, saveGetExpr, setExpr, type, annotations);
-			if (params == null) throw new InvalidParameterException("Unknown default DataHandler for type '" + type + "'");
+			if (params == null) throw new IllegalArgumentException("Unknown default DataHandler for type '" + type + "'");
 			return params;
 		}
 		
@@ -126,25 +126,29 @@ public class DataHandlerParameters
 		
 		public IDataHandler getDefaultDataType(TypeMirror type)
 		{
-			for (Entry<Predicate<TypeMirror>, IDataHandler> entry : this.typeMap)
+			List<IDataHandler> validHandlers = this.typeMap.stream().filter(entry -> entry.getKey().test(type)).map(Entry::getValue).collect(Collectors.toList());
+			
+			List<IDataHandler> prioritizedHandlers = HANDLER_PRIORITIES.getHighests(validHandlers);
+			
+			switch (prioritizedHandlers.size())
 			{
-				if (entry.getKey().test(type))
-				{
-					return entry.getValue();
-				}
+			case 0:
+				return SpecialDataHandler.CUSTOM;
+			case 1:
+				return prioritizedHandlers.get(0);
+			default:
+				throw new IllegalArgumentException("The data handler of the '" + type.toString() + "' type couldn't be chosen: handler priorities are equal: " + prioritizedHandlers.stream().map(h -> h.getClass().getTypeName() + ":" + h.toString()).collect(Collectors.joining(", ")));
 			}
 			
-			return SpecialDataHandler.CUSTOM;
 		}
 	}
 	
 	
 	private static final Map<DataType, IDataHandler> TYPE_TO_HANDLER = new EnumMap<>(DataType.class);
+	private static final PriorityManager<IDataHandler> HANDLER_PRIORITIES = new PriorityManager<>();
 	
 	static
 	{
-		//TODO [v2.0] add priority / prioritizeOver
-		
 		TYPE_TO_HANDLER.put(DataType.BYTE, PrimitiveDataHandler.BYTE);
 		TYPE_TO_HANDLER.put(DataType.SHORT, PrimitiveDataHandler.SHORT);
 		TYPE_TO_HANDLER.put(DataType.INT, PrimitiveDataHandler.INT);
@@ -182,6 +186,7 @@ public class DataHandlerParameters
 		TYPE_TO_HANDLER.put(DataType.NBT_STRING, NBTDataHandler.STRING);
 		TYPE_TO_HANDLER.put(DataType.NBT_BYTE_ARRAY, NBTDataHandler.BYTE_ARRAY);
 		TYPE_TO_HANDLER.put(DataType.NBT_INT_ARRAY, NBTDataHandler.INT_ARRAY);
+		TYPE_TO_HANDLER.put(DataType.NBT_LONG_ARRAY, NBTDataHandler.LONG_ARRAY);
 		TYPE_TO_HANDLER.put(DataType.NBT_LIST, NBTDataHandler.LIST);
 		TYPE_TO_HANDLER.put(DataType.NBT_COMPOUND, NBTDataHandler.COMPOUND);
 		TYPE_TO_HANDLER.put(DataType.NBT_ANY_NUMBER, NBTDataHandler.PRIMITIVE);
@@ -194,6 +199,14 @@ public class DataHandlerParameters
 		
 		TYPE_TO_HANDLER.put(DataType.DEFAULT, SpecialDataHandler.DEFAULT);
 		TYPE_TO_HANDLER.put(DataType.CUSTOM, SpecialDataHandler.CUSTOM);
+		
+		
+		HANDLER_PRIORITIES.prioritize(SimpleClassHandler.ITEM_STACK).over(SerializableDataHandler.NBT_SERIALISABLE);
+		
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.BYTE_ARRAY).over(CollectionDataHandler.INSTANCE);
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.INT_ARRAY).over(CollectionDataHandler.INSTANCE);
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.LONG_ARRAY).over(CollectionDataHandler.INSTANCE);
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.LIST).over(CollectionDataHandler.INSTANCE);
 	}
 	
 	private static IDataHandler dataTypeToHandler(DataType type)

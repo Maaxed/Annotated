@@ -95,7 +95,6 @@ public class PacketProcessingUnit
 		
 		messageParameters.forEach(f -> TypeHelper.provideTypeImports(f.asType(), builder::addImport));
 		
-		//TODO [v2.2] use method templates, parameters map
 		for (DataHandlerParameters handler : dataHandlers)
 		{
 			try

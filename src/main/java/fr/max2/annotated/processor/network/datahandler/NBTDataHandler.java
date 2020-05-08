@@ -93,6 +93,14 @@ public enum NBTDataHandler implements INamedDataHandler
 			addCustomInstructions("IntArray", params, builder);
 		}
 	},
+	LONG_ARRAY("LongArray")
+	{
+		@Override
+		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
+		{
+			addCustomInstructions("LongArray", params, builder);
+		}
+	},
 	LIST("List")
 	{
 		@Override

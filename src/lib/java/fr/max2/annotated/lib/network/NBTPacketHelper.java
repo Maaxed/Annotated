@@ -19,6 +19,7 @@ import net.minecraft.nbt.EndNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.LongArrayNBT;
 import net.minecraft.nbt.NBTSizeTracker;
 import net.minecraft.nbt.NBTTypes;
 import net.minecraft.nbt.NumberNBT;
@@ -55,6 +56,20 @@ public class NBTPacketHelper
 	{
 		IntArrayNBT intArray = readIntArray(buffer);
 		return intArray == null ? new IntArrayNBT(new int[0]) : intArray;
+	}
+	
+	
+	@Nullable
+	public static LongArrayNBT readLongArray(PacketBuffer buffer)
+	{
+		return readNBT(buffer, LongArrayNBT.class);
+	}
+	
+	@Nonnull
+	public static LongArrayNBT readLongArrayOrEmpty(PacketBuffer buffer)
+	{
+		LongArrayNBT longArray = readLongArray(buffer);
+		return longArray == null ? new LongArrayNBT(new long[0]) : longArray;
 	}
 	
 	

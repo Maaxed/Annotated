@@ -45,15 +45,16 @@ public enum DataType
 	NBT_STRING,
 	NBT_BYTE_ARRAY,
 	NBT_INT_ARRAY,
+	NBT_LONG_ARRAY,
 	NBT_LIST,
 	NBT_COMPOUND,
 	NBT_ANY_NUMBER,
 	NBT_ANY,
-	//TODO [v2.1] Entity + EntityPlayer
+	//TODO [v2.0] Entity + EntityPlayer
 	//TODO [v2.2] other data/packet class
-	//TODO [v2.2] IDynamicSerializable, JsonDeserializer + JsonSerializer
+	//TODO [v2.1] IDynamicSerializable, JsonDeserializer + JsonSerializer
 
-	//TODO [v2.0] test special types
+	//TODO [v2.1] test special types
 	// Special types
 	WILDCARD,
 	TYPE_VARIABLE,

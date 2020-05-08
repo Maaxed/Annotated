@@ -10,7 +10,7 @@ public interface IPacketBuilder
 		return addImport(className.toString());
 	}
 	
-	// TODO [v2.2] IPacketBuilder addField(String field)
+	// TODO [v2.1] IPacketBuilder addField(String field)
 	
 	IFunctionBuilder encoder();
 	IFunctionBuilder decoder();

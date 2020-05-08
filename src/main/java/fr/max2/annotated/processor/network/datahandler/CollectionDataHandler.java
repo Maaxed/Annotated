@@ -28,12 +28,13 @@ public enum CollectionDataHandler implements INamedDataHandler
 		DeclaredType type = TypeHelper.replaceTypeArgument((DeclaredType)params.type, contentFullType, contentType, params.finder.typeUtils);
 		
 		
-		String typeName = NamingUtils.computeFullName(contentType);
+		String contentTypeName = NamingUtils.computeFullName(contentType);
+		TypeHelper.provideTypeImports(contentType, builder::addImport);
 		
 		String elementVarName = params.uniqueName + "Element";
 		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))
-			.add("for (" + typeName + " " + elementVarName + " : " + params.saveAccessExpr + ")")
+			.add("for (" + contentTypeName + " " + elementVarName + " : " + params.saveAccessExpr + ")")
 			.add("{");
 		
 		String lenghtVarName = params.uniqueName + "Length";
@@ -41,7 +42,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(type) + "();", //TODO [v2.1] use parameters to use the right class
+			NamingUtils.computeFullName(type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(type) + "();", //TODO [v2.0] use parameters to use the right class
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
