@@ -6,7 +6,6 @@ import javax.lang.model.type.TypeMirror;
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
-import fr.max2.annotated.processor.utils.EmptyAnnotationConstruct;
 import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
@@ -32,7 +31,7 @@ public enum SerializableDataHandler implements INamedDataHandler
 			
 			builder.decoder().add(NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();");
 			
-			DataHandlerParameters handler = params.finder.getDataType(dataVarName, dataVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".deserializeNBT(" + value + ");"), nbtType, EmptyAnnotationConstruct.INSTANCE);
+			DataHandlerParameters handler = params.finder.getDataType(dataVarName, dataVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".deserializeNBT(" + value + ");"), nbtType, params.properties.getSubPropertiesOrEmpty("nbt"));
 			handler.addInstructions(builder);
 			
 			params.setExpr.accept(builder.decoder(), params.uniqueName); 

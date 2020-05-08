@@ -8,17 +8,11 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.TYPE, ElementType.PARAMETER})
-public @interface CustomData
+public @interface DataProperties
 {
 	/**
-	 * The type of data
-	 * @return the DataType
+	 * The list of properties for the DataHandler in the format: "identifier=value" where 'identifier' is a valid property identifier
+	 * @return the properties in a string array
 	 */
-	DataType type() default DataType.DEFAULT;
-	
-	/**
-	 * The parameters for the DataHandler
-	 * @return the parameters in a string array
-	 */
-	String[] value() default { }; //TODO [v2.0] create a property system
+	String[] value() default { };
 }

@@ -10,13 +10,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import fr.max2.annotated.api.processor.network.CustomData;
+import fr.max2.annotated.api.processor.network.DataProperties;
 import fr.max2.annotated.api.processor.network.DataType;
 import fr.max2.annotated.processor.network.datahandler.ArrayDataHandler;
 import fr.max2.annotated.processor.network.datahandler.CollectionDataHandler;
@@ -31,6 +30,9 @@ import fr.max2.annotated.processor.network.datahandler.SpecialDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.PriorityManager;
+import fr.max2.annotated.processor.utils.PropertyMap;
+import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
+import fr.max2.annotated.processor.utils.exceptions.InvalidPropertyException;
 
 public class DataHandlerParameters
 {
@@ -38,26 +40,19 @@ public class DataHandlerParameters
 	public final String saveAccessExpr;
 	public final BiConsumer<IFunctionBuilder, String> setExpr;
 	public final TypeMirror type;
-	public final AnnotatedConstruct annotations;
 	public final IDataHandler typeHandler;
 	public final Finder finder;
-	public final String[] parameters;
+	public final PropertyMap properties;
 	
-	public DataHandlerParameters(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations, IDataHandler typeHandler, Finder finder, String... parameters)
+	public DataHandlerParameters(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, IDataHandler typeHandler, PropertyMap properties, Finder finder)
 	{
 		this.uniqueName = uniqueName;
 		this.saveAccessExpr = saveGetExpr;
 		this.setExpr = setExpr;
 		this.type = type;
-		this.annotations = annotations;
 		this.typeHandler = typeHandler;
 		this.finder = finder;
-		this.parameters = parameters;
-	}
-	
-	public DataHandlerParameters(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations, CustomData data, Finder finder)
-	{
-		this(uniqueName, saveGetExpr, setExpr, type, annotations, dataTypeToHandler(data.type()), finder, data.value());
+		this.properties = properties;
 	}
 	
 	public void addInstructions(int indent, IPacketBuilder builder)
@@ -91,37 +86,44 @@ public class DataHandlerParameters
 		
 		public DataHandlerParameters getDataType(Element field)
 		{
+			DataProperties customData = field.getAnnotation(DataProperties.class);
+			if (customData == null)
+			{
+				Element elem = typeUtils.asElement(field.asType());
+				if (elem != null)
+					customData = elem.getAnnotation(DataProperties.class);
+			}
+			PropertyMap properties = customData == null ? PropertyMap.EMPTY_PROPERTIES : new PropertyMap(customData.value());
 			String setExpr = "msg." + field.getSimpleName() + " = ";
-			return this.getDataType(field.getSimpleName().toString(), "msg." + field.getSimpleName(), (loadInst, value) -> loadInst.add(setExpr + value + ";"), field.asType(), field);
+			return this.getDataType(field.getSimpleName().toString(), "msg." + field.getSimpleName(), (loadInst, value) -> loadInst.add(setExpr + value + ";"), field.asType(), properties);
 		}
 		
-		public DataHandlerParameters getDataType(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
+		public DataHandlerParameters getDataType(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, PropertyMap properties)
 		{
-			DataHandlerParameters params = this.getDataTypeOrNull(uniqueName, saveGetExpr, setExpr, type, annotations);
-			if (params == null) throw new IllegalArgumentException("Unknown default DataHandler for type '" + type + "'");
+			DataHandlerParameters params = this.getDataTypeOrNull(uniqueName, saveGetExpr, setExpr, type, properties);
+			
+			if (params == null)
+				throw new IncompatibleTypeException("No data handler can process the type '" + type.toString() + "'");
+			
 			return params;
 		}
 		
-		public DataHandlerParameters getDataTypeOrNull(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, AnnotatedConstruct annotations)
+		public DataHandlerParameters getDataTypeOrNull(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, PropertyMap properties)
 		{
-			CustomData customData = annotations.getAnnotation(CustomData.class);
-			if (customData == null)
-			{
-				Element elem = typeUtils.asElement(type);
-				if (elem != null)
-					customData = elem.getAnnotation(CustomData.class);
-			}
-			
-			if (customData != null)
-			{
-				return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, annotations, customData, this);
-			}
-			
-			IDataHandler defaultHandler = this.getDefaultDataType(type);
-			
-			if (defaultHandler == SpecialDataHandler.CUSTOM) return null;
-			
-			return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, annotations, defaultHandler, this);
+			return properties.getValue("type")
+				.map(str ->
+				{
+					return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, dataTypeToHandler(str), properties, this);
+				})
+				.orElseGet(() ->
+				{
+					IDataHandler defaultHandler = this.getDefaultDataType(type);
+					
+					if (defaultHandler == SpecialDataHandler.CUSTOM)
+						return null;
+					
+					return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, defaultHandler, properties, this);
+				});
 		}
 		
 		public IDataHandler getDefaultDataType(TypeMirror type)
@@ -209,8 +211,17 @@ public class DataHandlerParameters
 		HANDLER_PRIORITIES.prioritize(NBTDataHandler.LIST).over(CollectionDataHandler.INSTANCE);
 	}
 	
-	private static IDataHandler dataTypeToHandler(DataType type)
+	private static IDataHandler dataTypeToHandler(String typeName)
 	{
+		DataType type;
+		try
+		{
+			type = DataType.valueOf(typeName.toUpperCase());
+		}
+		catch (IllegalArgumentException e)
+		{
+			throw new InvalidPropertyException("The type '" + typeName + "' is invalid", e);
+		}
 		return TYPE_TO_HANDLER.get(type);
 	}
 	

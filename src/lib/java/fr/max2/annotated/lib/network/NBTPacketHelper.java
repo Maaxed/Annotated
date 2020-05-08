@@ -108,6 +108,13 @@ public class NBTPacketHelper
 	}
 	
 	
+	@Nullable
+	public static INBT readBase(PacketBuffer buffer)
+	{
+		return readNBT(buffer, INBT.class);
+	}
+	
+	
 	public static void writeNBT(PacketBuffer buffer, @Nullable INBT nbt)
 	{
 		if (nbt == null) {

@@ -10,7 +10,6 @@ import javax.lang.model.util.Types;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.EmptyAnnotationConstruct;
 import fr.max2.annotated.processor.utils.NamingUtils;
 import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
@@ -46,7 +45,7 @@ public enum ArrayDataHandler implements IDataHandler
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + params.uniqueName + ".length; " + indexVarName + "++)",
 			"{");
 		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + "[" + indexVarName + "] = " + value + ";"), contentType, EmptyAnnotationConstruct.INSTANCE);
+		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + "[" + indexVarName + "] = " + value + ";"), contentType, params.properties.getSubPropertiesOrEmpty("content"));
 		
 		contentHandler.addInstructions(1, builder);
 		

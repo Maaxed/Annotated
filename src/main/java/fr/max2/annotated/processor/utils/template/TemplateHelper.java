@@ -41,7 +41,7 @@ public class TemplateHelper
 		}
 		catch (Exception e)
 		{
-			processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
+			processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
 		}
 		return false;
 	}

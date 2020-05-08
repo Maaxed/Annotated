@@ -2,11 +2,12 @@ package fr.max2.annotated.test.network;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import fr.max2.annotated.api.processor.network.ClientPacket;
 import fr.max2.annotated.api.processor.network.CustomData;
-import fr.max2.annotated.api.processor.network.DataType;
 import fr.max2.annotated.api.processor.network.GenerateChannel;
 import fr.max2.annotated.api.processor.network.ServerPacket;
 import fr.max2.annotated.test.ModTestAnnotated;
@@ -95,12 +96,6 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void withCustomData(@CustomData(type = DataType.INT) Integer myCustomInt)
-	{
-		
-	}
-	
-	@ClientPacket
 	public static void primitiveArrays(int[] myIntArray, Integer[] myIntWrArray)
 	{
 		
@@ -151,7 +146,19 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void strangeTypes(CustomList<? extends Item, ? extends Item> items)
+	public static void strangeTypes(CustomList<? extends Item, ? extends Item> items, @CustomData({"impl=fr.max2.annotated.test.network.TestData.CustomList"}) List<? extends Item> items2)
+	{
+		
+	}
+	
+	@ClientPacket
+	public static void withCustomData(@CustomData("type=INT") Integer myCustomInt, @CustomData("type=NBT_LIST") ListNBT list1, @CustomData("type=COLLECTION") ListNBT list2)
+	{
+		
+	}
+	
+	@ClientPacket
+	public static void complexCustomData(@CustomData({"impl=java.util.TreeMap", "keys.type=COLLECTION", "values.impl=java.util.ArrayList", "values.content.type=COLLECTION"}) Map<ListNBT, List<ListNBT>> map)
 	{
 		
 	}

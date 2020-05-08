@@ -100,6 +100,7 @@ public class PacketProcessingUnit
 			try
 			{
 				handler.addInstructions(builder);
+				handler.properties.checkUnusedProperties();
 			}
 			catch (IncompatibleTypeException e)
 			{

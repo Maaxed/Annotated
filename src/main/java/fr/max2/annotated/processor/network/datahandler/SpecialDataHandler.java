@@ -29,7 +29,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			if (extendsBound == null) throw new IncompatibleTypeException("The wildcard type '" + params.type + "' has no extends bound");
 			
-			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.annotations).addInstructions(builder);
+			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.properties).addInstructions(builder);
 		}
 
 		@Override
@@ -48,7 +48,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			TypeMirror extendsBound = wildcardType.getUpperBound();
 			
-			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.annotations).addInstructions(builder);
+			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.properties).addInstructions(builder);
 		}
 
 		@Override
@@ -69,7 +69,7 @@ public enum SpecialDataHandler implements IDataHandler
 			
 			for (TypeMirror type : intersectionType.getBounds())
 			{
-				DataHandlerParameters newParams = params.finder.getDataTypeOrNull(params.uniqueName, params.saveAccessExpr, params.setExpr, type, params.annotations);
+				DataHandlerParameters newParams = params.finder.getDataTypeOrNull(params.uniqueName, params.saveAccessExpr, params.setExpr, type, params.properties);
 				if (newParams != null)
 				{
 					newParams.addInstructions(builder);
@@ -94,7 +94,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			DataHandlerParameters handler = new DataHandlerParameters(params.uniqueName, params.saveAccessExpr, params.setExpr, params.type, params.annotations, params.finder.getDefaultDataType(params.type), params.finder, params.parameters);
+			DataHandlerParameters handler = new DataHandlerParameters(params.uniqueName, params.saveAccessExpr, params.setExpr, params.type, params.finder.getDefaultDataType(params.type), params.properties, params.finder);
 			handler.addInstructions(builder);
 		}
 	},
@@ -104,7 +104,7 @@ public enum SpecialDataHandler implements IDataHandler
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
 			//TODO [v2.1] custom handler
-			
+			throw new IncompatibleTypeException("No data handler can process the type '" + params.type.toString() + "'");
 		}
 	};
 
