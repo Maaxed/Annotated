@@ -89,21 +89,21 @@ public class PacketProcessor extends AbstractProcessor
 			{
 				if (method.getAnnotation(side.opposite().getAnnotationClass()) != null)
 				{
-					this.tools.log(Kind.ERROR, "Packets can only be send to a single logical side", method, this.tools.typeHelper.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
+					this.tools.log(Kind.ERROR, "Packets can only be send to a single logical side", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
 					continue; // Skip this packet
 				}
 				
-				TypeElement enclosingClass = this.tools.typeHelper.asTypeElement(method.getEnclosingElement());
+				TypeElement enclosingClass = this.tools.elements.asTypeElement(method.getEnclosingElement());
 				TypeElement parent = enclosingClass;
 				while (!networks.containsKey(enclosingClass) && parent != null)
 				{
 					enclosingClass = parent;
-					parent = this.tools.typeHelper.asTypeElement(parent.getEnclosingElement());
+					parent = this.tools.elements.asTypeElement(parent.getEnclosingElement());
 				}
 				
 				if (enclosingClass == null)
 				{
-					this.tools.log(Kind.ERROR, "Couldn't find the enclosing class of the method", method, this.tools.typeHelper.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
+					this.tools.log(Kind.ERROR, "Couldn't find the enclosing class of the method", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
 					continue; // Skip this packet
 				}
 				
@@ -142,7 +142,7 @@ public class PacketProcessor extends AbstractProcessor
 	
 	private String extractModId(Element elem)
 	{
-		return this.tools.typeHelper.getAnnotationValue(elem, ClassRef.FORGE_MOD_ANNOTATION, "value")
+		return this.tools.elements.getAnnotationValue(elem, ClassRef.FORGE_MOD_ANNOTATION, "value")
 						 .map(an -> an.getValue().toString())
 						 .orElse(null);
 	}

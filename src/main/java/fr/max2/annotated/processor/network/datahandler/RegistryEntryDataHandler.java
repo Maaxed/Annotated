@@ -18,7 +18,7 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
-		DeclaredType collectionType = params.tools.typeHelper.refineTo(params.type, params.tools.elements.getTypeElement(this.getTypeName()).asType());
+		DeclaredType collectionType = params.tools.types.refineTo(params.type, params.tools.elements.getTypeElement(this.getTypeName()).asType());
 		if (collectionType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror contentType = collectionType.getTypeArguments().get(0);
@@ -29,13 +29,13 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 		Element typeElement = params.tools.types.asElement(contentType);
 		Name typeName = typeElement.getSimpleName();
 		
-		String registryName = getForgeRegistry(params.tools.typeHelper.asTypeElement(typeElement));
+		String registryName = getForgeRegistry(params.tools.elements.asTypeElement(typeElement));
 		String forgeRegistry;
 		
 		if (registryName == null)
 		{
 			forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)";
-			builder.addImport(params.tools.typeHelper.asTypeElement(typeElement).getQualifiedName());
+			builder.addImport(params.tools.elements.asTypeElement(typeElement).getQualifiedName());
 			builder.addImport("net.minecraftforge.registries.RegistryManager");
 		}
 		else

@@ -3,57 +3,37 @@ package fr.max2.annotated.processor.utils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Name;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.IntersectionType;
+import javax.lang.model.type.NoType;
+import javax.lang.model.type.NullType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.Types;
 
-public class TypeHelper
+public class ExtendedTypes implements Types
 {
 	private final ProcessingTools tools;
+	private final Types base;
 	
-	TypeHelper(ProcessingTools tools)
+	ExtendedTypes(ProcessingTools tools, Types base)
 	{
 		this.tools = tools;
-	}
-	
-	
-	public TypeElement asTypeElement(Element elem)
-	{
-		return elem == null ? null : TypeElementCaster.INSTANCE.visit(elem);
-	}
-	
-	private enum TypeElementCaster implements DefaultElementVisitor<TypeElement, Void>
-	{
-		INSTANCE;
-		
-		@Override
-		public TypeElement visitType(TypeElement e, Void p)
-		{
-			return e;
-		}
-		
-		@Override
-		public TypeElement visitDefault(Element e, Void p)
-		{
-			return null;
-		}
-		
+		this.base = base;
 	}
 	
 	public ArrayType asArrayType(TypeMirror type)
@@ -142,29 +122,6 @@ public class TypeHelper
 
 		@Override
 		public IntersectionType visitDefault(TypeMirror t, Void p)
-		{
-			return null;
-		}
-		
-	}
-	
-	public PackageElement asPackage(Element type)
-	{
-		return type == null ? null : PackageElementCaster.INSTANCE.visit(type);
-	}
-	
-	private enum PackageElementCaster implements DefaultElementVisitor<PackageElement, Void>
-	{
-		INSTANCE;
-		
-		@Override
-		public PackageElement visitPackage(PackageElement e, Void p)
-		{
-			return e;
-		}
-
-		@Override
-		public PackageElement visitDefault(Element e, Void p)
 		{
 			return null;
 		}
@@ -411,27 +368,6 @@ public class TypeHelper
 		}
 	}
 
-	public Optional<? extends AnnotationMirror> getAnnotationMirror(Element elem, CharSequence annotationType)
-	{
-		return elem.getAnnotationMirrors().stream().filter(a -> asTypeElement(a.getAnnotationType().asElement()).getQualifiedName().contentEquals(annotationType)).findAny();
-	}
-
-	public Optional<? extends AnnotationValue> getAnnotationValue(Optional<? extends AnnotationMirror> annotation, CharSequence propertyName)
-	{
-		return annotation
-			.flatMap(an ->
-				an.getElementValues().entrySet().stream()
-				.filter(entry -> entry.getKey().getSimpleName().contentEquals(propertyName))
-				.findAny()
-				).map(entry -> entry.getValue());
-	}
-
-	public Optional<? extends AnnotationValue> getAnnotationValue(Element elem, CharSequence annotationType, CharSequence propertyName)
-	{
-		return getAnnotationValue(getAnnotationMirror(elem, annotationType), propertyName);
-	}
-
-
 	public DeclaredType replaceTypeArgument(DeclaredType type, TypeMirror fromArg, TypeMirror toArg)
 	{
 		if (this.tools.types.isSameType(fromArg, toArg))
@@ -446,7 +382,7 @@ public class TypeHelper
 			newArgs[i] = prevArgs.get(i).equals(fromArg) ? toArg : prevArgs.get(i);
 		}
 		
-		return this.tools.types.getDeclaredType(this.asTypeElement(this.tools.types.asElement(type)), newArgs);
+		return this.tools.types.getDeclaredType(this.tools.elements.asTypeElement(this.tools.types.asElement(type)), newArgs);
 	}
 	
 	public TypeMirror shallowErasure(TypeMirror type)
@@ -475,4 +411,121 @@ public class TypeHelper
 			return t;
 		}
 	};
+
+	
+	// Delegate Types methods
+	
+	@Override
+	public Element asElement(TypeMirror t)
+	{
+		return this.base.asElement(t);
+	}
+
+	@Override
+	public boolean isSameType(TypeMirror t1, TypeMirror t2)
+	{
+		return this.base.isSameType(t1, t2);
+	}
+
+	@Override
+	public boolean isSubtype(TypeMirror t1, TypeMirror t2)
+	{
+		return this.base.isSubtype(t1, t2);
+	}
+
+	@Override
+	public boolean isAssignable(TypeMirror t1, TypeMirror t2)
+	{
+		return this.base.isAssignable(t1, t2);
+	}
+
+	@Override
+	public boolean contains(TypeMirror t1, TypeMirror t2)
+	{
+		return this.base.contains(t1, t2);
+	}
+
+	@Override
+	public boolean isSubsignature(ExecutableType m1, ExecutableType m2)
+	{
+		return this.base.isSubsignature(m1, m2);
+	}
+
+	@Override
+	public List<? extends TypeMirror> directSupertypes(TypeMirror t)
+	{
+		return this.base.directSupertypes(t);
+	}
+
+	@Override
+	public TypeMirror erasure(TypeMirror t)
+	{
+		return this.base.erasure(t);
+	}
+
+	@Override
+	public TypeElement boxedClass(PrimitiveType p)
+	{
+		return this.base.boxedClass(p);
+	}
+
+	@Override
+	public PrimitiveType unboxedType(TypeMirror t)
+	{
+		return this.base.unboxedType(t);
+	}
+
+	@Override
+	public TypeMirror capture(TypeMirror t)
+	{
+		return this.base.capture(t);
+	}
+
+	@Override
+	public PrimitiveType getPrimitiveType(TypeKind kind)
+	{
+		return this.base.getPrimitiveType(kind);
+	}
+
+	@Override
+	public NullType getNullType()
+	{
+		return this.base.getNullType();
+	}
+
+	@Override
+	public NoType getNoType(TypeKind kind)
+	{
+		return this.base.getNoType(kind);
+	}
+
+	@Override
+	public ArrayType getArrayType(TypeMirror componentType)
+	{
+		return this.base.getArrayType(componentType);
+	}
+
+	@Override
+	public WildcardType getWildcardType(TypeMirror extendsBound, TypeMirror superBound)
+	{
+		return this.base.getWildcardType(extendsBound, superBound);
+	}
+
+	@Override
+	public DeclaredType getDeclaredType(TypeElement typeElem, TypeMirror... typeArgs)
+	{
+		return this.base.getDeclaredType(typeElem, typeArgs);
+	}
+
+	@Override
+	public DeclaredType getDeclaredType(DeclaredType containing, TypeElement typeElem, TypeMirror... typeArgs)
+	{
+		return this.base.getDeclaredType(containing, typeElem, typeArgs);
+	}
+
+	@Override
+	public TypeMirror asMemberOf(DeclaredType containing, Element element)
+	{
+		return this.base.asMemberOf(containing, element);
+	}
 }

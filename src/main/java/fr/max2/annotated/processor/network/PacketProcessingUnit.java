@@ -37,9 +37,9 @@ public class PacketProcessingUnit
 		this.network = context;
 		this.method = packetMethod;
 		this.side = side;
-		this.annotation = tools.typeHelper.getAnnotationMirror(packetMethod, this.side.getAnnotationClass().getCanonicalName());
+		this.annotation = tools.elements.getAnnotationMirror(packetMethod, this.side.getAnnotationClass().getCanonicalName());
 		
-		String className = tools.typeHelper.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
+		String className = tools.elements.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
 		
 		int sep = className.lastIndexOf('.');
 		
@@ -88,7 +88,7 @@ public class PacketProcessingUnit
 		
 		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools.elements, messageClassName.packageName());
 		
-		messageParameters.forEach(f -> this.tools.typeHelper.provideTypeImports(f.asType(), builder::addImport));
+		messageParameters.forEach(f -> this.tools.types.provideTypeImports(f.asType(), builder::addImport));
 		
 		for (DataHandlerParameters handler : dataHandlers)
 		{
@@ -114,7 +114,7 @@ public class PacketProcessingUnit
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", messageClassName.packageName());
 		replacements.put("className", this.messageClassName.shortName());
-		replacements.put("generatorClass", network.networkClassName.shortName());
+		replacements.put("networkClass", network.networkClassName.shortName());
 		replacements.put("allFields" , messageParameters.stream().map(p -> this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsDeclaration", messageParameters.stream().map(p -> "\tprivate " + this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
 		replacements.put("fieldsInit", messageParameters.stream().map(p -> "\t\tthis." + p.getSimpleName() + " = " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
@@ -127,14 +127,14 @@ public class PacketProcessingUnit
 		replacements.put("serverPacket", Boolean.toString(this.side.isServer()));
 		replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
 		replacements.put("receiveSide", this.side.getSimpleName());
-		replacements.put("sheduled", this.tools.typeHelper.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
+		replacements.put("sheduled", this.tools.elements.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
 		
 		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);
 	}
 	
 	private Optional<String> specialValue(TypeMirror type)
 	{
-		TypeElement elem = this.tools.typeHelper.asTypeElement(this.tools.types.asElement(type));
+		TypeElement elem = this.tools.elements.asTypeElement(this.tools.types.asElement(type));
 		if (elem != null)
 		{
 			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT))

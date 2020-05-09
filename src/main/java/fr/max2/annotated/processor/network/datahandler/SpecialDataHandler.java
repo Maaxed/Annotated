@@ -7,11 +7,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
+import fr.max2.annotated.processor.utils.ExtendedElements;
+import fr.max2.annotated.processor.utils.ExtendedTypes;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum SpecialDataHandler implements IDataHandler
@@ -21,7 +21,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			WildcardType wildcardType = params.tools.typeHelper.asWildcardType(params.type);
+			WildcardType wildcardType = params.tools.types.asWildcardType(params.type);
 			if (wildcardType == null) throw incompatibleType("wildcard", params.type);
 			
 			TypeMirror extendsBound = wildcardType.getExtendsBound();
@@ -32,7 +32,7 @@ public enum SpecialDataHandler implements IDataHandler
 		}
 
 		@Override
-		public Predicate<TypeMirror> getTypeValidator(Elements elemUtils, Types typeUtils)
+		public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
 		{
 			return type -> type.getKind() == TypeKind.WILDCARD;
 		}
@@ -42,7 +42,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			TypeVariable wildcardType = params.tools.typeHelper.asVariableType(params.type);
+			TypeVariable wildcardType = params.tools.types.asVariableType(params.type);
 			if (wildcardType == null) throw incompatibleType("variable", params.type);
 			
 			TypeMirror extendsBound = wildcardType.getUpperBound();
@@ -51,7 +51,7 @@ public enum SpecialDataHandler implements IDataHandler
 		}
 
 		@Override
-		public Predicate<TypeMirror> getTypeValidator(Elements elemUtils, Types typeUtils)
+		public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
 		{
 			return type -> type.getKind() == TypeKind.TYPEVAR;
 		}
@@ -61,7 +61,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			IntersectionType intersectionType = params.tools.typeHelper.asIntersectionType(params.type);
+			IntersectionType intersectionType = params.tools.types.asIntersectionType(params.type);
 			if (intersectionType == null) throw incompatibleType("intersection", params.type);
 			
 			boolean success = false;
@@ -83,7 +83,7 @@ public enum SpecialDataHandler implements IDataHandler
 		}
 
 		@Override
-		public Predicate<TypeMirror> getTypeValidator(Elements elemUtils, Types typeUtils)
+		public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
 		{
 			return type -> type.getKind() == TypeKind.INTERSECTION;
 		}
@@ -108,7 +108,7 @@ public enum SpecialDataHandler implements IDataHandler
 	};
 
 	@Override
-	public Predicate<TypeMirror> getTypeValidator(Elements elemUtils, Types typeUtils)
+	public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
 	{
 		return type -> false;
 	}

@@ -18,18 +18,18 @@ public enum CollectionDataHandler implements INamedDataHandler
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
 		TypeMirror collectionType = params.tools.elements.getTypeElement(this.getTypeName()).asType();
-		DeclaredType refinedType = params.tools.typeHelper.refineTo(params.type, collectionType);
+		DeclaredType refinedType = params.tools.types.refineTo(params.type, collectionType);
 		if (refinedType == null)
 			throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror contentFullType = refinedType.getTypeArguments().get(0);
-		TypeMirror contentType = params.tools.typeHelper.shallowErasure(contentFullType);
-		DeclaredType revisedType = params.tools.typeHelper.replaceTypeArgument((DeclaredType)params.type, contentFullType, contentType);
+		TypeMirror contentType = params.tools.types.shallowErasure(contentFullType);
+		DeclaredType revisedType = params.tools.types.replaceTypeArgument((DeclaredType)params.type, contentFullType, contentType);
 		TypeMirror implType = params.type;
 		
 		String implName = params.properties.getValueOrEmpty("impl");
 		if (implName.isEmpty())
-			implName = defaultImplementation(params.tools.typeHelper.asTypeElement(params.tools.types.asElement(params.type)));
+			implName = defaultImplementation(params.tools.elements.asTypeElement(params.tools.types.asElement(params.type)));
 		
 		if (!implName.isEmpty())
 		{
@@ -37,12 +37,12 @@ public enum CollectionDataHandler implements INamedDataHandler
 			if (implType == null)
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + this.getTypeName());
 			
-			DeclaredType refinedImpl = params.tools.typeHelper.refineTo(implType, collectionType);
+			DeclaredType refinedImpl = params.tools.types.refineTo(implType, collectionType);
 			if (refinedImpl == null)
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of " + this.getTypeName());
 			
 			contentFullType = refinedImpl.getTypeArguments().get(0);
-			DeclaredType revisedImplType = params.tools.typeHelper.replaceTypeArgument((DeclaredType)implType, contentFullType, contentType);
+			DeclaredType revisedImplType = params.tools.types.replaceTypeArgument((DeclaredType)implType, contentFullType, contentType);
 			if (!params.tools.types.isAssignable(revisedImplType, revisedType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + params.type + "'");
 			
@@ -52,7 +52,7 @@ public enum CollectionDataHandler implements INamedDataHandler
 		DataHandlerUtils.requireDefaultConstructor(params.tools.types, implType);
 		
 		String contentTypeName = params.tools.naming.computeFullName(contentType);
-		params.tools.typeHelper.provideTypeImports(contentType, builder::addImport);
+		params.tools.types.provideTypeImports(contentType, builder::addImport);
 		
 		String elementVarName = params.uniqueName + "Element";
 		builder.encoder()

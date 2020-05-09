@@ -18,19 +18,19 @@ public enum MapDataHandler implements INamedDataHandler
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
 		TypeMirror mapType = params.tools.elements.getTypeElement(this.getTypeName()).asType();
-		DeclaredType refinedType = params.tools.typeHelper.refineTo(params.type, mapType);
+		DeclaredType refinedType = params.tools.types.refineTo(params.type, mapType);
 		if (refinedType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror keyFullType = refinedType.getTypeArguments().get(0);
 		TypeMirror valueFullType = refinedType.getTypeArguments().get(1);
-		TypeMirror keyType = params.tools.typeHelper.shallowErasure(keyFullType);
-		TypeMirror valueType = params.tools.typeHelper.shallowErasure(valueFullType);
-		DeclaredType revisedType = params.tools.typeHelper.replaceTypeArgument(params.tools.typeHelper.replaceTypeArgument((DeclaredType)params.type, keyFullType, keyType), valueFullType, valueType);
+		TypeMirror keyType = params.tools.types.shallowErasure(keyFullType);
+		TypeMirror valueType = params.tools.types.shallowErasure(valueFullType);
+		DeclaredType revisedType = params.tools.types.replaceTypeArgument(params.tools.types.replaceTypeArgument((DeclaredType)params.type, keyFullType, keyType), valueFullType, valueType);
 		TypeMirror implType = params.type;
 		
 		String implName = params.properties.getValueOrEmpty("impl");
 		if (implName.isEmpty())
-			implName = defaultImplementation(params.tools.typeHelper.asTypeElement(params.tools.types.asElement(params.type)));
+			implName = defaultImplementation(params.tools.elements.asTypeElement(params.tools.types.asElement(params.type)));
 		
 		if (!implName.isEmpty())
 		{
@@ -38,13 +38,13 @@ public enum MapDataHandler implements INamedDataHandler
 			if (implType == null)
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + this.getTypeName());
 			
-			DeclaredType refinedImpl = params.tools.typeHelper.refineTo(implType, mapType);
+			DeclaredType refinedImpl = params.tools.types.refineTo(implType, mapType);
 			if (refinedImpl == null)
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of " + this.getTypeName());
 			
 			TypeMirror implKeyFullType = refinedImpl.getTypeArguments().get(0);
 			TypeMirror implValueFullType = refinedImpl.getTypeArguments().get(1);
-			DeclaredType revisedImplType = params.tools.typeHelper.replaceTypeArgument(params.tools.typeHelper.replaceTypeArgument((DeclaredType)implType, implKeyFullType, keyType), implValueFullType, valueType);
+			DeclaredType revisedImplType = params.tools.types.replaceTypeArgument(params.tools.types.replaceTypeArgument((DeclaredType)implType, implKeyFullType, keyType), implValueFullType, valueType);
 			if (!params.tools.types.isAssignable(revisedImplType, revisedType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + params.type + "'");
 			
@@ -61,8 +61,8 @@ public enum MapDataHandler implements INamedDataHandler
 		String indexVarName = params.uniqueName + "Index";
 		
 		builder.addImport(this.getTypeName());
-		params.tools.typeHelper.provideTypeImports(keyType, builder::addImport);
-		params.tools.typeHelper.provideTypeImports(valueType, builder::addImport);
+		params.tools.types.provideTypeImports(keyType, builder::addImport);
+		params.tools.types.provideTypeImports(valueType, builder::addImport);
 		
 		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))

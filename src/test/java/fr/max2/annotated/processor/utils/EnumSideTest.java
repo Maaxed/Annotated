@@ -10,7 +10,7 @@ import org.junit.Test;
 import fr.max2.annotated.api.processor.network.ClientPacket;
 import fr.max2.annotated.api.processor.network.ServerPacket;
 
-public class EnumSidesTest
+public class EnumSideTest
 {
 	
 	@Test

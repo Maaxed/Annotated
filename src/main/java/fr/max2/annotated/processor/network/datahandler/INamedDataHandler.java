@@ -1,13 +1,14 @@
 package fr.max2.annotated.processor.network.datahandler;
 
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
+
+import fr.max2.annotated.processor.utils.ExtendedElements;
+import fr.max2.annotated.processor.utils.ExtendedTypes;
 
 public interface INamedDataHandler extends ITypedDataHandler
 {
 	@Override
-	default TypeMirror getType(Elements elemUtils, Types typeUtils)
+	default TypeMirror getType(ExtendedElements elemUtils, ExtendedTypes typeUtils)
 	{
 		return typeUtils.erasure(elemUtils.getTypeElement(this.getTypeName()).asType());
 	}

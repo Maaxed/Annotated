@@ -3,12 +3,12 @@ package fr.max2.annotated.processor.network.datahandler;
 import java.util.function.Predicate;
 
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
+import fr.max2.annotated.processor.utils.ExtendedElements;
+import fr.max2.annotated.processor.utils.ExtendedTypes;
 
 public enum NBTDataHandler implements INamedDataHandler
 {
@@ -154,7 +154,7 @@ public enum NBTDataHandler implements INamedDataHandler
 	}
 	
 	@Override
-	public Predicate<TypeMirror> getTypeValidator(Elements elemUtils, Types typeUtils)
+	public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
 	{
 		TypeMirror thisType = this.getType(elemUtils, typeUtils);
 		return type -> typeUtils.isAssignable(type, thisType) && typeUtils.isAssignable(thisType, type);

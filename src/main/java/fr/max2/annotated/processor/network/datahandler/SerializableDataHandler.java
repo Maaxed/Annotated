@@ -15,13 +15,13 @@ public enum SerializableDataHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			DeclaredType serialisableType = params.tools.typeHelper.refineTo(params.type, params.tools.elements.getTypeElement(this.getTypeName()).asType());
+			DeclaredType serialisableType = params.tools.types.refineTo(params.type, params.tools.elements.getTypeElement(this.getTypeName()).asType());
 			if (serialisableType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 			DataHandlerUtils.requireDefaultConstructor(params.tools.types, params.type);
 			
 			TypeMirror nbtType = serialisableType.getTypeArguments().get(0);
 			
-			params.tools.typeHelper.provideTypeImports(nbtType, builder::addImport);
+			params.tools.types.provideTypeImports(nbtType, builder::addImport);
 			
 			String dataVarName = params.uniqueName + "Data";
 			

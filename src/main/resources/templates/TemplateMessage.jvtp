@@ -51,7 +51,7 @@ ${decode}
 	
 	${if clientPacket}public${else}private${end} static void send(PacketDistributor.PacketTarget target${if allFields}, ${end}${allFields})
 	{
-		${generatorClass}.CHANNEL.send(target, new ${className}(${messageParameters}));
+		${networkClass}.CHANNEL.send(target, new ${className}(${messageParameters}));
 	}
 	${if serverPacket}
 	

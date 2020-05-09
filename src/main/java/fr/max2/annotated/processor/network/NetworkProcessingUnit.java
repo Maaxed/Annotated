@@ -37,7 +37,7 @@ public class NetworkProcessingUnit
 		this.modId = modId;
 		this.enclosingClassName = tools.naming.buildClassName(enclosingClass);
 		this.networkClassName = new ClassName(this.enclosingClassName.packageName(), this.enclosingClassName.shortName().replace('.', '_') + "Network");
-		this.annotation = tools.typeHelper.getAnnotationMirror(enclosingClass, GenerateChannel.class.getCanonicalName());
+		this.annotation = tools.elements.getAnnotationMirror(enclosingClass, GenerateChannel.class.getCanonicalName());
 	}
 	
 	public void addPacket(ExecutableElement method, EnumSide side)

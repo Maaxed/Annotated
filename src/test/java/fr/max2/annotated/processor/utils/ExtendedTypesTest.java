@@ -10,18 +10,9 @@ import static org.hamcrest.MatcherAssert.*;
 import org.junit.Test;
 
 
-public class TypeHelperTest extends TestModelProvider
+public class ExtendedTypesTest extends TestModelProvider
 {
-	private TypeHelper helper = new TypeHelper(null);
-	
-	@Test
-	public void testAsTypeElement()
-	{
-		this.setUpModel();
-
-		assertEquals(this.intElement, helper.asTypeElement(this.intElement));
-		assertNull(helper.asTypeElement(this.packageType));
-	}
+	private ExtendedTypes helper = new ExtendedTypes(null, null);
 	
 	@Test
 	public void testAsArrayType()
@@ -63,15 +54,6 @@ public class TypeHelperTest extends TestModelProvider
 		assertEquals(this.intersaction, helper.asIntersectionType(this.intersaction));
 		assertNull(helper.asIntersectionType(this.integer));
 		assertNull(helper.asIntersectionType(this.primitive));
-	}
-	
-	@Test
-	public void testAsPackage()
-	{
-		this.setUpModel();
-
-		assertEquals(this.packageType, helper.asPackage(this.packageType));
-		assertNull(helper.asPackage(this.intElement));
 	}
 	
 	@Test
@@ -138,5 +120,4 @@ public class TypeHelperTest extends TestModelProvider
 		assertEquals(1, imports.size());
 		assertThat(imports, hasItem("fr.max2.annotated.processor.utils.NamingUtils.TypeToString"));
 	}
-	
 }
