@@ -8,8 +8,6 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.NamingUtils;
-import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum CollectionDataHandler implements INamedDataHandler
@@ -19,42 +17,42 @@ public enum CollectionDataHandler implements INamedDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
-		TypeMirror collectionType = params.finder.elemUtils.getTypeElement(this.getTypeName()).asType();
-		DeclaredType refinedType = TypeHelper.refineTo(params.type, collectionType, params.finder.typeUtils);
+		TypeMirror collectionType = params.tools.elements.getTypeElement(this.getTypeName()).asType();
+		DeclaredType refinedType = params.tools.typeHelper.refineTo(params.type, collectionType);
 		if (refinedType == null)
 			throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror contentFullType = refinedType.getTypeArguments().get(0);
-		TypeMirror contentType = TypeHelper.shallowErasure(contentFullType, params.finder.elemUtils);
-		DeclaredType revisedType = TypeHelper.replaceTypeArgument((DeclaredType)params.type, contentFullType, contentType, params.finder.typeUtils);
+		TypeMirror contentType = params.tools.typeHelper.shallowErasure(contentFullType);
+		DeclaredType revisedType = params.tools.typeHelper.replaceTypeArgument((DeclaredType)params.type, contentFullType, contentType);
 		TypeMirror implType = params.type;
 		
 		String implName = params.properties.getValueOrEmpty("impl");
 		if (implName.isEmpty())
-			implName = defaultImplementation(TypeHelper.asTypeElement(params.finder.typeUtils.asElement(params.type)));
+			implName = defaultImplementation(params.tools.typeHelper.asTypeElement(params.tools.types.asElement(params.type)));
 		
 		if (!implName.isEmpty())
 		{
-			implType = params.finder.elemUtils.getTypeElement(implName).asType();
+			implType = params.tools.elements.getTypeElement(implName).asType();
 			if (implType == null)
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + this.getTypeName());
 			
-			DeclaredType refinedImpl = TypeHelper.refineTo(implType, collectionType, params.finder.typeUtils);
+			DeclaredType refinedImpl = params.tools.typeHelper.refineTo(implType, collectionType);
 			if (refinedImpl == null)
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of " + this.getTypeName());
 			
 			contentFullType = refinedImpl.getTypeArguments().get(0);
-			DeclaredType revisedImplType = TypeHelper.replaceTypeArgument((DeclaredType)implType, contentFullType, contentType, params.finder.typeUtils);
-			if (!params.finder.typeUtils.isAssignable(revisedImplType, revisedType))
+			DeclaredType revisedImplType = params.tools.typeHelper.replaceTypeArgument((DeclaredType)implType, contentFullType, contentType);
+			if (!params.tools.types.isAssignable(revisedImplType, revisedType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + params.type + "'");
 			
 			builder.addImport(implName);
 		}
 
-		DataHandlerUtils.requireDefaultConstructor(params.finder.typeUtils, implType);
+		DataHandlerUtils.requireDefaultConstructor(params.tools.types, implType);
 		
-		String contentTypeName = NamingUtils.computeFullName(contentType);
-		TypeHelper.provideTypeImports(contentType, builder::addImport);
+		String contentTypeName = params.tools.naming.computeFullName(contentType);
+		params.tools.typeHelper.provideTypeImports(contentType, builder::addImport);
 		
 		String elementVarName = params.uniqueName + "Element";
 		builder.encoder()
@@ -67,11 +65,11 @@ public enum CollectionDataHandler implements INamedDataHandler
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(revisedType) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(implType) + "();",
+			params.tools.naming.computeFullName(revisedType) + " " + params.uniqueName + " = new " + params.tools.naming.computeSimplifiedName(implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".add(" + value + ");"), contentType, params.properties.getSubPropertiesOrEmpty("content"));
+		DataHandlerParameters contentHandler = params.tools.handlers.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".add(" + value + ");"), contentType, params.properties.getSubPropertiesOrEmpty("content"));
 		
 		contentHandler.addInstructions(1, builder);
 		

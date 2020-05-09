@@ -10,8 +10,6 @@ import javax.lang.model.util.Types;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.NamingUtils;
-import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum ArrayDataHandler implements IDataHandler
@@ -21,11 +19,11 @@ public enum ArrayDataHandler implements IDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
-		ArrayType arrayType = TypeHelper.asArrayType(params.type);
+		ArrayType arrayType = params.tools.typeHelper.asArrayType(params.type);
 		if (arrayType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not an array");
 		
 		TypeMirror contentType = arrayType.getComponentType();
-		String typeName = NamingUtils.computeFullName(contentType);
+		String typeName = params.tools.naming.computeFullName(contentType);
 		
 		String elementVarName = params.uniqueName + "Element";
 		builder.encoder().add(
@@ -45,7 +43,7 @@ public enum ArrayDataHandler implements IDataHandler
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + params.uniqueName + ".length; " + indexVarName + "++)",
 			"{");
 		
-		DataHandlerParameters contentHandler = params.finder.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + "[" + indexVarName + "] = " + value + ";"), contentType, params.properties.getSubPropertiesOrEmpty("content"));
+		DataHandlerParameters contentHandler = params.tools.handlers.getDataType(elementVarName, elementVarName, (loadInst, value) -> loadInst.add(params.uniqueName + "[" + indexVarName + "] = " + value + ";"), contentType, params.properties.getSubPropertiesOrEmpty("content"));
 		
 		contentHandler.addInstructions(1, builder);
 		

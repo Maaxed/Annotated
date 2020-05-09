@@ -19,17 +19,21 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
-public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
+public class TypeHelper
 {
-	private TypeHelper() { }
+	private final ProcessingTools tools;
+	
+	TypeHelper(ProcessingTools tools)
+	{
+		this.tools = tools;
+	}
 	
 	
-	public static TypeElement asTypeElement(Element elem)
+	public TypeElement asTypeElement(Element elem)
 	{
 		return elem == null ? null : TypeElementCaster.INSTANCE.visit(elem);
 	}
@@ -52,7 +56,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		
 	}
 	
-	public static ArrayType asArrayType(TypeMirror type)
+	public ArrayType asArrayType(TypeMirror type)
 	{
 		return type == null ? null : ArrayTypeCaster.INSTANCE.visit(type);
 	}
@@ -75,7 +79,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		
 	}
 	
-	public static WildcardType asWildcardType(TypeMirror type)
+	public WildcardType asWildcardType(TypeMirror type)
 	{
 		return type == null ? null : WildcardTypeCaster.INSTANCE.visit(type);
 	}
@@ -98,7 +102,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		
 	}
 	
-	public static TypeVariable asVariableType(TypeMirror type)
+	public TypeVariable asVariableType(TypeMirror type)
 	{
 		return type == null ? null : VariableTypeCaster.INSTANCE.visit(type);
 	}
@@ -121,7 +125,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		
 	}
 	
-	public static IntersectionType asIntersectionType(TypeMirror type)
+	public IntersectionType asIntersectionType(TypeMirror type)
 	{
 		return type == null ? null : IntersectionTypeCaster.INSTANCE.visit(type);
 	}
@@ -144,7 +148,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		
 	}
 	
-	public static PackageElement asPackage(Element type)
+	public PackageElement asPackage(Element type)
 	{
 		return type == null ? null : PackageElementCaster.INSTANCE.visit(type);
 	}
@@ -167,33 +171,26 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		
 	}
 	
-	public static DeclaredType refineTo(TypeMirror type, TypeMirror base, Types types)
+	public DeclaredType refineTo(TypeMirror type, TypeMirror base)
 	{
-		return type.accept(new DeclaredTypeRefiner(types), types.erasure(base));
+		return type.accept(declaredTypeRefiner, this.tools.types.erasure(base));
 	}
 	
-	private static class DeclaredTypeRefiner implements DefaultTypeVisitor<DeclaredType, TypeMirror>
+	private final TypeVisitor<DeclaredType, TypeMirror> declaredTypeRefiner = new DefaultTypeVisitor<DeclaredType, TypeMirror>()
 	{
-		private final Types types;
-		
-		public DeclaredTypeRefiner(Types types)
-		{
-			this.types = types;
-		}
-
 		@Override
 		public DeclaredType visitDeclared(DeclaredType t, TypeMirror p)
 		{
-			if (types.isSameType(types.erasure(t), p))
+			if (tools.types.isSameType(tools.types.erasure(t), p))
 			{
 				return t;
 			}
 			
-			List<? extends TypeMirror> superTypes = types.directSupertypes(t);
+			List<? extends TypeMirror> superTypes = tools.types.directSupertypes(t);
 			
 			for (TypeMirror parent : superTypes)
 			{
-				DeclaredType result = visit(parent, p);
+				DeclaredType result = this.visit(parent, p);
 				
 				if (result != null)
 				{
@@ -233,9 +230,9 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		{
 			return null;
 		}
-	}
+	};
 	
-	public static void provideTypeImports(TypeMirror type, Consumer<String> imports)
+	public void provideTypeImports(TypeMirror type, Consumer<String> imports)
 	{
 		TypeImporter.INSTANCE.visit(type, imports);
 	}
@@ -292,7 +289,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		{
 			for (TypeMirror subType : t.getAlternatives())
 			{
-				provideTypeImports(subType, imports);
+				this.visit(subType, imports);
 			}
 			return null;
 		}
@@ -302,7 +299,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		{
 			for (TypeMirror subType : t.getBounds())
 			{
-				provideTypeImports(subType, imports);
+				this.visit(subType, imports);
 			}
 			return null;
 		}
@@ -345,12 +342,12 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		
 	}
 	
-	public static List<Element> getAllAccessibleMembers(TypeElement type, Elements elemUils, Visibility visibility)
+	public List<Element> getAllAccessibleMembers(TypeElement type, Visibility visibility)
 	{
-		return getAllMembers(type, elemUils, visibility.filterAtLeast);
+		return getAllMembers(type, visibility.filterAtLeast);
 	}
 	
-	public static List<Element> getAllMembers(TypeElement type, Elements elemUils, Predicate<Element> predicate)
+	public List<Element> getAllMembers(TypeElement type, Predicate<Element> predicate)
 	{
 		List<Element> elems = new ArrayList<>();
 		Set<Name> usedNames = new HashSet<>(); // For optimization purposes
@@ -363,7 +360,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 				{
 					for (Element olderElem : elems)
 					{
-						if (elemUils.hides(olderElem, elem)) return;
+						if (this.tools.elements.hides(olderElem, elem)) return;
 					}
 				}
 				elems.add(elem);
@@ -374,7 +371,7 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		return elems;
 	}
 	
-	public static void visitAllMembers(TypeElement type, Consumer<Element> memberConsumer)
+	public void visitAllMembers(TypeElement type, Consumer<Element> memberConsumer)
 	{
 		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer);
 	}
@@ -414,12 +411,12 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 		}
 	}
 
-	public static Optional<? extends AnnotationMirror> getAnnotationMirror(Types typeUtils, Element elem, CharSequence annotationType)
+	public Optional<? extends AnnotationMirror> getAnnotationMirror(Element elem, CharSequence annotationType)
 	{
 		return elem.getAnnotationMirrors().stream().filter(a -> asTypeElement(a.getAnnotationType().asElement()).getQualifiedName().contentEquals(annotationType)).findAny();
 	}
 
-	public static Optional<? extends AnnotationValue> getAnnotationValue(Optional<? extends AnnotationMirror> annotation, CharSequence propertyName)
+	public Optional<? extends AnnotationValue> getAnnotationValue(Optional<? extends AnnotationMirror> annotation, CharSequence propertyName)
 	{
 		return annotation
 			.flatMap(an ->
@@ -429,15 +426,15 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 				).map(entry -> entry.getValue());
 	}
 
-	public static Optional<? extends AnnotationValue> getAnnotationValue(Types typeUtils, Element elem, CharSequence annotationType, CharSequence propertyName)
+	public Optional<? extends AnnotationValue> getAnnotationValue(Element elem, CharSequence annotationType, CharSequence propertyName)
 	{
-		return getAnnotationValue(getAnnotationMirror(typeUtils, elem, annotationType), propertyName);
+		return getAnnotationValue(getAnnotationMirror(elem, annotationType), propertyName);
 	}
 
 
-	public static DeclaredType replaceTypeArgument(DeclaredType type, TypeMirror fromArg, TypeMirror toArg, Types typeUtils)
+	public DeclaredType replaceTypeArgument(DeclaredType type, TypeMirror fromArg, TypeMirror toArg)
 	{
-		if (typeUtils.isSameType(fromArg, toArg))
+		if (this.tools.types.isSameType(fromArg, toArg))
 			return type; // No replacement needed
 		
 		List<? extends TypeMirror> prevArgs = type.getTypeArguments();
@@ -449,36 +446,33 @@ public class TypeHelper //TODO [v2.0] create an ultimate ProcessingUtils
 			newArgs[i] = prevArgs.get(i).equals(fromArg) ? toArg : prevArgs.get(i);
 		}
 		
-		return typeUtils.getDeclaredType(TypeHelper.asTypeElement(typeUtils.asElement(type)), newArgs);
+		return this.tools.types.getDeclaredType(this.asTypeElement(this.tools.types.asElement(type)), newArgs);
 	}
 	
-	public static TypeMirror shallowErasure(TypeMirror type, Elements elemUtils)
+	public TypeMirror shallowErasure(TypeMirror type)
 	{
-		return type == null ? null : ShallowEraser.INSTANCE.visit(type, elemUtils);
+		return type == null ? null : shallowEraser.visit(type);
 	}
 	
-	private static enum ShallowEraser implements DefaultTypeVisitor<TypeMirror, Elements>
+	private final TypeVisitor<TypeMirror, Void> shallowEraser = new DefaultTypeVisitor<TypeMirror, Void>()
 	{
-		INSTANCE;
-		
 		@Override
-		public TypeMirror visitTypeVariable(TypeVariable t, Elements p)
+		public TypeMirror visitTypeVariable(TypeVariable t, Void p)
 		{
 			return this.visit(t.getUpperBound(), p);
 		}
 		
 		@Override
-		public TypeMirror visitWildcard(WildcardType t, Elements p)
+		public TypeMirror visitWildcard(WildcardType t, Void p)
 		{
 			TypeMirror extendsBound = t.getExtendsBound();
-			return extendsBound == null ? p.getTypeElement(Object.class.getCanonicalName()).asType() : this.visit(extendsBound, p);
+			return extendsBound == null ? tools.elements.getTypeElement(Object.class.getCanonicalName()).asType() : this.visit(extendsBound);
 		}
 
 		@Override
-		public TypeMirror visitDefault(TypeMirror t, Elements p)
+		public TypeMirror visitDefault(TypeMirror t, Void p)
 		{
 			return t;
 		}
-		
-	}
+	};
 }

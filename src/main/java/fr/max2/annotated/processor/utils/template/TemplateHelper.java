@@ -20,33 +20,37 @@ import javax.lang.model.element.Element;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.processor.network.PacketProcessor;
+import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.exceptions.TemplateException;
 
 public class TemplateHelper
 {
-	//TODO [v2.2] improve templates : method templates, for loop
-	private TemplateHelper() { }
-
+	private final ProcessingTools tools;
 	
-	public static boolean writeFileFromTemplateWithLog(PacketProcessor processor, String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws IOException
+	public TemplateHelper(ProcessingTools tools) //TODO [v2.2] improve templates : method templates, for loop
+	{
+		this.tools = tools;
+	}
+	
+	public boolean writeFileWithLog(String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws IOException
 	{
 		try
 		{
-			writeFileFromTemplate(processor.filer(), className, templateFile, replacements, originatingElement);
+			writeFile(tools.filer, className, templateFile, replacements, originatingElement);
 			return true;
 		}
 		catch (IOException e)
 		{
-			processor.log(Kind.ERROR, "An IOException occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
+			tools.log(Kind.ERROR, "An IOException occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
 		}
 		catch (Exception e)
 		{
-			processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
+			tools.log(Kind.ERROR, "An unexpected exception occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
 		}
 		return false;
 	}
 	
-	public static void writeFileFromTemplate(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException
+	public static void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException
 	{
 		JavaFileObject file = filer.createSourceFile(className, originatingElements);
 		try (Writer writer = file.openWriter();

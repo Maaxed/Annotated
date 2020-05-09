@@ -6,8 +6,6 @@ import javax.lang.model.type.TypeMirror;
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
-import fr.max2.annotated.processor.utils.NamingUtils;
-import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum SerializableDataHandler implements INamedDataHandler
@@ -17,21 +15,21 @@ public enum SerializableDataHandler implements INamedDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			DeclaredType serialisableType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
+			DeclaredType serialisableType = params.tools.typeHelper.refineTo(params.type, params.tools.elements.getTypeElement(this.getTypeName()).asType());
 			if (serialisableType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
-			DataHandlerUtils.requireDefaultConstructor(params.finder.typeUtils, params.type);
+			DataHandlerUtils.requireDefaultConstructor(params.tools.types, params.type);
 			
 			TypeMirror nbtType = serialisableType.getTypeArguments().get(0);
 			
-			TypeHelper.provideTypeImports(nbtType, builder::addImport);
+			params.tools.typeHelper.provideTypeImports(nbtType, builder::addImport);
 			
 			String dataVarName = params.uniqueName + "Data";
 			
-			builder.encoder().add(NamingUtils.computeFullName(nbtType) + " " + dataVarName + " = " + params.saveAccessExpr + ".serializeNBT()" + ";");
+			builder.encoder().add(params.tools.naming.computeFullName(nbtType) + " " + dataVarName + " = " + params.saveAccessExpr + ".serializeNBT()" + ";");
 			
-			builder.decoder().add(NamingUtils.computeFullName(params.type) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(params.type) + "();");
+			builder.decoder().add(params.tools.naming.computeFullName(params.type) + " " + params.uniqueName + " = new " + params.tools.naming.computeSimplifiedName(params.type) + "();");
 			
-			DataHandlerParameters handler = params.finder.getDataType(dataVarName, dataVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".deserializeNBT(" + value + ");"), nbtType, params.properties.getSubPropertiesOrEmpty("nbt"));
+			DataHandlerParameters handler = params.tools.handlers.getDataType(dataVarName, dataVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".deserializeNBT(" + value + ");"), nbtType, params.properties.getSubPropertiesOrEmpty("nbt"));
 			handler.addInstructions(builder);
 			
 			params.setExpr.accept(builder.decoder(), params.uniqueName); 

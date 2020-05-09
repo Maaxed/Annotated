@@ -13,36 +13,33 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.processor.network.model.SimplePacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.EnumSide;
-import fr.max2.annotated.processor.utils.NamingUtils;
-import fr.max2.annotated.processor.utils.TypeHelper;
+import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
-import fr.max2.annotated.processor.utils.template.TemplateHelper;
 
 public class PacketProcessingUnit
 {
-	private PacketProcessor processor;
+	private final ProcessingTools tools;
 	private final NetworkProcessingUnit network;
 	private final ExecutableElement method;
 	private final EnumSide side;
 	private Optional<? extends AnnotationMirror> annotation;
 	public final ClassName messageClassName;
 
-	public PacketProcessingUnit(PacketProcessor processor, NetworkProcessingUnit context, ExecutableElement packetMethod, EnumSide side)
+	public PacketProcessingUnit(ProcessingTools tools, NetworkProcessingUnit context, ExecutableElement packetMethod, EnumSide side)
 	{
-		this.processor = processor;
+		this.tools = tools;
 		this.network = context;
 		this.method = packetMethod;
 		this.side = side;
-		this.annotation = TypeHelper.getAnnotationMirror(processor.typeUtils(), packetMethod, this.side.getAnnotationClass().getCanonicalName());
+		this.annotation = tools.typeHelper.getAnnotationMirror(packetMethod, this.side.getAnnotationClass().getCanonicalName());
 		
-		String className = TypeHelper.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
+		String className = tools.typeHelper.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
 		
 		int sep = className.lastIndexOf('.');
 		
@@ -68,11 +65,11 @@ public class PacketProcessingUnit
         }
         catch (IOException e)
         {
-        	this.processor.log(Kind.ERROR, "An IOException occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getMessage(), this.method, this.annotation);
+        	this.tools.log(Kind.ERROR, "An IOException occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getMessage(), this.method, this.annotation);
         }
 		catch (Exception e)
 		{
-			this.processor.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.method, this.annotation);
+			this.tools.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.method, this.annotation);
 		}
 		return false;
 	}
@@ -81,19 +78,17 @@ public class PacketProcessingUnit
 	{
 		if (!this.method.getModifiers().contains(Modifier.STATIC))
 		{
-			this.processor.log(Kind.ERROR, "Packet handler must be static", this.method, this.annotation);
+			this.tools.log(Kind.ERROR, "Packet handler must be static", this.method, this.annotation);
 			return false;
 		}
 		
-		Elements elemUtils = this.processor.elementUtils();
-		
 		List<? extends VariableElement> parameters = this.method.getParameters();
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
-		List<DataHandlerParameters> dataHandlers = messageParameters.stream().map(p -> this.processor.getFinder().getDataType(p)).collect(Collectors.toList());
+		List<DataHandlerParameters> dataHandlers = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
 		
-		SimplePacketBuilder builder = new SimplePacketBuilder(elemUtils, messageClassName.packageName());
+		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools.elements, messageClassName.packageName());
 		
-		messageParameters.forEach(f -> TypeHelper.provideTypeImports(f.asType(), builder::addImport));
+		messageParameters.forEach(f -> this.tools.typeHelper.provideTypeImports(f.asType(), builder::addImport));
 		
 		for (DataHandlerParameters handler : dataHandlers)
 		{
@@ -104,12 +99,12 @@ public class PacketProcessingUnit
 			}
 			catch (IncompatibleTypeException e)
 			{
-				this.processor.log(Kind.ERROR, "An IncompatibleTypeException occured on the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.tools.log(Kind.ERROR, "An IncompatibleTypeException occured on the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
 				return false;
 			}
 			catch (Exception e)
 			{
-				this.processor.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.tools.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
 				return false;
 			}
 		}
@@ -120,8 +115,8 @@ public class PacketProcessingUnit
 		replacements.put("package", messageClassName.packageName());
 		replacements.put("className", this.messageClassName.shortName());
 		replacements.put("generatorClass", network.networkClassName.shortName());
-		replacements.put("allFields" , messageParameters.stream().map(p -> NamingUtils.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
-		replacements.put("fieldsDeclaration", messageParameters.stream().map(p -> "\tprivate " + NamingUtils.computeFullName(p.asType()) + " " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
+		replacements.put("allFields" , messageParameters.stream().map(p -> this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
+		replacements.put("fieldsDeclaration", messageParameters.stream().map(p -> "\tprivate " + this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
 		replacements.put("fieldsInit", messageParameters.stream().map(p -> "\t\tthis." + p.getSimpleName() + " = " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
 		replacements.put("encode", builder.saveInstructions(2).collect(Collectors.joining(ls)));
 		replacements.put("decode", builder.loadInstructions(2).collect(Collectors.joining(ls)));
@@ -132,14 +127,14 @@ public class PacketProcessingUnit
 		replacements.put("serverPacket", Boolean.toString(this.side.isServer()));
 		replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
 		replacements.put("receiveSide", this.side.getSimpleName());
-		replacements.put("sheduled", TypeHelper.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
+		replacements.put("sheduled", this.tools.typeHelper.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
 		
-		return TemplateHelper.writeFileFromTemplateWithLog(this.processor, this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);
+		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);
 	}
 	
 	private Optional<String> specialValue(TypeMirror type)
 	{
-		TypeElement elem = TypeHelper.asTypeElement(this.processor.typeUtils().asElement(type));
+		TypeElement elem = this.tools.typeHelper.asTypeElement(this.tools.types.asElement(type));
 		if (elem != null)
 		{
 			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT))

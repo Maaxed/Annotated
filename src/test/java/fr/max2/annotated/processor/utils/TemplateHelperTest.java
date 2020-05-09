@@ -41,20 +41,20 @@ public class TemplateHelperTest
 		Map<String, String> replacements = new HashMap<>();
 		
 		assertThrows(TemplateException.class, () ->
-			writeFileFromTemplate(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
+			writeFile(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer2 = new FakeFiler("Output2");
 		replacements.put("blue", "violets");
 		
 		assertThrows(TemplateException.class, () ->
-			writeFileFromTemplate(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
+			writeFile(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer3 = new FakeFiler("Output3");
 		replacements.put("red", "roses");
 		
 		try
 		{
-			writeFileFromTemplate(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
+			writeFile(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
 			assertArrayEquals(new Object[] {"This is a test template.",
 											"The value of \"red\" is roses.",
 											"The value of \"blue\" is violets."},

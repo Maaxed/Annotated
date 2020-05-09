@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.NamingUtils;
 
 public enum SimpleClassHandler implements INamedDataHandler
 {
@@ -24,7 +23,7 @@ public enum SimpleClassHandler implements INamedDataHandler
 		{
 			builder.encoder().add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".ordinal()"));
 			
-			params.setExpr.accept(builder.decoder(), NamingUtils.computeFullName(params.type) + ".values()[buf.readInt()]");
+			params.setExpr.accept(builder.decoder(), params.tools.naming.computeFullName(params.type) + ".values()[buf.readInt()]");
 		}
 	},
 	UUID(UUID.class)

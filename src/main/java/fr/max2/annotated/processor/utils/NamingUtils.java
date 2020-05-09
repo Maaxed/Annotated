@@ -12,14 +12,17 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.Elements;
 
 public class NamingUtils
 {
-	private NamingUtils() { }
+	private final ProcessingTools tools;
 	
+	NamingUtils(ProcessingTools tools)
+	{
+		this.tools = tools;
+	}
 	
-	public static ClassName buildClassName(Elements elemUtils, Element type)
+	public ClassName buildClassName(Element type)
 	{
 		StringBuilder builder = new StringBuilder();
 		do
@@ -31,16 +34,16 @@ public class NamingUtils
 		}
 		while (type != null && type.getKind() != ElementKind.PACKAGE);
 
-		String packageName = elemUtils.getPackageOf(type).getQualifiedName().toString();
+		String packageName = this.tools.elements.getPackageOf(type).getQualifiedName().toString();
 		return new ClassName(packageName, builder.toString());
 	}
 	
-	public static String computeSimplifiedName(TypeMirror type)
+	public String computeSimplifiedName(TypeMirror type)
 	{
 		return TypeToString.SIMPLIFIED.computeName(type);
 	}
 	
-	public static String computeFullName(TypeMirror type)
+	public String computeFullName(TypeMirror type)
 	{
 		return TypeToString.FULL.computeName(type);
 	}

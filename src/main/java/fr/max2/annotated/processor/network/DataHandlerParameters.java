@@ -9,11 +9,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
 import fr.max2.annotated.api.processor.network.DataProperties;
 import fr.max2.annotated.api.processor.network.DataType;
@@ -29,6 +26,7 @@ import fr.max2.annotated.processor.network.datahandler.SimpleClassHandler;
 import fr.max2.annotated.processor.network.datahandler.SpecialDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
+import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PriorityManager;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
@@ -36,22 +34,22 @@ import fr.max2.annotated.processor.utils.exceptions.InvalidPropertyException;
 
 public class DataHandlerParameters
 {
+	public final ProcessingTools tools;
 	public final String uniqueName;
 	public final String saveAccessExpr;
 	public final BiConsumer<IFunctionBuilder, String> setExpr;
 	public final TypeMirror type;
 	public final IDataHandler typeHandler;
-	public final Finder finder;
 	public final PropertyMap properties;
 	
-	public DataHandlerParameters(String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, IDataHandler typeHandler, PropertyMap properties, Finder finder)
+	public DataHandlerParameters(ProcessingTools tools, String uniqueName, String saveGetExpr, BiConsumer<IFunctionBuilder, String> setExpr, TypeMirror type, IDataHandler typeHandler, PropertyMap properties)
 	{
+		this.tools = tools;
 		this.uniqueName = uniqueName;
 		this.saveAccessExpr = saveGetExpr;
 		this.setExpr = setExpr;
 		this.type = type;
 		this.typeHandler = typeHandler;
-		this.finder = finder;
 		this.properties = properties;
 	}
 	
@@ -73,15 +71,13 @@ public class DataHandlerParameters
 	public static class Finder
 	{
 		private final List<Map.Entry<Predicate<TypeMirror>, IDataHandler>> typeMap;
-		public final Elements elemUtils;
-		public final Types typeUtils;
+		private final ProcessingTools tools;
 		
-		public Finder(ProcessingEnvironment env)
+		public Finder(ProcessingTools tools)
 		{
-			this.elemUtils = env.getElementUtils();
-			this.typeUtils = env.getTypeUtils();
+			this.tools = tools;
 			
-			this.typeMap = TYPE_TO_HANDLER.values().stream().map(data -> new SimpleEntry<>(data.getTypeValidator(this.elemUtils, this.typeUtils), data)).collect(Collectors.toList());
+			this.typeMap = TYPE_TO_HANDLER.values().stream().map(data -> new SimpleEntry<>(data.getTypeValidator(this.tools.elements, this.tools.types), data)).collect(Collectors.toList());
 		}
 		
 		public DataHandlerParameters getDataType(Element field)
@@ -89,7 +85,7 @@ public class DataHandlerParameters
 			DataProperties customData = field.getAnnotation(DataProperties.class);
 			if (customData == null)
 			{
-				Element elem = typeUtils.asElement(field.asType());
+				Element elem = this.tools.types.asElement(field.asType());
 				if (elem != null)
 					customData = elem.getAnnotation(DataProperties.class);
 			}
@@ -113,7 +109,7 @@ public class DataHandlerParameters
 			return properties.getValue("type")
 				.map(str ->
 				{
-					return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, dataTypeToHandler(str), properties, this);
+					return new DataHandlerParameters(this.tools, uniqueName, saveGetExpr, setExpr, type, dataTypeToHandler(str), properties);
 				})
 				.orElseGet(() ->
 				{
@@ -122,7 +118,7 @@ public class DataHandlerParameters
 					if (defaultHandler == SpecialDataHandler.CUSTOM)
 						return null;
 					
-					return new DataHandlerParameters(uniqueName, saveGetExpr, setExpr, type, defaultHandler, properties, this);
+					return new DataHandlerParameters(this.tools, uniqueName, saveGetExpr, setExpr, type, defaultHandler, properties);
 				});
 		}
 		

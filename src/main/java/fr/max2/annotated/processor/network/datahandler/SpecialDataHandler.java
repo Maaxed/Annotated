@@ -12,7 +12,6 @@ import javax.lang.model.util.Types;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum SpecialDataHandler implements IDataHandler
@@ -22,14 +21,14 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			WildcardType wildcardType = TypeHelper.asWildcardType(params.type);
+			WildcardType wildcardType = params.tools.typeHelper.asWildcardType(params.type);
 			if (wildcardType == null) throw incompatibleType("wildcard", params.type);
 			
 			TypeMirror extendsBound = wildcardType.getExtendsBound();
 			
 			if (extendsBound == null) throw new IncompatibleTypeException("The wildcard type '" + params.type + "' has no extends bound");
 			
-			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.properties).addInstructions(builder);
+			params.tools.handlers.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.properties).addInstructions(builder);
 		}
 
 		@Override
@@ -43,12 +42,12 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			TypeVariable wildcardType = TypeHelper.asVariableType(params.type);
+			TypeVariable wildcardType = params.tools.typeHelper.asVariableType(params.type);
 			if (wildcardType == null) throw incompatibleType("variable", params.type);
 			
 			TypeMirror extendsBound = wildcardType.getUpperBound();
 			
-			params.finder.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.properties).addInstructions(builder);
+			params.tools.handlers.getDataType(params.uniqueName, params.saveAccessExpr, params.setExpr, extendsBound, params.properties).addInstructions(builder);
 		}
 
 		@Override
@@ -62,14 +61,14 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			IntersectionType intersectionType = TypeHelper.asIntersectionType(params.type);
+			IntersectionType intersectionType = params.tools.typeHelper.asIntersectionType(params.type);
 			if (intersectionType == null) throw incompatibleType("intersection", params.type);
 			
 			boolean success = false;
 			
 			for (TypeMirror type : intersectionType.getBounds())
 			{
-				DataHandlerParameters newParams = params.finder.getDataTypeOrNull(params.uniqueName, params.saveAccessExpr, params.setExpr, type, params.properties);
+				DataHandlerParameters newParams = params.tools.handlers.getDataTypeOrNull(params.uniqueName, params.saveAccessExpr, params.setExpr, type, params.properties);
 				if (newParams != null)
 				{
 					newParams.addInstructions(builder);
@@ -94,7 +93,7 @@ public enum SpecialDataHandler implements IDataHandler
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			DataHandlerParameters handler = new DataHandlerParameters(params.uniqueName, params.saveAccessExpr, params.setExpr, params.type, params.finder.getDefaultDataType(params.type), params.properties, params.finder);
+			DataHandlerParameters handler = new DataHandlerParameters(params.tools, params.uniqueName, params.saveAccessExpr, params.setExpr, params.type, params.tools.handlers.getDefaultDataType(params.type), params.properties);
 			handler.addInstructions(builder);
 		}
 	},

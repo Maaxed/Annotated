@@ -9,7 +9,6 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum RegistryEntryDataHandler implements INamedDataHandler
@@ -19,7 +18,7 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
-		DeclaredType collectionType = TypeHelper.refineTo(params.type, params.finder.elemUtils.getTypeElement(this.getTypeName()).asType(), params.finder.typeUtils);
+		DeclaredType collectionType = params.tools.typeHelper.refineTo(params.type, params.tools.elements.getTypeElement(this.getTypeName()).asType());
 		if (collectionType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror contentType = collectionType.getTypeArguments().get(0);
@@ -27,16 +26,16 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 		{
 			throw new IncompatibleTypeException("The registry type is invalid");
 		}
-		Element typeElement = params.finder.typeUtils.asElement(contentType);
+		Element typeElement = params.tools.types.asElement(contentType);
 		Name typeName = typeElement.getSimpleName();
 		
-		String registryName = getForgeRegistry(TypeHelper.asTypeElement(typeElement));
+		String registryName = getForgeRegistry(params.tools.typeHelper.asTypeElement(typeElement));
 		String forgeRegistry;
 		
 		if (registryName == null)
 		{
 			forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)";
-			builder.addImport(TypeHelper.asTypeElement(typeElement).getQualifiedName());
+			builder.addImport(params.tools.typeHelper.asTypeElement(typeElement).getQualifiedName());
 			builder.addImport("net.minecraftforge.registries.RegistryManager");
 		}
 		else

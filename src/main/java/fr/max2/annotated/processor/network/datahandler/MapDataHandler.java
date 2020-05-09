@@ -8,8 +8,6 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.NamingUtils;
-import fr.max2.annotated.processor.utils.TypeHelper;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum MapDataHandler implements INamedDataHandler
@@ -19,41 +17,41 @@ public enum MapDataHandler implements INamedDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
-		TypeMirror mapType = params.finder.elemUtils.getTypeElement(this.getTypeName()).asType();
-		DeclaredType refinedType = TypeHelper.refineTo(params.type, mapType, params.finder.typeUtils);
+		TypeMirror mapType = params.tools.elements.getTypeElement(this.getTypeName()).asType();
+		DeclaredType refinedType = params.tools.typeHelper.refineTo(params.type, mapType);
 		if (refinedType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
 		TypeMirror keyFullType = refinedType.getTypeArguments().get(0);
 		TypeMirror valueFullType = refinedType.getTypeArguments().get(1);
-		TypeMirror keyType = TypeHelper.shallowErasure(keyFullType, params.finder.elemUtils);
-		TypeMirror valueType = TypeHelper.shallowErasure(valueFullType, params.finder.elemUtils);
-		DeclaredType revisedType = TypeHelper.replaceTypeArgument(TypeHelper.replaceTypeArgument((DeclaredType)params.type, keyFullType, keyType, params.finder.typeUtils), valueFullType, valueType, params.finder.typeUtils);
+		TypeMirror keyType = params.tools.typeHelper.shallowErasure(keyFullType);
+		TypeMirror valueType = params.tools.typeHelper.shallowErasure(valueFullType);
+		DeclaredType revisedType = params.tools.typeHelper.replaceTypeArgument(params.tools.typeHelper.replaceTypeArgument((DeclaredType)params.type, keyFullType, keyType), valueFullType, valueType);
 		TypeMirror implType = params.type;
 		
 		String implName = params.properties.getValueOrEmpty("impl");
 		if (implName.isEmpty())
-			implName = defaultImplementation(TypeHelper.asTypeElement(params.finder.typeUtils.asElement(params.type)));
+			implName = defaultImplementation(params.tools.typeHelper.asTypeElement(params.tools.types.asElement(params.type)));
 		
 		if (!implName.isEmpty())
 		{
-			implType = params.finder.elemUtils.getTypeElement(implName).asType();
+			implType = params.tools.elements.getTypeElement(implName).asType();
 			if (implType == null)
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + this.getTypeName());
 			
-			DeclaredType refinedImpl = TypeHelper.refineTo(implType, mapType, params.finder.typeUtils);
+			DeclaredType refinedImpl = params.tools.typeHelper.refineTo(implType, mapType);
 			if (refinedImpl == null)
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of " + this.getTypeName());
 			
 			TypeMirror implKeyFullType = refinedImpl.getTypeArguments().get(0);
 			TypeMirror implValueFullType = refinedImpl.getTypeArguments().get(1);
-			DeclaredType revisedImplType = TypeHelper.replaceTypeArgument(TypeHelper.replaceTypeArgument((DeclaredType)implType, implKeyFullType, keyType, params.finder.typeUtils), implValueFullType, valueType, params.finder.typeUtils);
-			if (!params.finder.typeUtils.isAssignable(revisedImplType, revisedType))
+			DeclaredType revisedImplType = params.tools.typeHelper.replaceTypeArgument(params.tools.typeHelper.replaceTypeArgument((DeclaredType)implType, implKeyFullType, keyType), implValueFullType, valueType);
+			if (!params.tools.types.isAssignable(revisedImplType, revisedType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + params.type + "'");
 			
 			builder.addImport(implName);
 		}
 		
-		DataHandlerUtils.requireDefaultConstructor(params.finder.typeUtils, implType);
+		DataHandlerUtils.requireDefaultConstructor(params.tools.types, implType);
 		
 		String keyVarName = params.uniqueName + "Key";
 		String keyVarTmpName = params.uniqueName + "KeyTmp";
@@ -63,26 +61,26 @@ public enum MapDataHandler implements INamedDataHandler
 		String indexVarName = params.uniqueName + "Index";
 		
 		builder.addImport(this.getTypeName());
-		TypeHelper.provideTypeImports(keyType, builder::addImport);
-		TypeHelper.provideTypeImports(valueType, builder::addImport);
+		params.tools.typeHelper.provideTypeImports(keyType, builder::addImport);
+		params.tools.typeHelper.provideTypeImports(valueType, builder::addImport);
 		
 		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))
-			.add("for (Map.Entry<" + NamingUtils.computeFullName(keyFullType) + ", " + NamingUtils.computeFullName(valueFullType) + "> " + entryVarName + " : " + params.saveAccessExpr + ".entrySet())")
+			.add("for (Map.Entry<" + params.tools.naming.computeFullName(keyFullType) + ", " + params.tools.naming.computeFullName(valueFullType) + "> " + entryVarName + " : " + params.saveAccessExpr + ".entrySet())")
 			.add("{");
 		
 		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataHandlerUtils.readBuffer("Int") + ";",
-			NamingUtils.computeFullName(revisedType) + " " + params.uniqueName + " = new " + NamingUtils.computeSimplifiedName(implType) + "();",
+			params.tools.naming.computeFullName(revisedType) + " " + params.uniqueName + " = new " + params.tools.naming.computeSimplifiedName(implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
 
-		DataHandlerParameters keyHandler = params.finder.getDataType(keyVarName, entryVarName + ".getKey()", (loadInst, key) -> loadInst.add(NamingUtils.computeFullName(keyType) + " " + keyVarTmpName + " = " + key + ";"), keyType, params.properties.getSubPropertiesOrEmpty("keys"));
+		DataHandlerParameters keyHandler = params.tools.handlers.getDataType(keyVarName, entryVarName + ".getKey()", (loadInst, key) -> loadInst.add(params.tools.naming.computeFullName(keyType) + " " + keyVarTmpName + " = " + key + ";"), keyType, params.properties.getSubPropertiesOrEmpty("keys"));
 		keyHandler.addInstructions(1, builder);
 		
-		DataHandlerParameters valueHandler = params.finder.getDataType(valueVarName, entryVarName + ".getValue()", (loadInst, value) -> loadInst.add(params.uniqueName + ".put(" + keyVarTmpName + ", " + value + ");"), valueType, params.properties.getSubPropertiesOrEmpty("values"));
+		DataHandlerParameters valueHandler = params.tools.handlers.getDataType(valueVarName, entryVarName + ".getValue()", (loadInst, value) -> loadInst.add(params.uniqueName + ".put(" + keyVarTmpName + ", " + value + ");"), valueType, params.properties.getSubPropertiesOrEmpty("values"));
 		valueHandler.addInstructions(1, builder);
 		
 		builder.encoder().add("}");
