@@ -21,6 +21,7 @@ import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.processor.network.PacketProcessor;
 import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.exceptions.IOConsumer;
 import fr.max2.annotated.processor.utils.exceptions.TemplateException;
 
 public class TemplateHelper
@@ -50,11 +51,37 @@ public class TemplateHelper
 		return false;
 	}
 	
+	public boolean readWithLog(String templateFile, Map<String, String> replacements, IOConsumer<String> lines, Element originatingElement, Optional<? extends AnnotationMirror> annotation)
+	{
+		try
+		{
+			readTemplate(templateFile, replacements, lines);
+			return true;
+		}
+		catch (IOException e)
+		{
+			tools.log(Kind.ERROR, "An IOException occured during the reading of the template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
+		}
+		catch (Exception e)
+		{
+			tools.log(Kind.ERROR, "An unexpected exception occured during the reading of the template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
+		}
+		return false;
+	}
+	
 	public static void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException
 	{
 		JavaFileObject file = filer.createSourceFile(className, originatingElements);
-		try (Writer writer = file.openWriter();
-			 InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile);
+		try (Writer writer = file.openWriter())
+		{
+			readTemplate(templateFile, replacements, writer::write);
+		}
+		
+	}
+	
+	public static void readTemplate(String templateFile, Map<String, String> replacements, IOConsumer<String> lines) throws IOException
+	{
+		try (InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile);
 			 Reader streamReader = new InputStreamReader(fileStream);
 			 BufferedReader reader = new BufferedReader(streamReader))
 		{
@@ -65,7 +92,7 @@ public class TemplateHelper
 			{
 				String newLine = mapKeys(controls, line + System.lineSeparator(), i, replacements);
 				
-				writer.write(newLine);
+				lines.accept(newLine);
 				i++;
 			}
 			

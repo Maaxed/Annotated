@@ -26,4 +26,10 @@ public class ClassName
 	{
 		return this.packageName;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return this.packageName + ":" + this.shortName;
+	}
 }

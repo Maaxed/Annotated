@@ -10,15 +10,15 @@ import java.lang.annotation.Target;
 public @interface GenerateChannel
 {
 	/**
-	 * Provides the name of the channel to generate
-	 * If the string is empty, the name of the channel will automatically be generated from the modid and the name of the class
+	 * Provides the name of the channel to generate.
+	 * If the string is empty, the name of the channel will automatically be generated from the modid and the name of the class.
 	 * @return the name of the channel to generate or an empty string
 	 */
 	String channelName() default "";
+	
 	/**
 	 * Provides the version of the channel to generate
 	 * @return the version of the channel
 	 */
 	String protocolVersion();
-	// TODO [v2.0] delegated packet network
 }

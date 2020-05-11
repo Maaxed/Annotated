@@ -14,7 +14,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
-import fr.max2.annotated.api.processor.network.GenerateChannel;
+import fr.max2.annotated.processor.network.model.ChannelProvider;
+import fr.max2.annotated.processor.network.model.SimpleImportClassBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.EnumSide;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -23,21 +24,28 @@ public class NetworkProcessingUnit
 {
 	private final ProcessingTools tools;
 	private final TypeElement enclosingClass;
+	private final ChannelProvider channelProvider;
+	private final Optional<? extends AnnotationMirror> annotation;
+	private final @Nullable String modId;
+	private final List<PacketProcessingUnit> packets = new ArrayList<>();
 	public final ClassName enclosingClassName;
 	public final ClassName networkClassName;
-	private Optional<? extends AnnotationMirror> annotation;
-	@Nullable
-	private final String modId;
-	private final List<PacketProcessingUnit> packets = new ArrayList<>();
+	private boolean hasErrors = false;
 	
-	public NetworkProcessingUnit(ProcessingTools tools, TypeElement enclosingClass, String modId)
+	public NetworkProcessingUnit(ProcessingTools tools, TypeElement enclosingClass, @Nullable ChannelProvider channelProvider, String modId)
 	{
 		this.tools = tools;
 		this.enclosingClass = enclosingClass;
+		this.channelProvider = channelProvider;
 		this.modId = modId;
 		this.enclosingClassName = tools.naming.buildClassName(enclosingClass);
 		this.networkClassName = new ClassName(this.enclosingClassName.packageName(), this.enclosingClassName.shortName().replace('.', '_') + "Network");
-		this.annotation = tools.elements.getAnnotationMirror(enclosingClass, GenerateChannel.class.getCanonicalName());
+		this.annotation = channelProvider == null ? Optional.empty() : tools.elements.getAnnotationMirror(enclosingClass, channelProvider.getAnnotationClass().getCanonicalName());
+	}
+	
+	public boolean hasErrors()
+	{
+		return this.hasErrors;
 	}
 	
 	public void addPacket(ExecutableElement method, EnumSide side)
@@ -56,7 +64,8 @@ public class NetworkProcessingUnit
 		// Generate the network class
 		try
         {
-			this.writeNetwork();
+			if (this.writeNetwork())
+				return;
 	    }
 	    catch (IOException e)
 	    {
@@ -66,46 +75,34 @@ public class NetworkProcessingUnit
 		{
 			this.tools.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.networkClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.enclosingClass, this.annotation);
 		}
+		this.hasErrors = true;
 	}
 	
 	private boolean writeNetwork() throws IOException
 	{
-		GenerateChannel generatorData = enclosingClass.getAnnotation(GenerateChannel.class);
-		
-		String channelName = generatorData.channelName();
-		if (!channelName.contains(":"))
-		{
-			if (this.modId == null)
-			{
-				this.tools.log(Kind.ERROR, "Couldn't find @Mod annotation in the package '" + this.enclosingClassName.packageName() + "'", this.enclosingClass, this.annotation);
-				return false;
-			}
-			if (channelName.isEmpty())
-				channelName = this.enclosingClassName.shortName().toLowerCase();
-			
-			channelName = this.modId + ":" + channelName;
-		}
-		
-		if (!channelName.toLowerCase().equals(channelName))
-		{
-			this.tools.log(Kind.WARNING, "The channel name '" + channelName + "' chould be in lower case, lower case is enforced", this.enclosingClass, this.annotation, "channelName");
-			channelName = channelName.toLowerCase();	
-		}
-
 		List<String> registerPackets = new ArrayList<>();
 		
 		for (int i = 0; i < this.packets.size(); i++)
 		{
-			registerPackets.add("\t\t" + this.packets.get(i).messageClassName.shortName() + ".registerTo(CHANNEL, " + i + ");");
+			PacketProcessingUnit packet = this.packets.get(i);
+			if (!packet.hasErrors()) // Don't include packets with errors in the network
+				registerPackets.add("\t\t" + packet.messageClassName.shortName() + ".registerTo(CHANNEL, index.getAndIncrement());");
 		}
+		
+		SimpleImportClassBuilder<?> imports = new SimpleImportClassBuilder<>(this.tools, this.networkClassName.packageName());
+		List<String> content = new ArrayList<>();
+		if (!this.channelProvider.getNetworkClassContent(this.tools, imports, content::add, this.enclosingClass, this.enclosingClassName, this.networkClassName, this.modId, this.annotation))
+			return false;
+		
+		String ls = System.lineSeparator();
 		
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", this.networkClassName.packageName());
+		replacements.put("imports", imports.imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		replacements.put("className", this.networkClassName.shortName());
-		replacements.put("channelName", channelName);
-		replacements.put("protocolVersion", generatorData.protocolVersion());
-		replacements.put("registerPackets", registerPackets.stream().collect(Collectors.joining(System.lineSeparator())));
-
+		replacements.put("registerPackets", registerPackets.stream().collect(Collectors.joining(ls)));
+		replacements.put("classContent", content.stream().map(l -> '\t' + l).collect(Collectors.joining()));
+		
 		return this.tools.templates.writeFileWithLog(this.networkClassName.qualifiedName(), "templates/TemplateNetwork.jvtp", replacements, this.enclosingClass, this.annotation);
 	}
 

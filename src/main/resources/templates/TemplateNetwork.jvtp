@@ -1,27 +1,18 @@
 package ${package};
 
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Generated;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
-
+${imports}
 @Generated("fr.max2.annotated.processor.network.PacketProcessor")
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class ${className}
 {
-	private static final String PROTOCOL_VERSION = "${protocolVersion}";
-	public static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
-			.named(new ResourceLocation("${channelName}"))
-			.clientAcceptedVersions(PROTOCOL_VERSION::equals)
-			.serverAcceptedVersions(PROTOCOL_VERSION::equals)
-			.networkProtocolVersion(() -> PROTOCOL_VERSION)
-			.simpleChannel();
-	
-	@SubscribeEvent
-	public static void registerPackets(FMLCommonSetupEvent event)
+${classContent}
+	private static void registerPackets(AtomicInteger index)
 	{
 ${registerPackets}
 	}

@@ -2,40 +2,18 @@ package fr.max2.annotated.processor.network.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
+import fr.max2.annotated.processor.utils.ProcessingTools;
 
-import fr.max2.annotated.processor.utils.ClassRef;
-
-public class SimplePacketBuilder implements IPacketBuilder
+public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder> implements IPacketBuilder
 {
-	public Set<String> imports = new TreeSet<>();
-	public List<String> fields = new ArrayList<>();
 	private SimpleFunctionBuilder saveFunction = new SimpleFunctionBuilder();
 	private SimpleFunctionBuilder loadFunction = new SimpleFunctionBuilder();
 	
-	private Elements elemUtils;
-	private CharSequence packageName;
-	
-	public SimplePacketBuilder(Elements elemUtils, CharSequence packageName)
+	public SimplePacketBuilder(ProcessingTools tools, String packageName)
 	{
-		this.elemUtils = elemUtils;
-		this.packageName = packageName;
-	}
-
-	@Override
-	public IPacketBuilder addImport(String className)
-	{
-		TypeElement type = elemUtils.getTypeElement(className);
-		if (className.startsWith(ClassRef.MAIN_PACKAGE) || !elemUtils.getPackageOf(type).getQualifiedName().contentEquals(packageName))
-		{
-			imports.add(className);
-		}
-		return this;
+		super(tools, packageName);
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public enum SerializableDataHandler implements INamedDataHandler
 {
-	NBT_SERIALISABLE(ClassRef.NBT_SERIALIZABLE_INTERFACE)
+	NBT_SERIALISABLE(ClassRef.NBT_SERIALIZABLE_INTERFACE.qualifiedName())
 	{
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
@@ -21,7 +21,7 @@ public enum SerializableDataHandler implements INamedDataHandler
 			
 			TypeMirror nbtType = serialisableType.getTypeArguments().get(0);
 			
-			params.tools.types.provideTypeImports(nbtType, builder::addImport);
+			params.tools.types.provideTypeImports(nbtType, builder);
 			
 			String dataVarName = params.uniqueName + "Data";
 			

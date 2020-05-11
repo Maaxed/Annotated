@@ -3,9 +3,10 @@ package fr.max2.annotated.processor.network;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -20,8 +21,10 @@ import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.api.processor.network.ClientPacket;
+import fr.max2.annotated.api.processor.network.DelegateChannel;
 import fr.max2.annotated.api.processor.network.GenerateChannel;
 import fr.max2.annotated.api.processor.network.ServerPacket;
+import fr.max2.annotated.processor.network.model.ChannelProvider;
 import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.EnumSide;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -29,21 +32,17 @@ import fr.max2.annotated.processor.utils.ProcessingTools;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PacketProcessor extends AbstractProcessor
 {
-	private Set<String> supportedAnnotations;
+	private static final Set<String> SUPPORTED_ANNOTATIONS = Collections.unmodifiableSet(Stream.of(
+			GenerateChannel.class, DelegateChannel.class,
+			ClientPacket.class, ServerPacket.class
+		).map(Class::getCanonicalName).collect(Collectors.toSet()));
+	
 	private ProcessingTools tools;
 	
 	@Override
 	public Set<String> getSupportedAnnotationTypes()
 	{
-		if (supportedAnnotations == null)
-		{
-	        Set<String> set = new HashSet<>();
-	        set.add(GenerateChannel.class.getCanonicalName());
-	        set.add(ClientPacket.class.getCanonicalName());
-	        set.add(ServerPacket.class.getCanonicalName());
-			supportedAnnotations = Collections.unmodifiableSet(set);
-		}
-        return supportedAnnotations;
+        return SUPPORTED_ANNOTATIONS;
 	}
 	
 	@Override
@@ -78,9 +77,12 @@ public class PacketProcessor extends AbstractProcessor
 	{
 		Map<TypeElement, NetworkProcessingUnit> networks = new HashMap<>();
 		
-		for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(GenerateChannel.class)))
+		for(ChannelProvider provider : ChannelProvider.values())
 		{
-			networks.put(elem, new NetworkProcessingUnit(this.tools, elem, findModAnnotationId(elem)));
+			for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(provider.getAnnotationClass())))
+			{
+				networks.put(elem, new NetworkProcessingUnit(this.tools, elem, provider, findModAnnotationId(elem)));
+			}
 		}
 		
 		for (EnumSide side : EnumSide.values())
@@ -107,7 +109,7 @@ public class PacketProcessor extends AbstractProcessor
 					continue; // Skip this packet
 				}
 				
-				NetworkProcessingUnit networkUnit = networks.computeIfAbsent(enclosingClass, clazz -> new NetworkProcessingUnit(this.tools, clazz, findModAnnotationId(clazz)));
+				NetworkProcessingUnit networkUnit = networks.computeIfAbsent(enclosingClass, clazz -> new NetworkProcessingUnit(this.tools, clazz, null, findModAnnotationId(clazz)));
 				networkUnit.addPacket(method, side);
 			}
 		}
@@ -142,7 +144,7 @@ public class PacketProcessor extends AbstractProcessor
 	
 	private String extractModId(Element elem)
 	{
-		return this.tools.elements.getAnnotationValue(elem, ClassRef.FORGE_MOD_ANNOTATION, "value")
+		return this.tools.elements.getAnnotationValue(elem, ClassRef.FORGE_MOD_ANNOTATION.qualifiedName(), "value")
 						 .map(an -> an.getValue().toString())
 						 .orElse(null);
 	}

@@ -17,7 +17,8 @@ public enum MapDataHandler implements INamedDataHandler
 	@Override
 	public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 	{
-		TypeMirror mapType = params.tools.elements.getTypeElement(this.getTypeName()).asType();
+		TypeElement mapElem = params.tools.elements.getTypeElement(this.getTypeName());
+		TypeMirror mapType = mapElem.asType();
 		DeclaredType refinedType = params.tools.types.refineTo(params.type, mapType);
 		if (refinedType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + this.getTypeName());
 		
@@ -34,10 +35,11 @@ public enum MapDataHandler implements INamedDataHandler
 		
 		if (!implName.isEmpty())
 		{
-			implType = params.tools.elements.getTypeElement(implName).asType();
-			if (implType == null)
+			TypeElement elem = params.tools.elements.getTypeElement(implName);
+			if (elem == null)
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + this.getTypeName());
 			
+			implType = elem.asType();
 			DeclaredType refinedImpl = params.tools.types.refineTo(implType, mapType);
 			if (refinedImpl == null)
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of " + this.getTypeName());
@@ -48,7 +50,7 @@ public enum MapDataHandler implements INamedDataHandler
 			if (!params.tools.types.isAssignable(revisedImplType, revisedType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + params.type + "'");
 			
-			builder.addImport(implName);
+			builder.addImport(elem);
 		}
 		
 		DataHandlerUtils.requireDefaultConstructor(params.tools.types, implType);
@@ -60,9 +62,9 @@ public enum MapDataHandler implements INamedDataHandler
 		String lenghtVarName = params.uniqueName + "Length";
 		String indexVarName = params.uniqueName + "Index";
 		
-		builder.addImport(this.getTypeName());
-		params.tools.types.provideTypeImports(keyType, builder::addImport);
-		params.tools.types.provideTypeImports(valueType, builder::addImport);
+		builder.addImport(mapElem);
+		params.tools.types.provideTypeImports(keyType, builder);
+		params.tools.types.provideTypeImports(valueType, builder);
 		
 		builder.encoder()
 			.add(DataHandlerUtils.writeBuffer("Int", params.saveAccessExpr + ".size()"))

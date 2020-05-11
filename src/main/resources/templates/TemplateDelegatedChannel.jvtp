@@ -1,0 +1,7 @@
+public static final SimpleChannel CHANNEL = ${delegateClass}.CHANNEL;
+
+@SubscribeEvent
+public static void registerNetwork(FMLCommonSetupEvent event)
+{
+	${delegateClass}.registerNetwork("${className}", ${className}::registerPackets);
+}

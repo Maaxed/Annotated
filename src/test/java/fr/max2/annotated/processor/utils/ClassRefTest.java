@@ -17,13 +17,13 @@ public class ClassRefTest
 	@Test
 	public void testValues()
 	{
-		assertEquals(NBTPacketHelper.class.getCanonicalName(), ClassRef.NBT_HELPER);
+		assertEquals(NBTPacketHelper.class.getCanonicalName(), ClassRef.NBT_HELPER.qualifiedName());
 		
-		assertEquals(INBTSerializable.class.getCanonicalName(), ClassRef.NBT_SERIALIZABLE_INTERFACE);
-		assertEquals(ServerPlayerEntity.class.getCanonicalName(), ClassRef.SERVER_PLAYER);
+		assertEquals(INBTSerializable.class.getCanonicalName(), ClassRef.NBT_SERIALIZABLE_INTERFACE.qualifiedName());
+		assertEquals(ServerPlayerEntity.class.getCanonicalName(), ClassRef.SERVER_PLAYER.qualifiedName());
 
-		assertEquals(Mod.class.getCanonicalName(), ClassRef.FORGE_MOD_ANNOTATION);
-		assertEquals(NetworkEvent.Context.class.getCanonicalName(), ClassRef.FORGE_NETWORK_CONTEXT);
+		assertEquals(Mod.class.getCanonicalName(), ClassRef.FORGE_MOD_ANNOTATION.qualifiedName());
+		assertEquals(NetworkEvent.Context.class.getCanonicalName(), ClassRef.FORGE_NETWORK_CONTEXT.qualifiedName());
 	}
 	
 }

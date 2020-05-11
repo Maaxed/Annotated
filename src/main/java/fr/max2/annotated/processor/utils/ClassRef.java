@@ -8,11 +8,11 @@ public class ClassRef
 	
 	public static final String MAIN_PACKAGE = "fr.max2.annotated";
 	
-	public static final String NBT_HELPER = MAIN_PACKAGE + ".lib.network.NBTPacketHelper";
+	public static final ClassName NBT_HELPER = new ClassName(MAIN_PACKAGE + ".lib.network", "NBTPacketHelper");
 	
-	public static final String NBT_SERIALIZABLE_INTERFACE = "net.minecraftforge.common.util.INBTSerializable";
-	public static final String SERVER_PLAYER = "net.minecraft.entity.player.ServerPlayerEntity";
+	public static final ClassName NBT_SERIALIZABLE_INTERFACE = new ClassName("net.minecraftforge.common.util", "INBTSerializable");
+	public static final ClassName SERVER_PLAYER = new ClassName("net.minecraft.entity.player", "ServerPlayerEntity");
 
-	public static final String FORGE_MOD_ANNOTATION = "net.minecraftforge.fml.common.Mod";
-	public static final String FORGE_NETWORK_CONTEXT = "net.minecraftforge.fml.network.NetworkEvent.Context";
+	public static final ClassName FORGE_MOD_ANNOTATION = new ClassName("net.minecraftforge.fml.common", "Mod");
+	public static final ClassName FORGE_NETWORK_CONTEXT = new ClassName("net.minecraftforge.fml.network", "NetworkEvent.Context");
 }

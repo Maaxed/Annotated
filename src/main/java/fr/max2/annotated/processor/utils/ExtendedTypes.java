@@ -25,6 +25,8 @@ import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Types;
 
+import fr.max2.annotated.processor.network.model.IImportClassBuilder;
+
 public class ExtendedTypes implements Types
 {
 	private final ProcessingTools tools;
@@ -189,18 +191,18 @@ public class ExtendedTypes implements Types
 		}
 	};
 	
-	public void provideTypeImports(TypeMirror type, Consumer<String> imports)
+	public void provideTypeImports(TypeMirror type, IImportClassBuilder<?> imports)
 	{
 		TypeImporter.INSTANCE.visit(type, imports);
 	}
 	
-	private enum TypeImporter implements DefaultTypeVisitor<Void, Consumer<String>>, DefaultElementVisitor<Void, Consumer<String>>
+	private enum TypeImporter implements DefaultTypeVisitor<Void, IImportClassBuilder<?>>, DefaultElementVisitor<Void, IImportClassBuilder<?>>
 	{
 		INSTANCE;
 		
 		// TypeVisitor
 		@Override
-		public Void visit(TypeMirror t, Consumer<String> imports)
+		public Void visit(TypeMirror t, IImportClassBuilder<?> imports)
 		{
 			return imports == null ? this.visit(t) : t.accept(this, imports);
 		}
@@ -212,14 +214,14 @@ public class ExtendedTypes implements Types
 		}
 		
 		@Override
-		public Void visitArray(ArrayType t, Consumer<String> imports)
+		public Void visitArray(ArrayType t, IImportClassBuilder<?> imports)
 		{
 			this.visit(t.getComponentType(), imports);
 			return null;
 		}
 		
 		@Override
-		public Void visitDeclared(DeclaredType t, Consumer<String> imports)
+		public Void visitDeclared(DeclaredType t, IImportClassBuilder<?> imports)
 		{
 			this.visit(t.asElement(), imports);
 			
@@ -231,7 +233,7 @@ public class ExtendedTypes implements Types
 		}
 		
 		@Override
-		public Void visitWildcard(WildcardType t, Consumer<String> imports)
+		public Void visitWildcard(WildcardType t, IImportClassBuilder<?> imports)
 		{
 			TypeMirror extendsBound = t.getExtendsBound();
 			TypeMirror superBound = t.getSuperBound();
@@ -242,7 +244,7 @@ public class ExtendedTypes implements Types
 		}
 		
 		@Override
-		public Void visitUnion(UnionType t, Consumer<String> imports)
+		public Void visitUnion(UnionType t, IImportClassBuilder<?> imports)
 		{
 			for (TypeMirror subType : t.getAlternatives())
 			{
@@ -252,7 +254,7 @@ public class ExtendedTypes implements Types
 		}
 		
 		@Override
-		public Void visitIntersection(IntersectionType t, Consumer<String> imports)
+		public Void visitIntersection(IntersectionType t, IImportClassBuilder<?> imports)
 		{
 			for (TypeMirror subType : t.getBounds())
 			{
@@ -262,14 +264,14 @@ public class ExtendedTypes implements Types
 		}
 		
 		@Override
-		public Void visitDefault(TypeMirror t, Consumer<String> imports)
+		public Void visitDefault(TypeMirror t, IImportClassBuilder<?> imports)
 		{
 			return null;
 		}
 		
 		// ElementVisitor
 		@Override
-		public Void visit(Element e, Consumer<String> imports)
+		public Void visit(Element e, IImportClassBuilder<?> imports)
 		{
 			return imports == null ? this.visit(e) : e.accept(this, imports);
 		}
@@ -281,18 +283,14 @@ public class ExtendedTypes implements Types
 		}
 		
 		@Override
-		public Void visitType(TypeElement e, Consumer<String> imports)
+		public Void visitType(TypeElement e, IImportClassBuilder<?> imports)
 		{
-			String name = e.getQualifiedName().toString();
-			if (!name.startsWith("java.lang"))
-			{
-				imports.accept(name);
-			}
+			imports.addImport(e);
 			return null;
 		}
 		
 		@Override
-		public Void visitDefault(Element e, Consumer<String> imports)
+		public Void visitDefault(Element e, IImportClassBuilder<?> imports)
 		{
 			return null;
 		}

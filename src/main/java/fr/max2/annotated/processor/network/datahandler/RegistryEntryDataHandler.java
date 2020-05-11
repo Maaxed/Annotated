@@ -1,6 +1,5 @@
 package fr.max2.annotated.processor.network.datahandler;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -26,16 +25,16 @@ public enum RegistryEntryDataHandler implements INamedDataHandler
 		{
 			throw new IncompatibleTypeException("The registry type is invalid");
 		}
-		Element typeElement = params.tools.types.asElement(contentType);
+		TypeElement typeElement = params.tools.elements.asTypeElement(params.tools.types.asElement(contentType));
 		Name typeName = typeElement.getSimpleName();
 		
-		String registryName = getForgeRegistry(params.tools.elements.asTypeElement(typeElement));
+		String registryName = getForgeRegistry(typeElement);
 		String forgeRegistry;
 		
 		if (registryName == null)
 		{
 			forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)";
-			builder.addImport(params.tools.elements.asTypeElement(typeElement).getQualifiedName());
+			builder.addImport(typeElement);
 			builder.addImport("net.minecraftforge.registries.RegistryManager");
 		}
 		else

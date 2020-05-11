@@ -28,8 +28,9 @@ public class PacketProcessingUnit
 	private final NetworkProcessingUnit network;
 	private final ExecutableElement method;
 	private final EnumSide side;
-	private Optional<? extends AnnotationMirror> annotation;
+	private final Optional<? extends AnnotationMirror> annotation;
 	public final ClassName messageClassName;
+	private boolean hasErrors = false;
 
 	public PacketProcessingUnit(ProcessingTools tools, NetworkProcessingUnit context, ExecutableElement packetMethod, EnumSide side)
 	{
@@ -57,11 +58,17 @@ public class PacketProcessingUnit
 		this.messageClassName = new ClassName(packageName, className);
 	}
 	
-	public boolean processPacket()
+	public boolean hasErrors()
+	{
+		return this.hasErrors;
+	}
+	
+	public void processPacket()
 	{
 		try
         {
-			return this.writePacket();
+			if (this.writePacket())
+				return;
         }
         catch (IOException e)
         {
@@ -71,7 +78,7 @@ public class PacketProcessingUnit
 		{
 			this.tools.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.method, this.annotation);
 		}
-		return false;
+		this.hasErrors = true;
 	}
 	
 	private boolean writePacket() throws IOException
@@ -86,9 +93,9 @@ public class PacketProcessingUnit
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
 		List<DataHandlerParameters> dataHandlers = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
 		
-		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools.elements, messageClassName.packageName());
+		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools, messageClassName.packageName());
 		
-		messageParameters.forEach(f -> this.tools.types.provideTypeImports(f.asType(), builder::addImport));
+		messageParameters.forEach(f -> this.tools.types.provideTypeImports(f.asType(), builder));
 		
 		for (DataHandlerParameters handler : dataHandlers)
 		{
@@ -137,10 +144,10 @@ public class PacketProcessingUnit
 		TypeElement elem = this.tools.elements.asTypeElement(this.tools.types.asElement(type));
 		if (elem != null)
 		{
-			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT))
+			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT.qualifiedName()))
 				return Optional.of("ctx");
 			
-			if (elem.getQualifiedName().contentEquals(ClassRef.SERVER_PLAYER))
+			if (elem.getQualifiedName().contentEquals(ClassRef.SERVER_PLAYER.qualifiedName()))
 				return Optional.of("ctx.getSender()");
 		}
 		
