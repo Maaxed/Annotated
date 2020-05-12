@@ -1,14 +1,15 @@
 package ${package};
 
+import java.util.function.Supplier;
 import javax.annotation.Generated;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 ${if clientPacket}
 import net.minecraft.entity.player.ServerPlayerEntity;
 ${end}
-import fr.max2.annotated.lib.network.${receiveSide}MessageHandler;
 ${imports}
 @Generated("fr.max2.annotated.processor.network.PacketProcessor")
 public class ${className}
@@ -39,14 +40,23 @@ ${decode}
 		return msg;
 	}
 	
-	private static void handle(${className} msg, NetworkEvent.Context ctx)
+	private static void handle(${className} msg, Supplier<NetworkEvent.Context> ctxSup)
 	{
-		${function}(${parameters});
+		NetworkEvent.Context ctx = ctxSup.get();
+		if (ctx.getDirection().getReceptionSide() == LogicalSide.${receiveSide})
+		{
+			${if sheduled}
+			ctx.enqueueWork(() -> ${function}(${parameters}));
+			${else}
+			${function}(${parameters});
+			${end}
+			ctx.setPacketHandled(true);
+		}
 	}
 	
 	static void registerTo(SimpleChannel channel, int index)
 	{
-		channel.registerMessage(index, ${className}.class, ${className}::encode, ${className}::decode, ${receiveSide}MessageHandler.buildHandler(${sheduled}, ${className}::handle));
+		channel.registerMessage(index, ${className}.class, ${className}::encode, ${className}::decode, ${className}::handle);
 	}
 	
 	${if clientPacket}public${else}private${end} static void send(PacketDistributor.PacketTarget target${if allFields}, ${end}${allFields})

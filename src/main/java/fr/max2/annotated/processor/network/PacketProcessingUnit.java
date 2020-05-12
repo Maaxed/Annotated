@@ -133,7 +133,7 @@ public class PacketProcessingUnit
 		replacements.put("imports", builder.imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		replacements.put("serverPacket", Boolean.toString(this.side.isServer()));
 		replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
-		replacements.put("receiveSide", this.side.getSimpleName());
+		replacements.put("receiveSide", this.side.getSimpleName().toUpperCase());
 		replacements.put("sheduled", this.tools.elements.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
 		
 		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);

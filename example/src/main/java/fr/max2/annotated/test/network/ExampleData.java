@@ -12,7 +12,7 @@ import net.minecraft.util.text.StringTextComponent;
 @DelegateChannel("fr.max2.annotated.test.network.TestData")
 public class ExampleData
 {
-	@ServerPacket(className = "ExampleMessage")
+	@ServerPacket(className = "ExampleMessage", runInMainThread = false)
 	public static void doExampleData(int someNumber, ItemStack aStack, String[] aStringArray, ArrayList<UUID> collectionOfIds, ServerPlayerEntity sender)
 	{
 		sender.sendMessage(new StringTextComponent("The number is " + someNumber));
