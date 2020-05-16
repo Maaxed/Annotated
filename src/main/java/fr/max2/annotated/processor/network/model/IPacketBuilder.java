@@ -4,6 +4,8 @@ public interface IPacketBuilder extends IImportClassBuilder<IPacketBuilder>
 {
 	// TODO [v2.1] IPacketBuilder addField(String field)
 	
+	IPacketBuilder require(String module);
+	
 	IFunctionBuilder encoder();
 	IFunctionBuilder decoder();
 }

@@ -2,135 +2,69 @@ package fr.max2.annotated.processor.network.datahandler;
 
 import java.util.function.Predicate;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 
 import fr.max2.annotated.processor.network.DataHandlerParameters;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
-import fr.max2.annotated.processor.utils.ClassRef;
+import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ExtendedElements;
 import fr.max2.annotated.processor.utils.ExtendedTypes;
 
 public enum NBTDataHandler implements INamedDataHandler
 {
-	END("End")
+	PRIMITIVE("NumberNBT")
 	{
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			//Just create a new TagEnd, doesn't need to be saved
-			params.setExpr.accept(builder.decoder(), "EndNBT.INSTANCE");
+			Element elem = params.tools.types.asElement(params.type);
+			String className = elem.getSimpleName().toString();
+			String primitive = className.substring(0, className.length() - 3);
+			DataHandlerUtils.addBufferInstructions(primitive, params.saveAccessExpr + ".get" + primitive + "()", (loadInst, value) -> params.setExpr.accept(loadInst, className + ".valueOf(" + value + ")"), builder);
+		}
+		
+		@Override
+		public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
+		{
+			TypeMirror thisType = this.getType(elemUtils, typeUtils);
+			TypeMirror stringType = typeUtils.erasure(elemUtils.getTypeElement("net.minecraft.nbt.StringNBT").asType());
+			return type -> (typeUtils.isAssignable(type, thisType) && !typeUtils.isSameType(type, thisType)) || typeUtils.isAssignable(type, stringType);
 		}
 	},
-	BYTE("Byte")
+	CONCRETE("INBT")
 	{
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			addBufferInstructions("Byte", params, builder);
+			addCustomInstructions("Concrete", params, builder);
+		}
+		
+		@Override
+		public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
+		{
+			TypeMirror thisType = this.getType(elemUtils, typeUtils);
+			return type ->
+			{
+				if (!typeUtils.isAssignable(type, thisType))
+					return false;
+				
+				Element elem = typeUtils.asElement(type);
+				if (elem == null)
+					return false;
+				
+				return ElementFilter.fieldsIn(elem.getEnclosedElements()).stream().anyMatch(var -> var.getModifiers().contains(Modifier.STATIC) && var.getSimpleName().contentEquals("TYPE"));
+			};
 		}
 	},
-	SHORT("Short")
+	ABSTRACT("INBT")
 	{
 		@Override
 		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
 		{
-			addBufferInstructions("Short", params, builder);
-		}
-	},
-	INT("Int")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addBufferInstructions("Int", params, builder);
-		}
-	},
-	LONG("Long")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addBufferInstructions("Long", params, builder);
-		}
-	},
-	FLOAT("Float")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addBufferInstructions("Float", params, builder);
-		}
-	},
-	DOUBLE("Double")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addBufferInstructions("Double", params, builder);
-		}
-	},
-	STRING("String")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addBufferInstructions("String", params, builder);
-		}
-	},
-	BYTE_ARRAY("ByteArray")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addCustomInstructions("ByteArray", params, builder);
-		}
-	},
-	INT_ARRAY("IntArray")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addCustomInstructions("IntArray", params, builder);
-		}
-	},
-	LONG_ARRAY("LongArray")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addCustomInstructions("LongArray", params, builder);
-		}
-	},
-	LIST("List")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addCustomInstructions("List", params, builder);
-		}
-	},
-	COMPOUND("Compound")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addCustomInstructions("Compound", params, builder);
-		}
-	},
-	PRIMITIVE("Number")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addCustomInstructions("Number", params, builder);
-		}
-	},
-	BASE("I")
-	{
-		@Override
-		public void addInstructions(DataHandlerParameters params, IPacketBuilder builder)
-		{
-			addCustomInstructions("Base", params, builder);
+			addCustomInstructions("Abstract", params, builder);
 		}
 	};
 	
@@ -138,26 +72,32 @@ public enum NBTDataHandler implements INamedDataHandler
 	
 	private NBTDataHandler(String nbtType)
 	{
-		this.className = "net.minecraft.nbt." + nbtType + "NBT";
+		this.className = "net.minecraft.nbt." + nbtType;
 	}
 	
-	private static void addBufferInstructions(String primitive, DataHandlerParameters params, IPacketBuilder builder)
+	private static void addCustomInstructions(String mode, DataHandlerParameters params, IPacketBuilder builder)
 	{
-		DataHandlerUtils.addBufferInstructions(primitive, params.saveAccessExpr + ".get" + primitive + "()", params.setExpr, builder);
-	}
-	
-	private static void addCustomInstructions(String type, DataHandlerParameters params, IPacketBuilder builder)
-	{
-		builder.encoder().add("NBTPacketHelper.writeNBT(buf, " + params.saveAccessExpr + ");");
-		params.setExpr.accept(builder.decoder(), "NBTPacketHelper.read" + type + "(buf)");
-		builder.addImport(ClassRef.NBT_HELPER);
-	}
-	
-	@Override
-	public Predicate<TypeMirror> getTypeValidator(ExtendedElements elemUtils, ExtendedTypes typeUtils)
-	{
-		TypeMirror thisType = this.getType(elemUtils, typeUtils);
-		return type -> typeUtils.isAssignable(type, thisType) && typeUtils.isAssignable(thisType, type);
+		ClassName typeName = params.tools.naming.buildClassName(params.tools.types.asElement(params.type));
+		builder.encoder().add("write" + mode + "NBT(buf, " + params.saveAccessExpr + ");");
+		params.setExpr.accept(builder.decoder(), "read" + mode + "NBT(buf, " + typeName.shortName() + "." + (mode.equals("Abstract") ? "class" : "TYPE") + ")");
+		
+		builder.addImport("net.minecraft.nbt.INBTType");
+		builder.addImport("net.minecraft.nbt.INBT");
+		builder.addImport("javax.annotation.Nonnull");
+		builder.addImport("io.netty.buffer.ByteBufOutputStream");
+		builder.addImport("io.netty.buffer.ByteBufInputStream");
+		builder.addImport("java.io.IOException");
+		builder.addImport("io.netty.handler.codec.EncoderException");
+		builder.addImport("net.minecraft.nbt.NBTSizeTracker");
+		builder.addImport("net.minecraft.crash.CrashReport");
+		builder.addImport("net.minecraft.crash.CrashReportCategory");
+		builder.addImport("net.minecraft.crash.ReportedException");
+		builder.require("templates/TemplateConcreteNBTHandlingModule.jvtp");
+		if (mode.equals("Abstract"))
+		{
+			builder.require("templates/TemplateAbstractNBTHandlingModule.jvtp");
+			builder.addImport("net.minecraft.nbt.NBTTypes");
+		}
 	}
 
 	@Override
@@ -169,7 +109,6 @@ public enum NBTDataHandler implements INamedDataHandler
 	@Override
 	public String toString()
 	{
-		return super.toString() + "NBT";
+		return super.toString() + "_NBT";
 	}
-	
 }

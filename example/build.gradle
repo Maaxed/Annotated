@@ -8,9 +8,8 @@ group = 'fr.max2.annotated.example'
 archivesBaseName = 'AnnotatedExample'
 
 dependencies {
-	implementation rootProject.sourceSets.lib.output
-	compileOnly rootProject.sourceSets.main.output
-	annotationProcessor rootProject.sourceSets.main.output
+	compileOnly rootProject
+	annotationProcessor rootProject
 }
 
 eclipse {

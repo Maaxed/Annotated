@@ -77,4 +77,6 @@ ${decode}
 		send(PacketDistributor.PLAYER.with(() -> player)${if allFields}, ${end}${messageParameters});
 	}
 	${end}
+	
+${modulesContent}
 }

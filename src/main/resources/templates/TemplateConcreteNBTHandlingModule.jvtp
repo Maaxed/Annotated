@@ -1,0 +1,27 @@
+public static void writeConcreteNBT(PacketBuffer buffer, @Nonnull INBT nbt)
+{
+	try (ByteBufOutputStream output = new ByteBufOutputStream(buffer))
+	{
+		nbt.write(output);
+	}
+	catch (IOException e)
+	{
+		throw new EncoderException(e);
+	}
+}
+
+@Nonnull
+public static <T extends INBT> T readConcreteNBT(PacketBuffer buffer, INBTType<T> type)
+{
+	try
+	{
+		return type.func_225649_b_(new ByteBufInputStream(buffer), 0, new NBTSizeTracker(2097112L));
+	}
+	catch (IOException e)
+	{
+		CrashReport crashReport = CrashReport.makeCrashReport(e, "Loading NBT data");
+		CrashReportCategory category = crashReport.makeCategory("NBT Tag");
+		category.addDetail("Tag type", type.func_225648_a_());
+		throw new ReportedException(crashReport);
+	}
+}

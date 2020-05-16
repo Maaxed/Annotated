@@ -1,19 +1,29 @@
 package fr.max2.annotated.processor.network.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import fr.max2.annotated.processor.utils.ProcessingTools;
 
 public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder> implements IPacketBuilder
 {
+	public final Set<String> modules = new HashSet<>();
 	private SimpleFunctionBuilder saveFunction = new SimpleFunctionBuilder();
 	private SimpleFunctionBuilder loadFunction = new SimpleFunctionBuilder();
 	
 	public SimplePacketBuilder(ProcessingTools tools, String packageName)
 	{
 		super(tools, packageName);
+	}
+
+	@Override
+	public IPacketBuilder require(String module)
+	{
+		this.modules.add(module);
+		return this;
 	}
 
 	@Override

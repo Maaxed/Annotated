@@ -17,8 +17,10 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.LongArrayNBT;
+import net.minecraft.nbt.LongNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -90,7 +92,7 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void otherMinecraftObjets(ItemStack myStack, CompoundNBT myTags, ListNBT nyTagList, LongArrayNBT myLongArray, BlockPos pos, ResourceLocation loc, FluidStack fluid, ITextComponent text, BlockRayTraceResult rayResult)
+	public static void otherMinecraftObjets(ItemStack myStack, CompoundNBT myTags, ListNBT nyTagList, LongNBT myLong, StringNBT myString, INBT anyNBT, BlockPos pos, ResourceLocation loc, FluidStack fluid, ITextComponent text, BlockRayTraceResult rayResult)
 	{
 		
 	}
@@ -152,7 +154,7 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void withCustomData(@DataProperties("type=INT") Integer myCustomInt, @DataProperties("type=NBT_LIST") ListNBT list1, @DataProperties("type=COLLECTION") ListNBT list2)
+	public static void withCustomData(@DataProperties("type=INT") Integer myCustomInt, @DataProperties("type=NBT_CONCRETE") ListNBT list1, @DataProperties("type=COLLECTION") ListNBT list2)
 	{
 		
 	}

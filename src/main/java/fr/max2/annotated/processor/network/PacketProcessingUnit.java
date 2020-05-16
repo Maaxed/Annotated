@@ -1,6 +1,7 @@
 package fr.max2.annotated.processor.network;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +136,16 @@ public class PacketProcessingUnit
 		replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
 		replacements.put("receiveSide", this.side.getSimpleName().toUpperCase());
 		replacements.put("sheduled", this.tools.elements.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
+		replacements.put("modulesContent", builder.modules.stream().map(this::readModule).flatMap(List::stream).map(l -> '\t' + l).collect(Collectors.joining()));
 		
 		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);
+	}
+	
+	private List<String> readModule(String module)
+	{
+		List<String> lines = new ArrayList<>();
+		this.tools.templates.readWithLog(module, new HashMap<>(), lines::add, this.method, this.annotation);
+		return lines;
 	}
 	
 	private Optional<String> specialValue(TypeMirror type)

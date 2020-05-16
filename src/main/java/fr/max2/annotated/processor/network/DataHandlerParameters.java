@@ -174,21 +174,9 @@ public class DataHandlerParameters
 		TYPE_TO_HANDLER.put(DataType.REGISTRY_ENTRY, RegistryEntryDataHandler.INSTANCE);
 		TYPE_TO_HANDLER.put(DataType.NBT_SERIALIZABLE, SerializableDataHandler.NBT_SERIALISABLE);
 		
-		TYPE_TO_HANDLER.put(DataType.NBT_END, NBTDataHandler.END);
-		TYPE_TO_HANDLER.put(DataType.NBT_BYTE, NBTDataHandler.BYTE);
-		TYPE_TO_HANDLER.put(DataType.NBT_SHORT, NBTDataHandler.SHORT);
-		TYPE_TO_HANDLER.put(DataType.NBT_INT, NBTDataHandler.INT);
-		TYPE_TO_HANDLER.put(DataType.NBT_LONG, NBTDataHandler.LONG);
-		TYPE_TO_HANDLER.put(DataType.NBT_FLOAT, NBTDataHandler.FLOAT);
-		TYPE_TO_HANDLER.put(DataType.NBT_DOUBLE, NBTDataHandler.DOUBLE);
-		TYPE_TO_HANDLER.put(DataType.NBT_STRING, NBTDataHandler.STRING);
-		TYPE_TO_HANDLER.put(DataType.NBT_BYTE_ARRAY, NBTDataHandler.BYTE_ARRAY);
-		TYPE_TO_HANDLER.put(DataType.NBT_INT_ARRAY, NBTDataHandler.INT_ARRAY);
-		TYPE_TO_HANDLER.put(DataType.NBT_LONG_ARRAY, NBTDataHandler.LONG_ARRAY);
-		TYPE_TO_HANDLER.put(DataType.NBT_LIST, NBTDataHandler.LIST);
-		TYPE_TO_HANDLER.put(DataType.NBT_COMPOUND, NBTDataHandler.COMPOUND);
-		TYPE_TO_HANDLER.put(DataType.NBT_ANY_NUMBER, NBTDataHandler.PRIMITIVE);
-		TYPE_TO_HANDLER.put(DataType.NBT_ANY, NBTDataHandler.BASE);
+		TYPE_TO_HANDLER.put(DataType.NBT_PRIMITIVE, NBTDataHandler.PRIMITIVE);
+		TYPE_TO_HANDLER.put(DataType.NBT_CONCRETE, NBTDataHandler.CONCRETE);
+		TYPE_TO_HANDLER.put(DataType.NBT_ABSTRACT, NBTDataHandler.ABSTRACT);
 		
 		
 		TYPE_TO_HANDLER.put(DataType.WILDCARD, SpecialDataHandler.WILDCRD);
@@ -200,11 +188,11 @@ public class DataHandlerParameters
 		
 		
 		HANDLER_PRIORITIES.prioritize(SimpleClassHandler.ITEM_STACK).over(SerializableDataHandler.NBT_SERIALISABLE);
-		
-		HANDLER_PRIORITIES.prioritize(NBTDataHandler.BYTE_ARRAY).over(CollectionDataHandler.INSTANCE);
-		HANDLER_PRIORITIES.prioritize(NBTDataHandler.INT_ARRAY).over(CollectionDataHandler.INSTANCE);
-		HANDLER_PRIORITIES.prioritize(NBTDataHandler.LONG_ARRAY).over(CollectionDataHandler.INSTANCE);
-		HANDLER_PRIORITIES.prioritize(NBTDataHandler.LIST).over(CollectionDataHandler.INSTANCE);
+
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.PRIMITIVE).over(NBTDataHandler.CONCRETE);
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.CONCRETE).over(NBTDataHandler.ABSTRACT);
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.CONCRETE).over(CollectionDataHandler.INSTANCE);
+		HANDLER_PRIORITIES.prioritize(NBTDataHandler.ABSTRACT).over(CollectionDataHandler.INSTANCE);
 	}
 	
 	private static IDataHandler dataTypeToHandler(String typeName)

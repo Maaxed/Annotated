@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import fr.max2.annotated.lib.network.NBTPacketHelper;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.common.Mod;
@@ -17,8 +16,6 @@ public class ClassRefTest
 	@Test
 	public void testValues()
 	{
-		assertEquals(NBTPacketHelper.class.getCanonicalName(), ClassRef.NBT_HELPER.qualifiedName());
-		
 		assertEquals(INBTSerializable.class.getCanonicalName(), ClassRef.NBT_SERIALIZABLE_INTERFACE.qualifiedName());
 		assertEquals(ServerPlayerEntity.class.getCanonicalName(), ClassRef.SERVER_PLAYER.qualifiedName());
 

@@ -106,29 +106,6 @@ allprojects {
 	}
 }
 
-sourceSets {
-	lib {
- 		java {
- 			compileClasspath += main.compileClasspath
-            runtimeClasspath += main.runtimeClasspath
- 		}
- 	}
- 	test {
- 		java {
- 			compileClasspath += lib.output
-            runtimeClasspath += lib.output
- 		}
- 	}
-}
-
-/*configurations {
-    libMinecraft.extendsFrom minecraft
-}
-
-dependencies {
-	libMinecraft 'net.minecraftforge:forge:1.15.2-31.1.0'
-}*/
-
 processResources {
 	from(sourceSets.main.java.srcDirs) {
 		include 'fr/max2/annotated/lib/ModAnnotatedLib.java'
