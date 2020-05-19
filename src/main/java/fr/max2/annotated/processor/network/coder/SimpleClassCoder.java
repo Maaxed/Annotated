@@ -28,7 +28,7 @@ public class SimpleClassCoder
 			{
 				builder.encoder().add(DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".ordinal()"));
 				
-				setExpr.accept(builder.decoder(), params.tools.naming.computeFullName(params.type) + ".values()[buf.readInt()]");
+				setExpr.accept(builder.decoder(), tools.naming.computeFullName(paramType) + ".values()[buf.readInt()]");
 			}
 		});
 }

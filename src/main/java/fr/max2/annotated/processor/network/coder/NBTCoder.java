@@ -21,7 +21,7 @@ public class NBTCoder
 			@Override
 			public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
 			{
-				Element elem = params.tools.types.asElement(params.type);
+				Element elem = tools.types.asElement(paramType);
 				String className = elem.getSimpleName().toString();
 				String primitive = className.substring(0, className.length() - 3);
 				DataCoderUtils.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", (loadInst, value) -> setExpr.accept(loadInst, className + ".valueOf(" + value + ")"), builder);
@@ -64,7 +64,7 @@ public class NBTCoder
 		@Override
 		public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
 		{
-			ClassName typeName = params.tools.naming.buildClassName(params.tools.types.asElement(params.type));
+			ClassName typeName = tools.naming.buildClassName(tools.types.asElement(paramType));
 			builder.encoder().add("write" + this.mode + "NBT(buf, " + saveAccessExpr + ");");
 			setExpr.accept(builder.decoder(), "read" + this.mode + "NBT(buf, " + typeName.shortName() + "." + (this.mode.equals("Abstract") ? "class" : "TYPE") + ")");
 			

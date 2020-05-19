@@ -4,19 +4,26 @@ import java.util.function.BiConsumer;
 
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.DataCoderParameters;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
+import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.PropertyMap;
 
 public abstract class DataCoder
 {
-	public DataCoderParameters params;
+	protected ProcessingTools tools;
+	public String uniqueName;
+	protected TypeMirror paramType;
+	public PropertyMap properties;
 	protected TypeMirror codedType;
 	
-	public void init(DataCoderParameters params)
+	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		this.params = params;
-		this.codedType = params.type;
+		this.tools = tools;
+		this.uniqueName = uniqueName;
+		this.paramType = paramType;
+		this.properties = properties;
+		this.codedType = paramType;
 	}
 	
 	public TypeMirror getCodedType()

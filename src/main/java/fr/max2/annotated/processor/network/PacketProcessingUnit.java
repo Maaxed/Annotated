@@ -103,17 +103,17 @@ public class PacketProcessingUnit
 		{
 			try
 			{
-				coder.addInstructions(builder, "msg." + coder.params.uniqueName, (loadInst, value) -> loadInst.add("msg." + coder.params.uniqueName + " = " + value + ";"));
-				coder.params.properties.checkUnusedProperties();
+				coder.addInstructions(builder, "msg." + coder.uniqueName, (loadInst, value) -> loadInst.add("msg." + coder.uniqueName + " = " + value + ";"));
+				coder.properties.checkUnusedProperties();
 			}
 			catch (IncompatibleTypeException e)
 			{
-				this.tools.log(Kind.ERROR, "An IncompatibleTypeException occured on the '" + coder.params.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.tools.log(Kind.ERROR, "An IncompatibleTypeException occured on the '" + coder.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
 				return false;
 			}
 			catch (Exception e)
 			{
-				this.tools.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + coder.params.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.tools.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + coder.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
 				return false;
 			}
 		}

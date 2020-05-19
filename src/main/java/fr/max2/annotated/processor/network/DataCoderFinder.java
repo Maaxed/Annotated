@@ -21,101 +21,84 @@ import fr.max2.annotated.processor.network.coder.PrimitiveCoder;
 import fr.max2.annotated.processor.network.coder.RegistryEntryCoder;
 import fr.max2.annotated.processor.network.coder.SerializableCoder;
 import fr.max2.annotated.processor.network.coder.SimpleClassCoder;
+import fr.max2.annotated.processor.network.coder.SpecialDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
-import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;
 import fr.max2.annotated.processor.utils.PriorityManager;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 import fr.max2.annotated.processor.utils.exceptions.InvalidPropertyException;
 
-public class DataCoderParameters
+public class DataCoderFinder
 {
-	public final ProcessingTools tools;
-	public final String uniqueName;
-	public final TypeMirror type;
-	public final PropertyMap properties;
+	private final Collection<IDataHandler> typeMap;
+	private final ProcessingTools tools;
 	
-	public DataCoderParameters(ProcessingTools tools, String uniqueName, TypeMirror type, PropertyMap properties)
+	public DataCoderFinder(ProcessingTools tools)
 	{
 		this.tools = tools;
-		this.uniqueName = uniqueName;
-		this.type = type;
-		this.properties = properties;
+		
+		this.typeMap = TYPE_TO_HANDLER.values();
+		this.typeMap.forEach(data -> data.init(this.tools));
 	}
 	
-	
-	public static class Finder
+	public DataCoder getDataType(Element field)
 	{
-		private final Collection<IDataHandler> typeMap;
-		private final ProcessingTools tools;
-		
-		public Finder(ProcessingTools tools)
+		DataProperties customData = field.getAnnotation(DataProperties.class);
+		if (customData == null)
 		{
-			this.tools = tools;
-			
-			this.typeMap = TYPE_TO_HANDLER.values();
-			this.typeMap.forEach(data -> data.init(this.tools));
+			Element elem = this.tools.types.asElement(field.asType());
+			if (elem != null)
+				customData = elem.getAnnotation(DataProperties.class);
 		}
+		PropertyMap properties = customData == null ? PropertyMap.EMPTY_PROPERTIES : new PropertyMap(customData.value());
+		return this.getDataType(field.getSimpleName().toString(), field.asType(), properties);
+	}
+	
+	public DataCoder getDataType(String uniqueName, TypeMirror type, PropertyMap properties)
+	{
+		DataCoder params = this.getDataTypeOrNull(uniqueName, type, properties);
 		
-		public DataCoder getDataType(Element field)
-		{
-			DataProperties customData = field.getAnnotation(DataProperties.class);
-			if (customData == null)
+		if (params == null)
+			throw new IncompatibleTypeException("No data handler can process the type '" + type.toString() + "'");
+		
+		return params;
+	}
+	
+	public DataCoder getDataTypeOrNull(String uniqueName, TypeMirror type, PropertyMap properties)
+	{
+		IDataHandler handler = properties.getValue("type")
+			.map(DataCoderFinder::dataTypeToHandler)
+			.orElseGet(() ->
 			{
-				Element elem = this.tools.types.asElement(field.asType());
-				if (elem != null)
-					customData = elem.getAnnotation(DataProperties.class);
-			}
-			PropertyMap properties = customData == null ? PropertyMap.EMPTY_PROPERTIES : new PropertyMap(customData.value());
-			return this.getDataType(field.getSimpleName().toString(), field.asType(), properties);
+				IDataHandler defaultHandler = this.getDefaultDataType(type);
+				return defaultHandler == SpecialDataHandler.CUSTOM ? null : defaultHandler;
+			});
+		if (handler == null)
+			return null;
+		
+		DataCoder coder = handler.createCoder();
+		coder.init(this.tools, uniqueName, type, properties);
+		return coder;
+		
+		
+	}
+	
+	public IDataHandler getDefaultDataType(TypeMirror type)
+	{
+		List<IDataHandler> validHandlers = this.typeMap.stream().filter(entry -> entry.canProcess(type)).collect(Collectors.toList());
+		
+		List<IDataHandler> prioritizedHandlers = HANDLER_PRIORITIES.getHighests(validHandlers);
+		
+		switch (prioritizedHandlers.size())
+		{
+		case 0:
+			return SpecialDataHandler.CUSTOM;
+		case 1:
+			return prioritizedHandlers.get(0);
+		default:
+			throw new IllegalArgumentException("The data handler of the '" + type.toString() + "' type couldn't be chosen: handler priorities are equal: " + prioritizedHandlers.stream().map(h -> h.getClass().getTypeName() + ":" + h.toString()).collect(Collectors.joining(", ")));
 		}
 		
-		public DataCoder getDataType(String uniqueName, TypeMirror type, PropertyMap properties)
-		{
-			DataCoder params = this.getDataTypeOrNull(uniqueName, type, properties);
-			
-			if (params == null)
-				throw new IncompatibleTypeException("No data handler can process the type '" + type.toString() + "'");
-			
-			return params;
-		}
-		
-		public DataCoder getDataTypeOrNull(String uniqueName, TypeMirror type, PropertyMap properties)
-		{
-			IDataHandler handler = properties.getValue("type")
-				.map(DataCoderParameters::dataTypeToHandler)
-				.orElseGet(() ->
-				{
-					IDataHandler defaultHandler = this.getDefaultDataType(type);
-					return defaultHandler == SpecialDataHandler.CUSTOM ? null : defaultHandler;
-				});
-			if (handler == null)
-				return null;
-			
-			DataCoder coder = handler.createCoder();
-			coder.init(new DataCoderParameters(this.tools, uniqueName, type, properties));
-			return coder;
-			
-			
-		}
-		
-		public IDataHandler getDefaultDataType(TypeMirror type)
-		{
-			List<IDataHandler> validHandlers = this.typeMap.stream().filter(entry -> entry.canProcess(type)).collect(Collectors.toList());
-			
-			List<IDataHandler> prioritizedHandlers = HANDLER_PRIORITIES.getHighests(validHandlers);
-			
-			switch (prioritizedHandlers.size())
-			{
-			case 0:
-				return SpecialDataHandler.CUSTOM;
-			case 1:
-				return prioritizedHandlers.get(0);
-			default:
-				throw new IllegalArgumentException("The data handler of the '" + type.toString() + "' type couldn't be chosen: handler priorities are equal: " + prioritizedHandlers.stream().map(h -> h.getClass().getTypeName() + ":" + h.toString()).collect(Collectors.joining(", ")));
-			}
-			
-		}
 	}
 	
 	

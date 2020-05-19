@@ -8,10 +8,11 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.DataCoderParameters;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
+import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public class RegistryEntryCoder extends DataCoder
@@ -22,19 +23,19 @@ public class RegistryEntryCoder extends DataCoder
 	private TypeElement typeElement;
 	
 	@Override
-	public void init(DataCoderParameters params)
+	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		super.init(params);
+		super.init(tools, uniqueName, paramType, properties);
 		
-		DeclaredType entryType = params.tools.types.refineTo(params.type, params.tools.elements.getTypeElement(ENTRY_TYPE).asType());
-		if (entryType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + ENTRY_TYPE);
+		DeclaredType entryType = tools.types.refineTo(paramType, tools.elements.getTypeElement(ENTRY_TYPE).asType());
+		if (entryType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + ENTRY_TYPE);
 		
 		TypeMirror contentType = entryType.getTypeArguments().get(0);
 		if (contentType.getKind() != TypeKind.DECLARED)
 		{
 			throw new IncompatibleTypeException("The registry type is invalid");
 		}
-		this.typeElement = params.tools.elements.asTypeElement(params.tools.types.asElement(contentType));
+		this.typeElement = tools.elements.asTypeElement(tools.types.asElement(contentType));
 	}
 	
 	@Override

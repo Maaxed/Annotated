@@ -5,12 +5,13 @@ import java.util.function.BiConsumer;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.DataCoderParameters;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
+import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public class SerializableCoder extends DataCoder
@@ -21,32 +22,32 @@ public class SerializableCoder extends DataCoder
 	private DataCoder nbtHandler;
 	
 	@Override
-	public void init(DataCoderParameters params)
+	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		super.init(params);
+		super.init(tools, uniqueName, paramType, properties);
 		
 		String typeName = ClassRef.NBT_SERIALIZABLE_INTERFACE.qualifiedName();
-		DeclaredType serialisableType = params.tools.types.refineTo(params.type, params.tools.elements.getTypeElement(typeName).asType());
-		if (serialisableType == null) throw new IncompatibleTypeException("The type '" + params.type + "' is not a sub type of " + typeName);
-		DataCoderUtils.requireDefaultConstructor(params.tools.types, params.type);
+		DeclaredType serialisableType = tools.types.refineTo(paramType, tools.elements.getTypeElement(typeName).asType());
+		if (serialisableType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + typeName);
+		DataCoderUtils.requireDefaultConstructor(tools.types, paramType);
 		
 		this.nbtType = serialisableType.getTypeArguments().get(0);
-		this.nbtHandler = params.tools.handlers.getDataType(params.uniqueName + "Data", nbtType, params.properties.getSubPropertiesOrEmpty("nbt"));
+		this.nbtHandler = tools.handlers.getDataType(uniqueName + "Data", nbtType, properties.getSubPropertiesOrEmpty("nbt"));
 	}
 	
 	@Override
 	public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
 	{
-		params.tools.types.provideTypeImports(this.nbtType, builder);
+		tools.types.provideTypeImports(this.nbtType, builder);
 		
-		String dataVarName = params.uniqueName + "Data";
+		String dataVarName = uniqueName + "Data";
 		
-		builder.encoder().add(params.tools.naming.computeFullName(this.nbtType) + " " + dataVarName + " = " + saveAccessExpr + ".serializeNBT()" + ";");
+		builder.encoder().add(tools.naming.computeFullName(this.nbtType) + " " + dataVarName + " = " + saveAccessExpr + ".serializeNBT()" + ";");
 		
-		builder.decoder().add(params.tools.naming.computeFullName(params.type) + " " + params.uniqueName + " = new " + params.tools.naming.computeSimplifiedName(params.type) + "();");
+		builder.decoder().add(tools.naming.computeFullName(paramType) + " " + uniqueName + " = new " + tools.naming.computeSimplifiedName(paramType) + "();");
 		
-		this.nbtHandler.addInstructions(builder, dataVarName, (loadInst, value) -> loadInst.add(params.uniqueName + ".deserializeNBT(" + value + ");"));
+		this.nbtHandler.addInstructions(builder, dataVarName, (loadInst, value) -> loadInst.add(uniqueName + ".deserializeNBT(" + value + ");"));
 		
-		setExpr.accept(builder.decoder(), params.uniqueName); 
+		setExpr.accept(builder.decoder(), uniqueName); 
 	}
 }
