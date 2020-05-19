@@ -5,7 +5,7 @@ public class ClassRef
 {
 	private ClassRef() { }
 	
-	
+	//TODO [v2.0] add refs
 	public static final String MAIN_PACKAGE = "fr.max2.annotated";
 	
 	public static final ClassName NBT_SERIALIZABLE_INTERFACE = new ClassName("net.minecraftforge.common.util", "INBTSerializable");

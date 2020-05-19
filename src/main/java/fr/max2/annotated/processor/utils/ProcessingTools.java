@@ -10,7 +10,7 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
-import fr.max2.annotated.processor.network.DataHandlerParameters;
+import fr.max2.annotated.processor.network.DataCoderParameters;
 import fr.max2.annotated.processor.utils.template.TemplateHelper;
 
 public class ProcessingTools
@@ -21,7 +21,7 @@ public class ProcessingTools
 	public final ExtendedTypes types;
 	public final Filer filer;
 	public final NamingUtils naming;
-	public final DataHandlerParameters.Finder handlers;
+	public final DataCoderParameters.Finder handlers;
 	public final TemplateHelper templates;
 	
 	public ProcessingTools(ProcessingEnvironment env)
@@ -31,7 +31,7 @@ public class ProcessingTools
 		this.elements = new ExtendedElements(this, env.getElementUtils());
 		this.types = new ExtendedTypes(this, env.getTypeUtils());
 		this.naming = new NamingUtils(this);
-		this.handlers = new DataHandlerParameters.Finder(this);
+		this.handlers = new DataCoderParameters.Finder(this);
 		this.templates = new TemplateHelper(this);
 	}
 	

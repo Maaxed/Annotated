@@ -16,6 +16,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
+import fr.max2.annotated.processor.network.coder.DataCoder;
 import fr.max2.annotated.processor.network.model.SimplePacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ClassRef;
@@ -92,27 +93,27 @@ public class PacketProcessingUnit
 		
 		List<? extends VariableElement> parameters = this.method.getParameters();
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
-		List<DataHandlerParameters> dataHandlers = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
+		List<DataCoder> dataHandlers = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
 		
 		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools, messageClassName.packageName());
 		
 		messageParameters.forEach(f -> this.tools.types.provideTypeImports(f.asType(), builder));
 		
-		for (DataHandlerParameters handler : dataHandlers)
+		for (DataCoder coder : dataHandlers)
 		{
 			try
 			{
-				handler.addInstructions(builder);
-				handler.properties.checkUnusedProperties();
+				coder.addInstructions(builder, "msg." + coder.params.uniqueName, (loadInst, value) -> loadInst.add("msg." + coder.params.uniqueName + " = " + value + ";"));
+				coder.params.properties.checkUnusedProperties();
 			}
 			catch (IncompatibleTypeException e)
 			{
-				this.tools.log(Kind.ERROR, "An IncompatibleTypeException occured on the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.tools.log(Kind.ERROR, "An IncompatibleTypeException occured on the '" + coder.params.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
 				return false;
 			}
 			catch (Exception e)
 			{
-				this.tools.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + handler.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.tools.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + coder.params.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
 				return false;
 			}
 		}

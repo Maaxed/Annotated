@@ -16,12 +16,10 @@ import javax.lang.model.util.Elements;
 
 public class ExtendedElements implements Elements
 {
-	private final ProcessingTools tools;
 	private final Elements base;
 	
 	ExtendedElements(ProcessingTools tools, Elements base)
 	{
-		this.tools = tools;
 		this.base = base;
 	}
 	

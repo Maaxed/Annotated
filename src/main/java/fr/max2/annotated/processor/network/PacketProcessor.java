@@ -148,5 +148,5 @@ public class PacketProcessor extends AbstractProcessor
 						 .map(an -> an.getValue().toString())
 						 .orElse(null);
 	}
-	//TODO [v2.0] Add code completion
+	//TODO [v2.1] Add code completion
 }

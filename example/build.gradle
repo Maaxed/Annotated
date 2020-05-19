@@ -1,6 +1,5 @@
 plugins {
-	id 'net.ltgt.apt' version '0.19'
-	id 'net.ltgt.apt-eclipse' version '0.19'
+	id 'net.ltgt.apt-eclipse' version '0.21'
 }
 
 version = "$rootProject.mcVersion-1.0"
@@ -18,6 +17,12 @@ eclipse {
 			genSrcDir = file('src/generated/java')
 		}
 	}
+	classpath.file {
+		whenMerged {
+			entries.findAll { it.kind == 'output' } *.path = 'bin/main'
+		}
+	}
+			
 }
 
 processResources {
