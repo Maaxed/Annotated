@@ -5,6 +5,8 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
+import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.PropertyMap;
 
 public class PrimitiveCoder
 {
@@ -47,9 +49,9 @@ public class PrimitiveCoder
 		}
 
 		@Override
-		public DataCoder createCoder()
+		public DataCoder createCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 		{
-			return new DataCoderUtils.SimpleCoder(this.primitiveName);
+			return new DataCoderUtils.SimpleCoder(tools, uniqueName, paramType, properties, this.primitiveName);
 		}
 	}
 }

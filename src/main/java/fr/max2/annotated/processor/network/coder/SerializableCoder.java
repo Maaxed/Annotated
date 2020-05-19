@@ -21,10 +21,9 @@ public class SerializableCoder extends DataCoder
 	private TypeMirror nbtType;
 	private DataCoder nbtHandler;
 	
-	@Override
-	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public SerializableCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		super.init(tools, uniqueName, paramType, properties);
+		super(tools, uniqueName, paramType, properties);
 		
 		String typeName = ClassRef.NBT_SERIALIZABLE_INTERFACE.qualifiedName();
 		DeclaredType serialisableType = tools.types.refineTo(paramType, tools.elements.getTypeElement(typeName).asType());

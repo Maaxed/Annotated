@@ -20,10 +20,9 @@ public class ArrayCoder extends DataCoder
 
 	private DataCoder contentCoder;
 	
-	@Override
-	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public ArrayCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		super.init(tools, uniqueName, paramType, properties);
+		super(tools, uniqueName, paramType, properties);
 		
 		ArrayType arrayType = tools.types.asArrayType(paramType);
 		if (arrayType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not an array");

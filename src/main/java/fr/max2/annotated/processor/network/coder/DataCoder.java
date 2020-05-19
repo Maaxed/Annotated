@@ -11,19 +11,24 @@ import fr.max2.annotated.processor.utils.PropertyMap;
 
 public abstract class DataCoder
 {
-	protected ProcessingTools tools;
-	public String uniqueName;
-	protected TypeMirror paramType;
-	public PropertyMap properties;
+	public final ProcessingTools tools;
+	public final String uniqueName;
+	public final TypeMirror paramType;
+	public final PropertyMap properties;
 	protected TypeMirror codedType;
 	
-	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public DataCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	{
+		this(tools, uniqueName, paramType, properties, paramType);
+	}
+	
+	public DataCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, TypeMirror codedType)
 	{
 		this.tools = tools;
 		this.uniqueName = uniqueName;
 		this.paramType = paramType;
 		this.properties = properties;
-		this.codedType = paramType;
+		this.codedType = codedType;
 	}
 	
 	public TypeMirror getCodedType()

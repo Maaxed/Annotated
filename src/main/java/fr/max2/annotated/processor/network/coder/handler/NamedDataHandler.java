@@ -1,17 +1,17 @@
 package fr.max2.annotated.processor.network.coder.handler;
 
-import java.util.function.Supplier;
-
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.DataCoder;
+import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.PropertyMap;
 
 public class NamedDataHandler extends TypedDataHandler
 {
 	public final String typeName;
-	protected final Supplier<DataCoder> coderProvider;
+	protected final IDataCoderProvider coderProvider;
 	
-	public NamedDataHandler(String typaName, Supplier<DataCoder> coderProvider)
+	public NamedDataHandler(String typaName, IDataCoderProvider coderProvider)
 	{
 		this.typeName = typaName;
 		this.coderProvider = coderProvider;
@@ -30,8 +30,8 @@ public class NamedDataHandler extends TypedDataHandler
 	}
 
 	@Override
-	public DataCoder createCoder()
+	public DataCoder createCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		return this.coderProvider.get();
+		return this.coderProvider.createCoder(tools, uniqueName, paramType, properties);
 	};
 }

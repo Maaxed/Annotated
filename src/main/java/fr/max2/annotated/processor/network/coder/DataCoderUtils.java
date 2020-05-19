@@ -1,7 +1,6 @@
 package fr.max2.annotated.processor.network.coder;
 
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -9,10 +8,13 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 
+import fr.max2.annotated.processor.network.coder.handler.IDataCoderProvider;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
+import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public class DataCoderUtils
@@ -35,9 +37,9 @@ public class DataCoderUtils
 		loadValue.accept(builder.decoder(), readBuffer(type));
 	}
 	
-	public static Supplier<DataCoder> simpleCoder(String type)
+	public static IDataCoderProvider simpleCoder(String type)
 	{
-		return () -> new SimpleCoder(type);
+		return (tools, uniqueName, paramType, properties) -> new SimpleCoder(tools, uniqueName, paramType, properties, type);
 	}
 	
 	public static IDataHandler simpleHandler(String className, String typeName)
@@ -66,9 +68,10 @@ public class DataCoderUtils
 	public static class SimpleCoder extends DataCoder
 	{
 		private final String typeName;
-		
-		public SimpleCoder(String typeName)
+
+		public SimpleCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, String typeName)
 		{
+			super(tools, uniqueName, paramType, properties);
 			this.typeName = typeName;
 		}
 

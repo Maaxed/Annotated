@@ -21,7 +21,7 @@ public class SimpleClassCoder
 		FLUID_STACK = DataCoderUtils.simpleHandler("net.minecraftforge.fluids.FluidStack", "FluidStack"),
 		TEXT_COMPONENT = DataCoderUtils.simpleHandler("net.minecraft.util.text.ITextComponent", "TextComponent"),
 		BLOCK_RAY_TRACE = DataCoderUtils.simpleHandler("net.minecraft.util.math.BlockRayTraceResult", "BlockRay"),
-		ENUM = new NamedDataHandler(Enum.class.getTypeName(), () -> new DataCoder()
+		ENUM = new NamedDataHandler(Enum.class.getTypeName(), (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
 		{
 			@Override
 			public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)

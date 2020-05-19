@@ -22,10 +22,9 @@ public class RegistryEntryCoder extends DataCoder
 	
 	private TypeElement typeElement;
 	
-	@Override
-	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public RegistryEntryCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		super.init(tools, uniqueName, paramType, properties);
+		super(tools, uniqueName, paramType, properties);
 		
 		DeclaredType entryType = tools.types.refineTo(paramType, tools.elements.getTypeElement(ENTRY_TYPE).asType());
 		if (entryType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + ENTRY_TYPE);

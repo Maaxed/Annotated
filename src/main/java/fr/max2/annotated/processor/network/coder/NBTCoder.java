@@ -12,11 +12,13 @@ import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
+import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.utils.PropertyMap;
 
 public class NBTCoder
 {
 	public static final IDataHandler
-		PRIMITIVE = new NamedDataHandler("net.minecraft.nbt.NumberNBT", () -> new DataCoder()
+		PRIMITIVE = new NamedDataHandler("net.minecraft.nbt.NumberNBT", (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
 		{
 			@Override
 			public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
@@ -35,7 +37,7 @@ public class NBTCoder
 				return (this.tools.types.isAssignable(type, this.type) && !this.tools.types.isSameType(type, this.type)) || this.tools.types.isAssignable(type, stringType);
 			}
 		},
-		CONCRETE = new NamedDataHandler("net.minecraft.nbt.INBT", () -> new Coder("Concrete"))
+		CONCRETE = new NamedDataHandler("net.minecraft.nbt.INBT", (tools, uniqueName, paramType, properties) -> new Coder(tools, uniqueName, paramType, properties, "Concrete"))
 		{
 			@Override
 			public boolean canProcess(TypeMirror type)
@@ -50,14 +52,15 @@ public class NBTCoder
 				return ElementFilter.fieldsIn(elem.getEnclosedElements()).stream().anyMatch(var -> var.getModifiers().contains(Modifier.STATIC) && var.getSimpleName().contentEquals("TYPE"));
 			}
 		},
-		ABSTRACT = new NamedDataHandler("net.minecraft.nbt.INBT", () -> new Coder("Abstract"));
+		ABSTRACT = new NamedDataHandler("net.minecraft.nbt.INBT", (tools, uniqueName, paramType, properties) -> new Coder(tools, uniqueName, paramType, properties, "Abstract"));
 	
 	private static class Coder extends DataCoder
 	{
 		private final String mode;
 		
-		public Coder(String mode)
+		public Coder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, String mode)
 		{
+			super(tools, uniqueName, paramType, properties);
 			this.mode = mode;
 		}
 

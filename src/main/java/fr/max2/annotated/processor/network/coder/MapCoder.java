@@ -22,10 +22,9 @@ public class MapCoder extends DataCoder
 	private DataCoder keyHandler, valueHandler;
 	private TypeMirror implType, keyType, keyFullType, valueType, valueFullType;
 	
-	@Override
-	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public MapCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		super.init(tools, uniqueName, paramType, properties);
+		super(tools, uniqueName, paramType, properties);
 		
 		TypeElement mapElem = tools.elements.getTypeElement(MAP_TYPE);
 		TypeMirror mapType = mapElem.asType();

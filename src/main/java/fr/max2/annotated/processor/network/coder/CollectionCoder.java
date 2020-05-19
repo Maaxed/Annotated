@@ -22,10 +22,9 @@ public class CollectionCoder extends DataCoder
 	private DataCoder contentHandler;
 	private TypeMirror implType, contentType;
 	
-	@Override
-	public void init(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public CollectionCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
-		super.init(tools, uniqueName, paramType, properties);
+		super(tools, uniqueName, paramType, properties);
 		
 		DeclaredType refinedType = tools.types.refineTo(paramType, HANDLER.getType());
 		if (refinedType == null)

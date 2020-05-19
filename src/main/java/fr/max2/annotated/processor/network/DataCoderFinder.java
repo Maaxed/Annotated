@@ -76,8 +76,7 @@ public class DataCoderFinder
 		if (handler == null)
 			return null;
 		
-		DataCoder coder = handler.createCoder();
-		coder.init(this.tools, uniqueName, type, properties);
+		DataCoder coder = handler.createCoder(this.tools, uniqueName, type, properties);
 		return coder;
 		
 		
