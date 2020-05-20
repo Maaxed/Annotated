@@ -1,7 +1,5 @@
 package fr.max2.annotated.processor.network.coder;
 
-import java.util.function.BiConsumer;
-
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -9,7 +7,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -39,7 +36,7 @@ public class RegistryEntryCoder extends DataCoder
 	}
 	
 	@Override
-	public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 	{
 		
 		Name typeName = this.typeElement.getSimpleName();
@@ -60,7 +57,7 @@ public class RegistryEntryCoder extends DataCoder
 		}
 
 		builder.encoder().add("buf.writeRegistryIdUnsafe(" + forgeRegistry + ", " + saveAccessExpr + ");");
-		setExpr.accept(builder.decoder(), "buf.readRegistryIdUnsafe(" + forgeRegistry + ")");
+		return new OutputExpressions("buf.readRegistryIdUnsafe(" + forgeRegistry + ")");
 	}
 	
 	public static String getForgeRegistry(TypeElement typeElement)

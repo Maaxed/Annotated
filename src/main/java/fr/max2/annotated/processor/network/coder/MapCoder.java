@@ -1,14 +1,12 @@
 package fr.max2.annotated.processor.network.coder;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
@@ -20,7 +18,10 @@ public class MapCoder extends DataCoder
 	public static final NamedDataHandler HANDLER = new NamedDataHandler(MAP_TYPE, MapCoder::new);
 
 	private DataCoder keyHandler, valueHandler;
-	private TypeMirror implType, keyType, keyFullType, valueType, valueFullType;
+	private TypeMirror
+		codedType, implType,
+		keyFullType, keyType,
+		valueFullType, valueType;
 	
 	public MapCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -33,13 +34,14 @@ public class MapCoder extends DataCoder
 		
 		this.keyFullType = refinedType.getTypeArguments().get(0);
 		this.keyHandler = tools.handlers.getDataType(uniqueName + "Key", this.keyFullType, properties.getSubPropertiesOrEmpty("keys"));
-		this.keyType = this.keyHandler.getCodedType();
+		this.keyType = tools.types.shallowErasure(this.keyHandler.getInternalType());
 
 		this.valueFullType = refinedType.getTypeArguments().get(1);
 		this.valueHandler = tools.handlers.getDataType(uniqueName + "Element", this.valueFullType, properties.getSubPropertiesOrEmpty("values"));
-		this.valueType = this.valueHandler.getCodedType();
+		this.valueType = tools.types.shallowErasure(this.valueHandler.getInternalType());
 		
-		this.codedType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyFullType, keyType), this.valueFullType, valueType);
+		this.internalType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyFullType, this.keyHandler.getInternalType()), this.valueFullType, this.valueHandler.getInternalType());
+		this.codedType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyFullType, this.keyType), this.valueFullType, this.valueType);
 		this.implType = paramType;
 		
 		String implName = properties.getValueOrEmpty("impl");
@@ -59,7 +61,7 @@ public class MapCoder extends DataCoder
 			
 			TypeMirror implKeyFullType = refinedImpl.getTypeArguments().get(0);
 			TypeMirror implValueFullType = refinedImpl.getTypeArguments().get(1);
-			DeclaredType revisedImplType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)this.implType, implKeyFullType, keyType), implValueFullType, valueType);
+			DeclaredType revisedImplType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)this.implType, implKeyFullType, this.keyType), implValueFullType, this.valueType);
 			if (!tools.types.isAssignable(revisedImplType, this.codedType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + paramType + "'");
 			
@@ -69,7 +71,7 @@ public class MapCoder extends DataCoder
 	}
 	
 	@Override
-	public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 	{
 		String keyVarTmpName = uniqueName + "KeyTmp";
 		String entryVarName = uniqueName + "Entry";
@@ -86,22 +88,22 @@ public class MapCoder extends DataCoder
 			.add("for (Map.Entry<" + tools.naming.computeFullName(keyFullType) + ", " + tools.naming.computeFullName(valueFullType) + "> " + entryVarName + " : " + saveAccessExpr + ".entrySet())")
 			.add("{");
 		
-		
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataCoderUtils.readBuffer("Int") + ";",
 			tools.naming.computeFullName(this.codedType) + " " + uniqueName + " = new " + tools.naming.computeSimplifiedName(implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
-
-		this.keyHandler.addInstructions(1, builder, entryVarName + ".getKey()", (loadInst, key) -> loadInst.add(tools.naming.computeFullName(keyType) + " " + keyVarTmpName + " = " + key + ";"));
+		OutputExpressions keyOutput = this.keyHandler.addInstructions(1, builder, entryVarName + ".getKey()");
+		builder.decoder().add(tools.naming.computeFullName(keyType) + " " + keyVarTmpName + " = " + keyOutput.decoded + ";");
 		
-		this.valueHandler.addInstructions(1, builder, entryVarName + ".getValue()", (loadInst, value) -> loadInst.add(uniqueName + ".put(" + keyVarTmpName + ", " + value + ");"));
+		OutputExpressions valueOutput = this.valueHandler.addInstructions(1, builder, entryVarName + ".getValue()");
+		builder.decoder().add(uniqueName + ".put(" + keyVarTmpName + ", " + valueOutput.decoded + ");");
 		
 		builder.encoder().add("}");
 		builder.decoder().add("}");
 		
-		setExpr.accept(builder.decoder(), uniqueName);
+		return new OutputExpressions(uniqueName);
 	}
 
 	private static String defaultImplementation(TypeElement type)

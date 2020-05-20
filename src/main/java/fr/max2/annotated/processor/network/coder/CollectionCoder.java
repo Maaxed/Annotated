@@ -1,14 +1,12 @@
 package fr.max2.annotated.processor.network.coder;
 
 import java.util.Collection;
-import java.util.function.BiConsumer;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
@@ -20,7 +18,7 @@ public class CollectionCoder extends DataCoder
 	public static final NamedDataHandler HANDLER = new NamedDataHandler(COLLECTION_TYPE, CollectionCoder::new);
 	
 	private DataCoder contentHandler;
-	private TypeMirror implType, contentType;
+	private TypeMirror codedType, implType, contentType;
 	
 	public CollectionCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -32,8 +30,9 @@ public class CollectionCoder extends DataCoder
 		
 		TypeMirror contentFullType = refinedType.getTypeArguments().get(0);
 		this.contentHandler = tools.handlers.getDataType(uniqueName + "Element", contentFullType, properties.getSubPropertiesOrEmpty("content"));
-		this.contentType = this.contentHandler.getCodedType();
+		this.contentType = tools.types.shallowErasure(this.contentHandler.getInternalType());
 		
+		this.internalType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.contentHandler.getInternalType());
 		this.codedType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.contentType);
 		this.implType = paramType;
 		
@@ -62,7 +61,7 @@ public class CollectionCoder extends DataCoder
 	}
 	
 	@Override
-	public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 	{
 		builder.addImport(tools.elements.asTypeElement(tools.types.asElement(this.implType)));
 		
@@ -84,12 +83,13 @@ public class CollectionCoder extends DataCoder
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
-		this.contentHandler.addInstructions(1, builder, elementVarName, (loadInst, value) -> loadInst.add(uniqueName + ".add(" + value + ");"));
+		OutputExpressions contentOutput = this.contentHandler.addInstructions(1, builder, elementVarName);
+		builder.decoder().add(uniqueName + ".add(" + contentOutput.decoded + ");");
 		
 		builder.encoder().add("}");
 		builder.decoder().add("}");
 		
-		setExpr.accept(builder.decoder(), uniqueName);
+		return new OutputExpressions(this.uniqueName);
 	}
 
 	private static String defaultImplementation(TypeElement type)

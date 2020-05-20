@@ -1,7 +1,5 @@
 package fr.max2.annotated.processor.network.coder;
 
-import java.util.function.BiConsumer;
-
 import javax.annotation.Nullable;
 import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.TypeKind;
@@ -12,7 +10,6 @@ import javax.lang.model.type.WildcardType;
 import fr.max2.annotated.processor.network.coder.handler.IDataCoderProvider;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
@@ -67,14 +64,14 @@ public class SpecialCoder extends DataCoder
 	
 	private SpecialCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, DataCoder actualCoder)
 	{
-		super(tools, uniqueName, paramType, properties, actualCoder.getCodedType());
+		super(tools, uniqueName, paramType, properties, tools.types.isSameType(actualCoder.getInternalType(), actualCoder.paramType) ? paramType : actualCoder.getInternalType());
 		this.actualCoder = actualCoder;
 	}
 	
 	@Override
-	public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 	{
-		this.actualCoder.addInstructions(builder, saveAccessExpr, setExpr);
+		return this.actualCoder.addInstructions(builder, saveAccessExpr);
 	}
 	
 	private static RuntimeException incompatibleType(String expected, TypeMirror actual)

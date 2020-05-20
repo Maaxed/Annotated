@@ -1,7 +1,5 @@
 package fr.max2.annotated.processor.network.coder;
 
-import java.util.function.BiConsumer;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
@@ -9,7 +7,6 @@ import javax.lang.model.util.ElementFilter;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ClassRef;
@@ -22,12 +19,13 @@ public class NBTCoder
 		PRIMITIVE = new NamedDataHandler(ClassRef.NBT_NUMBER, (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
 		{
 			@Override
-			public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 			{
 				Element elem = tools.types.asElement(paramType);
 				String className = elem.getSimpleName().toString();
 				String primitive = className.substring(0, className.length() - 3);
-				DataCoderUtils.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", (loadInst, value) -> setExpr.accept(loadInst, className + ".valueOf(" + value + ")"), builder);
+				OutputExpressions primitiveOutput = DataCoderUtils.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", builder);
+				return new OutputExpressions(className + ".valueOf(" + primitiveOutput.decoded + ")");
 			}
 		})
 		{
@@ -66,11 +64,9 @@ public class NBTCoder
 		}
 
 		@Override
-		public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 		{
 			ClassName typeName = tools.naming.buildClassName(tools.types.asElement(paramType));
-			builder.encoder().add("write" + this.mode + "NBT(buf, " + saveAccessExpr + ");");
-			setExpr.accept(builder.decoder(), "read" + this.mode + "NBT(buf, " + typeName.shortName() + "." + (this.mode.equals("Abstract") ? "class" : "TYPE") + ")");
 			
 			builder.addImport("net.minecraft.nbt.INBTType");
 			builder.addImport("net.minecraft.nbt.INBT");
@@ -89,6 +85,9 @@ public class NBTCoder
 				builder.addImport("net.minecraft.nbt.NBTTypes");
 				builder.require("templates/TemplateAbstractNBTHandlingModule.jvtp");
 			}
+
+			builder.encoder().add("write" + this.mode + "NBT(buf, " + saveAccessExpr + ");");
+			return new OutputExpressions("read" + this.mode + "NBT(buf, " + typeName.shortName() + "." + (this.mode.equals("Abstract") ? "class" : "TYPE") + ")");
 		}
 	}
 }

@@ -2,11 +2,9 @@ package fr.max2.annotated.processor.network.coder;
 
 import java.util.Date;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
 
@@ -25,11 +23,11 @@ public class SimpleClassCoder
 		ENUM = new NamedDataHandler(Enum.class.getTypeName(), (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
 		{
 			@Override
-			public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 			{
 				builder.encoder().add(DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".ordinal()"));
 				
-				setExpr.accept(builder.decoder(), tools.naming.computeFullName(paramType) + ".values()[buf.readInt()]");
+				return new OutputExpressions(tools.naming.computeFullName(paramType) + ".values()[buf.readInt()]");
 			}
 		});
 }

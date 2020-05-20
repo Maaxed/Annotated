@@ -1,13 +1,10 @@
 package fr.max2.annotated.processor.network.coder;
 
-import java.util.function.BiConsumer;
-
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -35,7 +32,7 @@ public class SerializableCoder extends DataCoder
 	}
 	
 	@Override
-	public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 	{
 		tools.types.provideTypeImports(this.nbtType, builder);
 		
@@ -45,8 +42,9 @@ public class SerializableCoder extends DataCoder
 		
 		builder.decoder().add(tools.naming.computeFullName(paramType) + " " + uniqueName + " = new " + tools.naming.computeSimplifiedName(paramType) + "();");
 		
-		this.nbtHandler.addInstructions(builder, dataVarName, (loadInst, value) -> loadInst.add(uniqueName + ".deserializeNBT(" + value + ");"));
+		OutputExpressions nbtOutput = this.nbtHandler.addInstructions(builder, dataVarName);
+		builder.decoder().add(uniqueName + ".deserializeNBT(" + nbtOutput.decoded + ");");
 		
-		setExpr.accept(builder.decoder(), uniqueName); 
+		return new OutputExpressions(uniqueName); 
 	}
 }

@@ -93,17 +93,19 @@ public class PacketProcessingUnit
 		
 		List<? extends VariableElement> parameters = this.method.getParameters();
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
-		List<DataCoder> dataHandlers = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
+		List<DataCoder> dataCoders = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
 		
 		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools, messageClassName.packageName());
 		
 		messageParameters.forEach(f -> this.tools.types.provideTypeImports(f.asType(), builder));
 		
-		for (DataCoder coder : dataHandlers)
+		for (DataCoder coder : dataCoders)
 		{
 			try
 			{
-				coder.addInstructions(builder, "msg." + coder.uniqueName, (loadInst, value) -> loadInst.add("msg." + coder.uniqueName + " = " + value + ";"));
+				DataCoder.OutputExpressions paramOutput = coder.addInstructions(builder, "msg." + coder.uniqueName);
+				builder.decoder().add("msg." + coder.uniqueName + " = " + paramOutput.decoded + ";");
+				
 				coder.properties.checkUnusedProperties();
 			}
 			catch (IncompatibleTypeException e)
@@ -125,7 +127,7 @@ public class PacketProcessingUnit
 		replacements.put("className", this.messageClassName.shortName());
 		replacements.put("networkClass", network.networkClassName.shortName());
 		replacements.put("allFields" , messageParameters.stream().map(p -> this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
-		replacements.put("fieldsDeclaration", messageParameters.stream().map(p -> "\tprivate " + this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
+		replacements.put("fieldsDeclaration", dataCoders.stream().map(c -> "\tprivate " + this.tools.naming.computeFullName(c.getInternalType()) + " " + c.uniqueName + ";").collect(Collectors.joining(ls)));
 		replacements.put("fieldsInit", messageParameters.stream().map(p -> "\t\tthis." + p.getSimpleName() + " = " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
 		replacements.put("encode", builder.saveInstructions(2).collect(Collectors.joining(ls)));
 		replacements.put("decode", builder.loadInstructions(2).collect(Collectors.joining(ls)));

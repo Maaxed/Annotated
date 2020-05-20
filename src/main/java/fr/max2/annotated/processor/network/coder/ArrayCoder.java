@@ -1,14 +1,11 @@
 package fr.max2.annotated.processor.network.coder;
 
-import java.util.function.BiConsumer;
-
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;
-import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
@@ -29,13 +26,13 @@ public class ArrayCoder extends DataCoder
 		TypeMirror contentType = arrayType.getComponentType();
 		
 		this.contentCoder = tools.handlers.getDataType(uniqueName + "Element", contentType, properties.getSubPropertiesOrEmpty("content"));
-		this.codedType = tools.types.getArrayType(this.contentCoder.getCodedType());
+		this.internalType = tools.types.getArrayType(this.contentCoder.getInternalType());
 	}
 	
 	@Override
-	public void addInstructions(IPacketBuilder builder, String saveAccessExpr, BiConsumer<IFunctionBuilder, String> setExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
 	{
-		String contentTypeName = tools.naming.computeFullName(this.contentCoder.getCodedType());
+		String contentTypeName = tools.naming.computeFullName(this.contentCoder.getInternalType());
 		String elementVarName = uniqueName + "Element";
 		builder.encoder().add(
 			DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".length"),
@@ -54,12 +51,12 @@ public class ArrayCoder extends DataCoder
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + uniqueName + ".length; " + indexVarName + "++)",
 			"{");
 		
-		contentCoder.addInstructions(1, builder, elementVarName, (loadInst, value) -> loadInst.add(uniqueName + "[" + indexVarName + "] = " + value + ";"));
+		OutputExpressions contentOutput = contentCoder.addInstructions(1, builder, elementVarName);
+		builder.decoder().add(uniqueName + "[" + indexVarName + "] = " + contentOutput.decoded + ";");
 		
 		builder.encoder().add("}");
-		
 		builder.decoder().add("}");
 		
-		setExpr.accept(builder.decoder(), uniqueName); 
+		return new OutputExpressions(this.uniqueName); 
 	}
 }
