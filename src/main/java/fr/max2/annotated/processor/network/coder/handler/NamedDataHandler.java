@@ -26,7 +26,17 @@ public class NamedDataHandler extends TypedDataHandler
 	@Override
 	public boolean canProcess(TypeMirror type)
 	{
-		return tools.types.isAssignable(type, this.type);
+		switch (type.getKind())
+		{
+		case TYPEVAR:
+		case WILDCARD:
+		case UNION:
+		case INTERSECTION:
+			return false;
+		
+		default:
+			return tools.types.isAssignable(type, this.type);
+		}
 	}
 
 	@Override
@@ -34,4 +44,10 @@ public class NamedDataHandler extends TypedDataHandler
 	{
 		return this.coderProvider.createCoder(tools, uniqueName, paramType, properties);
 	};
+	
+	@Override
+	public String toString()
+	{
+		return "NamedHandler:" + this.typeName;
+	}
 }

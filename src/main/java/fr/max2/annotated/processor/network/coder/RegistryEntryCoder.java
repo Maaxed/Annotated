@@ -11,13 +11,14 @@ import javax.lang.model.type.TypeMirror;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
+import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public class RegistryEntryCoder extends DataCoder
 {
-	private static final String ENTRY_TYPE = "net.minecraftforge.registries.IForgeRegistryEntry";
+	private static final String ENTRY_TYPE = ClassRef.REGISTRY_ENTRY;
 	public static final NamedDataHandler HANDLER = new NamedDataHandler(ENTRY_TYPE, RegistryEntryCoder::new);
 	
 	private TypeElement typeElement;

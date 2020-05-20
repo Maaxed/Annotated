@@ -21,7 +21,7 @@ import fr.max2.annotated.processor.network.coder.PrimitiveCoder;
 import fr.max2.annotated.processor.network.coder.RegistryEntryCoder;
 import fr.max2.annotated.processor.network.coder.SerializableCoder;
 import fr.max2.annotated.processor.network.coder.SimpleClassCoder;
-import fr.max2.annotated.processor.network.coder.SpecialDataHandler;
+import fr.max2.annotated.processor.network.coder.SpecialCoder;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.utils.PriorityManager;
 import fr.max2.annotated.processor.utils.PropertyMap;
@@ -71,7 +71,7 @@ public class DataCoderFinder
 			.orElseGet(() ->
 			{
 				IDataHandler defaultHandler = this.getDefaultDataType(type);
-				return defaultHandler == SpecialDataHandler.CUSTOM ? null : defaultHandler;
+				return defaultHandler == SpecialCoder.CUSTOM ? null : defaultHandler;
 			});
 		if (handler == null)
 			return null;
@@ -91,7 +91,7 @@ public class DataCoderFinder
 		switch (prioritizedHandlers.size())
 		{
 		case 0:
-			return SpecialDataHandler.CUSTOM;
+			return SpecialCoder.CUSTOM;
 		case 1:
 			return prioritizedHandlers.get(0);
 		default:
@@ -138,12 +138,12 @@ public class DataCoderFinder
 		TYPE_TO_HANDLER.put(DataType.NBT_ABSTRACT, NBTCoder.ABSTRACT);
 		
 		
-		TYPE_TO_HANDLER.put(DataType.WILDCARD, SpecialDataHandler.WILDCRD);
-		TYPE_TO_HANDLER.put(DataType.TYPE_VARIABLE, SpecialDataHandler.VARIABLE_TYPE);
-		TYPE_TO_HANDLER.put(DataType.INTERSECTION, SpecialDataHandler.INTERSECTION);
+		TYPE_TO_HANDLER.put(DataType.WILDCARD, SpecialCoder.WILDCRD);
+		TYPE_TO_HANDLER.put(DataType.TYPE_VARIABLE, SpecialCoder.VARIABLE_TYPE);
+		TYPE_TO_HANDLER.put(DataType.INTERSECTION, SpecialCoder.INTERSECTION);
 		
-		TYPE_TO_HANDLER.put(DataType.DEFAULT, SpecialDataHandler.DEFAULT);
-		TYPE_TO_HANDLER.put(DataType.CUSTOM, SpecialDataHandler.CUSTOM);
+		TYPE_TO_HANDLER.put(DataType.DEFAULT, SpecialCoder.DEFAULT);
+		TYPE_TO_HANDLER.put(DataType.CUSTOM, SpecialCoder.CUSTOM);
 		
 		
 		HANDLER_PRIORITIES.prioritize(SimpleClassCoder.ITEM_STACK).over(SerializableCoder.NBT_SERIALISABLE);

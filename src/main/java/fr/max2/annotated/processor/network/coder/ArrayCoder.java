@@ -7,7 +7,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
-import fr.max2.annotated.processor.network.coder.handler.SimpleDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -16,7 +16,7 @@ import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public class ArrayCoder extends DataCoder
 {
-	public static final IDataHandler HANDLER = new SimpleDataHandler(t -> t.getKind() == TypeKind.ARRAY, ArrayCoder::new);
+	public static final IDataHandler HANDLER = new SpecialDataHandler(TypeKind.ARRAY, ArrayCoder::new);
 
 	private DataCoder contentCoder;
 	

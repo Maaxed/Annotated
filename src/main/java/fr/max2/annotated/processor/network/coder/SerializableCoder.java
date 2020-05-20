@@ -16,7 +16,7 @@ import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public class SerializableCoder extends DataCoder
 {
-	public static final IDataHandler NBT_SERIALISABLE = new NamedDataHandler(ClassRef.NBT_SERIALIZABLE_INTERFACE.qualifiedName(), SerializableCoder::new);
+	public static final IDataHandler NBT_SERIALISABLE = new NamedDataHandler(ClassRef.NBT_SERIALIZABLE_INTERFACE, SerializableCoder::new);
 	
 	private TypeMirror nbtType;
 	private DataCoder nbtHandler;
@@ -25,7 +25,7 @@ public class SerializableCoder extends DataCoder
 	{
 		super(tools, uniqueName, paramType, properties);
 		
-		String typeName = ClassRef.NBT_SERIALIZABLE_INTERFACE.qualifiedName();
+		String typeName = ClassRef.NBT_SERIALIZABLE_INTERFACE;
 		DeclaredType serialisableType = tools.types.refineTo(paramType, tools.elements.getTypeElement(typeName).asType());
 		if (serialisableType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + typeName);
 		DataCoderUtils.requireDefaultConstructor(tools.types, paramType);

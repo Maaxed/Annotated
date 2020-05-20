@@ -11,14 +11,14 @@ import javax.lang.model.type.WildcardType;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataCoderProvider;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
-import fr.max2.annotated.processor.network.coder.handler.SimpleDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;
 import fr.max2.annotated.processor.network.model.IFunctionBuilder;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
-public class SpecialDataHandler extends DataCoder
+public class SpecialCoder extends DataCoder
 {
 	public static final IDataHandler WILDCRD = handler(TypeKind.WILDCARD, (tools, uniqueName, paramType, properties) ->
 	{
@@ -65,7 +65,7 @@ public class SpecialDataHandler extends DataCoder
 	
 	protected DataCoder actualCoder;
 	
-	private SpecialDataHandler(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, DataCoder actualCoder)
+	private SpecialCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, DataCoder actualCoder)
 	{
 		super(tools, uniqueName, paramType, properties, actualCoder.getCodedType());
 		this.actualCoder = actualCoder;
@@ -84,6 +84,6 @@ public class SpecialDataHandler extends DataCoder
 	
 	private static IDataHandler handler(@Nullable TypeKind kind, IDataCoderProvider coderProvider)
 	{
-		return new SimpleDataHandler(type -> kind != null && type.getKind() == kind, (tools, uniqueName, paramType, properties) -> new SpecialDataHandler(tools, uniqueName, paramType, properties, coderProvider.createCoder(tools, uniqueName, paramType, properties)));
+		return new SpecialDataHandler(kind, (tools, uniqueName, paramType, properties) -> new SpecialCoder(tools, uniqueName, paramType, properties, coderProvider.createCoder(tools, uniqueName, paramType, properties)));
 	}
 }

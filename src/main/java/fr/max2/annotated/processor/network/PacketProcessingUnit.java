@@ -154,10 +154,10 @@ public class PacketProcessingUnit
 		TypeElement elem = this.tools.elements.asTypeElement(this.tools.types.asElement(type));
 		if (elem != null)
 		{
-			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT.qualifiedName()))
+			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT))
 				return Optional.of("ctx");
 			
-			if (elem.getQualifiedName().contentEquals(ClassRef.SERVER_PLAYER.qualifiedName()))
+			if (elem.getQualifiedName().contentEquals(ClassRef.SERVER_PLAYER))
 				return Optional.of("ctx.getSender()");
 		}
 		

@@ -22,4 +22,10 @@ public abstract class TypedDataHandler implements IDataHandler
 	{
 		return type;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "TypedHandler:" + this.type;
+	}
 }

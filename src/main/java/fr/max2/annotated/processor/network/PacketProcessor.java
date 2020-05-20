@@ -144,7 +144,7 @@ public class PacketProcessor extends AbstractProcessor
 	
 	private String extractModId(Element elem)
 	{
-		return this.tools.elements.getAnnotationValue(elem, ClassRef.FORGE_MOD_ANNOTATION.qualifiedName(), "value")
+		return this.tools.elements.getAnnotationValue(elem, ClassRef.FORGE_MOD_ANNOTATION, "value")
 						 .map(an -> an.getValue().toString())
 						 .orElse(null);
 	}
