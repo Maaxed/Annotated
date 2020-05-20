@@ -23,11 +23,11 @@ public class SimpleClassCoder
 		ENUM = new NamedDataHandler(Enum.class.getTypeName(), (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
 		{
 			@Override
-			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 			{
 				builder.encoder().add(DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".ordinal()"));
 				
-				return new OutputExpressions(tools.naming.computeFullName(paramType) + ".values()[buf.readInt()]");
+				return new OutputExpressions(tools.naming.computeFullName(paramType) + ".values()[buf.readInt()]", internalAccessExpr, externalAccessExpr);
 			}
 		});
 }

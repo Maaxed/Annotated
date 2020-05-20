@@ -35,28 +35,22 @@ public abstract class DataCoder
 	
 	public boolean requireConversion()
 	{
-		return !this.tools.types.isSameType(this.internalType, this.paramType);
+		return !this.tools.types.isAssignable(this.internalType, this.paramType) || !this.tools.types.isAssignable(this.paramType, this.internalType);
 	}
 	
-	public abstract OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr);
-	
-	public OutputExpressions addInstructions(int indent, IPacketBuilder builder, String saveAccessExpr)
-	{
-		builder.encoder().indent(indent);
-		builder.decoder().indent(indent);
-		OutputExpressions output = this.addInstructions(builder, saveAccessExpr);
-		builder.encoder().indent(-indent);
-		builder.decoder().indent(-indent);
-		return output;
-	}
+	public abstract OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr);
 	
 	public static final class OutputExpressions
 	{
 		public final String decoded;
+		public final String internalized;
+		public final String externalized;
 
-		public OutputExpressions(String decodedOutput)
+		public OutputExpressions(String decodedOutput, String internalizedOutput, String externalizedOutput)
 		{
 			this.decoded = decodedOutput;
+			this.internalized = internalizedOutput;
+			this.externalized = externalizedOutput;
 		}
 	}
 }

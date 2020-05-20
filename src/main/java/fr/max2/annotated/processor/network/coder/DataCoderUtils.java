@@ -1,13 +1,11 @@
 package fr.max2.annotated.processor.network.coder;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 
-import fr.max2.annotated.processor.network.coder.DataCoder.OutputExpressions;
 import fr.max2.annotated.processor.network.coder.handler.IDataCoderProvider;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
@@ -30,10 +28,10 @@ public class DataCoderUtils
 		return "buf.read" + type + "()";
 	}
 	
-	public static OutputExpressions addBufferInstructions(String type, String saveValue, IPacketBuilder builder)
+	public static String addBufferInstructions(String type, String saveValue, IPacketBuilder builder)
 	{
 		builder.encoder().add(writeBuffer(type, saveValue));
-		return new OutputExpressions(readBuffer(type));
+		return readBuffer(type);
 	}
 	
 	public static IDataCoderProvider simpleCoder(String type)
@@ -75,9 +73,9 @@ public class DataCoderUtils
 		}
 
 		@Override
-		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 		{
-			return DataCoderUtils.addBufferInstructions(this.typeName, saveAccessExpr, builder);
+			return new OutputExpressions(DataCoderUtils.addBufferInstructions(this.typeName, saveAccessExpr, builder), internalAccessExpr, externalAccessExpr);
 		}
 	}
 }

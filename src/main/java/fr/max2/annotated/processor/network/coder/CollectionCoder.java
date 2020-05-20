@@ -17,8 +17,8 @@ public class CollectionCoder extends DataCoder
 	private static final String COLLECTION_TYPE = Collection.class.getCanonicalName();
 	public static final NamedDataHandler HANDLER = new NamedDataHandler(COLLECTION_TYPE, CollectionCoder::new);
 	
-	private DataCoder contentHandler;
-	private TypeMirror codedType, implType, contentType;
+	private final DataCoder contentHandler;
+	private final TypeMirror codedType, extType, implType, contentType, extContentType;
 	
 	public CollectionCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -27,14 +27,16 @@ public class CollectionCoder extends DataCoder
 		DeclaredType refinedType = tools.types.refineTo(paramType, HANDLER.getType());
 		if (refinedType == null)
 			throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + COLLECTION_TYPE);
-		
+
 		TypeMirror contentFullType = refinedType.getTypeArguments().get(0);
+		this.extContentType = tools.types.shallowErasure(contentFullType);
 		this.contentHandler = tools.handlers.getDataType(uniqueName + "Element", contentFullType, properties.getSubPropertiesOrEmpty("content"));
 		this.contentType = tools.types.shallowErasure(this.contentHandler.getInternalType());
-		
+
+		this.extType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.extContentType);
 		this.internalType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.contentHandler.getInternalType());
 		this.codedType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.contentType);
-		this.implType = paramType;
+		TypeMirror implType = paramType;
 		
 		String implName = properties.getValueOrEmpty("impl");
 		if (implName.isEmpty())
@@ -46,50 +48,67 @@ public class CollectionCoder extends DataCoder
 			if (elem == null)
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + COLLECTION_TYPE);
 
-			this.implType = elem.asType();
-			DeclaredType refinedImpl = tools.types.refineTo(this.implType, HANDLER.getType());
+			implType = elem.asType();
+			DeclaredType refinedImpl = tools.types.refineTo(implType, HANDLER.getType());
 			if (refinedImpl == null)
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of " + COLLECTION_TYPE);
 			
-			contentFullType = refinedImpl.getTypeArguments().get(0);
-			DeclaredType revisedImplType = tools.types.replaceTypeArgument((DeclaredType)this.implType, contentFullType, this.contentType);
+			TypeMirror implContentType = refinedImpl.getTypeArguments().get(0);
+			DeclaredType revisedImplType = tools.types.replaceTypeArgument((DeclaredType)implType, implContentType, this.contentType);
 			if (!tools.types.isAssignable(revisedImplType, this.codedType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + paramType + "'");
-			
 		}
+		
+		this.implType = implType;
 		DataCoderUtils.requireDefaultConstructor(tools.types, this.implType);
 	}
 	
 	@Override
-	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 	{
-		builder.addImport(tools.elements.asTypeElement(tools.types.asElement(this.implType)));
+		builder.addImport(this.tools.elements.asTypeElement(this.tools.types.asElement(this.implType)));
 		
-		String contentTypeName = tools.naming.computeFullName(this.contentType);
-		tools.types.provideTypeImports(this.contentType, builder);
+		String contentTypeName = this.tools.naming.computeFullName(this.contentType);
+		String extContentTypeName = this.tools.naming.computeFullName(this.extContentType);
+		this.tools.types.provideTypeImports(this.contentType, builder);
 		
-		String elementVarName = uniqueName + "Element";
-		builder.encoder()
-			.add(DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".size()"))
-			.add("for (" + contentTypeName + " " + elementVarName + " : " + saveAccessExpr + ")")
-			.add("{");
+		String elementVarName = this.uniqueName + "Element";
+		String lenghtVarName = this.uniqueName + "Length";
+		String indexVarName = this.uniqueName + "Index";
+		String convertedName = uniqueName + "Converted";
 		
-		String lenghtVarName = uniqueName + "Length";
-		String indexVarName = uniqueName + "Index";
-		
+		builder.encoder().add(
+			DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".size()"),
+			"for (" + contentTypeName + " " + elementVarName + " : " + saveAccessExpr + ")",
+			"{");
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataCoderUtils.readBuffer("Int") + ";",
-			tools.naming.computeFullName(this.codedType) + " " + uniqueName + " = new " + tools.naming.computeSimplifiedName(this.implType) + "();",
+			tools.naming.computeFullName(this.codedType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
+
+		builder.internalizer().add(
+			tools.naming.computeFullName(this.codedType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
+			"for (" + extContentTypeName + " " + elementVarName + " : " + internalAccessExpr + ")",
+			"{");
+		builder.externalizer().add(
+			tools.naming.computeFullName(this.extType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
+			"for (" + contentTypeName + " " + elementVarName + " : " + externalAccessExpr + ")",
+			"{");
 		
-		OutputExpressions contentOutput = this.contentHandler.addInstructions(1, builder, elementVarName);
-		builder.decoder().add(uniqueName + ".add(" + contentOutput.decoded + ");");
+		builder.indentAll(1);
+		OutputExpressions contentOutput = builder.runCoder(this.contentHandler, elementVarName);
+		builder.decoder().add(this.uniqueName + ".add(" + contentOutput.decoded + ");");
+		builder.internalizer().add(convertedName + ".add(" + contentOutput.internalized + ");");
+		builder.externalizer().add(convertedName + ".add(" + contentOutput.externalized + ");");
+		builder.indentAll(-1);
 		
 		builder.encoder().add("}");
 		builder.decoder().add("}");
+		builder.internalizer().add("}");
+		builder.externalizer().add("}");
 		
-		return new OutputExpressions(this.uniqueName);
+		return new OutputExpressions(this.uniqueName, convertedName, convertedName);
 	}
 
 	private static String defaultImplementation(TypeElement type)

@@ -19,13 +19,13 @@ public class NBTCoder
 		PRIMITIVE = new NamedDataHandler(ClassRef.NBT_NUMBER, (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
 		{
 			@Override
-			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 			{
-				Element elem = tools.types.asElement(paramType);
+				Element elem = this.tools.types.asElement(paramType);
 				String className = elem.getSimpleName().toString();
 				String primitive = className.substring(0, className.length() - 3);
-				OutputExpressions primitiveOutput = DataCoderUtils.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", builder);
-				return new OutputExpressions(className + ".valueOf(" + primitiveOutput.decoded + ")");
+				String decodedOutput = DataCoderUtils.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", builder);
+				return new OutputExpressions(className + ".valueOf(" + decodedOutput + ")", internalAccessExpr, externalAccessExpr);
 			}
 		})
 		{
@@ -64,7 +64,7 @@ public class NBTCoder
 		}
 
 		@Override
-		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 		{
 			ClassName typeName = tools.naming.buildClassName(tools.types.asElement(paramType));
 			
@@ -87,7 +87,7 @@ public class NBTCoder
 			}
 
 			builder.encoder().add("write" + this.mode + "NBT(buf, " + saveAccessExpr + ");");
-			return new OutputExpressions("read" + this.mode + "NBT(buf, " + typeName.shortName() + "." + (this.mode.equals("Abstract") ? "class" : "TYPE") + ")");
+			return new OutputExpressions("read" + this.mode + "NBT(buf, " + typeName.shortName() + "." + (this.mode.equals("Abstract") ? "class" : "TYPE") + ")", internalAccessExpr, externalAccessExpr);
 		}
 	}
 }

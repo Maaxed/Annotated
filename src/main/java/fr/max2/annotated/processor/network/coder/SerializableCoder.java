@@ -15,8 +15,8 @@ public class SerializableCoder extends DataCoder
 {
 	public static final IDataHandler NBT_SERIALISABLE = new NamedDataHandler(ClassRef.NBT_SERIALIZABLE_INTERFACE, SerializableCoder::new);
 	
-	private TypeMirror nbtType;
-	private DataCoder nbtHandler;
+	private final TypeMirror nbtType;
+	private final DataCoder nbtHandler;
 	
 	public SerializableCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -32,19 +32,19 @@ public class SerializableCoder extends DataCoder
 	}
 	
 	@Override
-	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 	{
 		tools.types.provideTypeImports(this.nbtType, builder);
 		
-		String dataVarName = uniqueName + "Data";
+		String dataVarName = this.uniqueName + "Data";
 		
-		builder.encoder().add(tools.naming.computeFullName(this.nbtType) + " " + dataVarName + " = " + saveAccessExpr + ".serializeNBT()" + ";");
+		builder.encoder().add(this.tools.naming.computeFullName(this.nbtType) + " " + dataVarName + " = " + saveAccessExpr + ".serializeNBT()" + ";");
 		
-		builder.decoder().add(tools.naming.computeFullName(paramType) + " " + uniqueName + " = new " + tools.naming.computeSimplifiedName(paramType) + "();");
+		builder.decoder().add(this.tools.naming.computeFullName(this.paramType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.paramType) + "();");
 		
-		OutputExpressions nbtOutput = this.nbtHandler.addInstructions(builder, dataVarName);
-		builder.decoder().add(uniqueName + ".deserializeNBT(" + nbtOutput.decoded + ");");
+		OutputExpressions nbtOutput = builder.runCoderWithoutConversion(this.nbtHandler, dataVarName);
+		builder.decoder().add(this.uniqueName + ".deserializeNBT(" + nbtOutput.decoded + ");");
 		
-		return new OutputExpressions(uniqueName); 
+		return new OutputExpressions(this.uniqueName, internalAccessExpr, externalAccessExpr); 
 	}
 }

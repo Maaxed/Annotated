@@ -15,7 +15,8 @@ public class ArrayCoder extends DataCoder
 {
 	public static final IDataHandler HANDLER = new SpecialDataHandler(TypeKind.ARRAY, ArrayCoder::new);
 
-	private DataCoder contentCoder;
+	private final DataCoder contentCoder;
+	private final TypeMirror extContentType;
 	
 	public ArrayCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -23,40 +24,60 @@ public class ArrayCoder extends DataCoder
 		
 		ArrayType arrayType = tools.types.asArrayType(paramType);
 		if (arrayType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not an array");
-		TypeMirror contentType = arrayType.getComponentType();
+		this.extContentType = arrayType.getComponentType();
 		
-		this.contentCoder = tools.handlers.getDataType(uniqueName + "Element", contentType, properties.getSubPropertiesOrEmpty("content"));
+		this.contentCoder = tools.handlers.getDataType(uniqueName + "Element", this.extContentType, properties.getSubPropertiesOrEmpty("content"));
 		this.internalType = tools.types.getArrayType(this.contentCoder.getInternalType());
 	}
 	
 	@Override
-	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 	{
-		String contentTypeName = tools.naming.computeFullName(this.contentCoder.getInternalType());
-		String elementVarName = uniqueName + "Element";
-		builder.encoder().add(
-			DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".length"),
-			"for (" + contentTypeName + " " + elementVarName + " : " + saveAccessExpr + ")",
-			"{");
-		
+		String contentTypeName = this.tools.naming.computeFullName(this.contentCoder.getInternalType());
+		String extContentTypeName = this.tools.naming.computeFullName(this.extContentType);
+		String elementVarName = this.uniqueName + "Element";
+		String indexVarName = this.uniqueName + "Index";
+		String convertedName = this.uniqueName + "Converted";
 		
 		String arrayTypeName = contentTypeName + "[]";
+		String extArrayTypeName = extContentTypeName + "[]";
 		
 		int firstBrackets;
 		for (firstBrackets = arrayTypeName.length() - 2; firstBrackets >= 2 && arrayTypeName.substring(firstBrackets - 2, firstBrackets).equals("[]"); firstBrackets-=2);
 
-		String indexVarName = uniqueName + "Index";
+		int extFirstBrackets;
+		for (extFirstBrackets = extArrayTypeName.length() - 2; extFirstBrackets >= 2 && extArrayTypeName.substring(extFirstBrackets - 2, extFirstBrackets).equals("[]"); extFirstBrackets-=2);
+
+		builder.encoder().add(
+			DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".length"),
+			"for (" + contentTypeName + " " + elementVarName + " : " + saveAccessExpr + ")",
+			"{");
 		builder.decoder().add(
-			arrayTypeName + " " + uniqueName + " = new " + arrayTypeName.substring(0, firstBrackets + 1) + DataCoderUtils.readBuffer("Int") + arrayTypeName.substring(firstBrackets + 1) + ";",
-			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + uniqueName + ".length; " + indexVarName + "++)",
+			arrayTypeName + " " + this.uniqueName + " = new " + arrayTypeName.substring(0, firstBrackets + 1) + DataCoderUtils.readBuffer("Int") + arrayTypeName.substring(firstBrackets + 1) + ";",
+			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + this.uniqueName + ".length; " + indexVarName + "++)",
 			"{");
 		
-		OutputExpressions contentOutput = contentCoder.addInstructions(1, builder, elementVarName);
-		builder.decoder().add(uniqueName + "[" + indexVarName + "] = " + contentOutput.decoded + ";");
+		builder.internalizer().add(
+			arrayTypeName + " " + convertedName + " = new " + arrayTypeName.substring(0, firstBrackets + 1) + internalAccessExpr + ".length" + arrayTypeName.substring(firstBrackets + 1) + ";",
+			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + convertedName + ".length; " + indexVarName + "++)",
+			"{");
+		builder.externalizer().add(
+			extArrayTypeName + " " + convertedName + " = new " + extArrayTypeName.substring(0, extFirstBrackets + 1) + externalAccessExpr + ".length" + extArrayTypeName.substring(extFirstBrackets + 1) + ";",
+			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + convertedName + ".length; " + indexVarName + "++)",
+			"{");
+		
+		builder.indentAll(1);
+		OutputExpressions contentOutput = builder.runCoder(contentCoder, elementVarName);
+		builder.decoder().add(this.uniqueName + "[" + indexVarName + "] = " + contentOutput.decoded + ";");
+		builder.internalizer().add(convertedName + "[" + indexVarName + "] = " + contentOutput.internalized + ";");
+		builder.externalizer().add(convertedName + "[" + indexVarName + "] = " + contentOutput.externalized + ";");
+		builder.indentAll(-1);
 		
 		builder.encoder().add("}");
 		builder.decoder().add("}");
+		builder.internalizer().add("}");
+		builder.externalizer().add("}");
 		
-		return new OutputExpressions(this.uniqueName); 
+		return new OutputExpressions(this.uniqueName, convertedName, convertedName); 
 	}
 }

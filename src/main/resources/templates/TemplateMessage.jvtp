@@ -22,7 +22,7 @@ ${fieldsDeclaration}
 	${if allFields}
 	private ${className}(${allFields})
 	{
-${fieldsInit}
+${internalize}
 	}
 	${end}
 
@@ -45,6 +45,7 @@ ${decode}
 		NetworkEvent.Context ctx = ctxSup.get();
 		if (ctx.getDirection().getReceptionSide() == LogicalSide.${receiveSide})
 		{
+${externalize}
 			${if sheduled}
 			ctx.enqueueWork(() -> ${function}(${parameters}));
 			${else}

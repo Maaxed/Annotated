@@ -18,7 +18,7 @@ public class RegistryEntryCoder extends DataCoder
 	private static final String ENTRY_TYPE = ClassRef.REGISTRY_ENTRY;
 	public static final NamedDataHandler HANDLER = new NamedDataHandler(ENTRY_TYPE, RegistryEntryCoder::new);
 	
-	private TypeElement typeElement;
+	private final TypeElement typeElement;
 	
 	public RegistryEntryCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -36,7 +36,7 @@ public class RegistryEntryCoder extends DataCoder
 	}
 	
 	@Override
-	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 	{
 		
 		Name typeName = this.typeElement.getSimpleName();
@@ -57,7 +57,7 @@ public class RegistryEntryCoder extends DataCoder
 		}
 
 		builder.encoder().add("buf.writeRegistryIdUnsafe(" + forgeRegistry + ", " + saveAccessExpr + ");");
-		return new OutputExpressions("buf.readRegistryIdUnsafe(" + forgeRegistry + ")");
+		return new OutputExpressions("buf.readRegistryIdUnsafe(" + forgeRegistry + ")", internalAccessExpr, externalAccessExpr);
 	}
 	
 	public static String getForgeRegistry(TypeElement typeElement)

@@ -6,17 +6,49 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import fr.max2.annotated.processor.network.coder.DataCoder;
+import fr.max2.annotated.processor.network.coder.DataCoder.OutputExpressions;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 
 public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder> implements IPacketBuilder
 {
 	public final Set<String> modules = new HashSet<>();
-	private SimpleFunctionBuilder saveFunction = new SimpleFunctionBuilder();
-	private SimpleFunctionBuilder loadFunction = new SimpleFunctionBuilder();
+	public final SimpleFunctionBuilder encodeFunction = new SimpleFunctionBuilder();
+	public final SimpleFunctionBuilder decodeFunction = new SimpleFunctionBuilder();
+	public final SimpleFunctionBuilder internalizeFunction = new SimpleFunctionBuilder();
+	public final SimpleFunctionBuilder externalizeFunction = new SimpleFunctionBuilder();
 	
 	public SimplePacketBuilder(ProcessingTools tools, String packageName)
 	{
 		super(tools, packageName);
+	}
+	
+	private OutputExpressions runCoder(DataCoder coder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr, boolean conversion)
+	{
+		boolean prevInt = this.internalizeFunction.active;
+		boolean prevExt = this.externalizeFunction.active;
+		this.internalizeFunction.active = conversion;
+		this.externalizeFunction.active = conversion;
+		OutputExpressions output = IPacketBuilder.super.runCoder(coder, saveAccessExpr, internalAccessExpr, externalAccessExpr);
+		this.internalizeFunction.active = prevInt;
+		this.externalizeFunction.active = prevExt;
+		
+		if (!coder.requireConversion())
+			return new OutputExpressions(output.decoded, internalAccessExpr, externalAccessExpr);
+		
+		return output;
+	}
+	
+	@Override
+	public OutputExpressions runCoder(DataCoder coder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
+	{
+		return runCoder(coder, saveAccessExpr, internalAccessExpr, externalAccessExpr, coder.requireConversion());
+	}
+	
+	@Override
+	public OutputExpressions runCoderWithoutConversion(DataCoder coder, String saveAccessExpr)
+	{
+		return runCoder(coder, saveAccessExpr, "UNUSED", "UNUSED", false);
 	}
 
 	@Override
@@ -29,13 +61,25 @@ public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder
 	@Override
 	public IFunctionBuilder encoder()
 	{
-		return this.saveFunction;
+		return this.encodeFunction;
 	}
 
 	@Override
 	public IFunctionBuilder decoder()
 	{
-		return this.loadFunction;
+		return this.decodeFunction;
+	}
+	
+	@Override
+	public IFunctionBuilder internalizer()
+	{
+		return this.internalizeFunction;
+	}
+	
+	@Override
+	public IFunctionBuilder externalizer()
+	{
+		return this.externalizeFunction;
 	}
 	
 	private static String indentString(String str, int indent)
@@ -52,20 +96,11 @@ public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder
 		return new String(array) + str;
 	}
 	
-	public Stream<String> saveInstructions(int indent)
-	{
-		return this.saveFunction.instructions.stream().map(str -> indentString(str, indent));
-	}
-	
-	public Stream<String> loadInstructions(int indent)
-	{
-		return this.loadFunction.instructions.stream().map(str -> indentString(str, indent));
-	}
-	
-	private class SimpleFunctionBuilder implements IFunctionBuilder
+	public class SimpleFunctionBuilder implements IFunctionBuilder
 	{
 		private List<String> instructions = new ArrayList<>();
-		private int indent;
+		private int indent = 0;
+		private boolean active = true;
 
 		@Override
 		public IPacketBuilder end()
@@ -76,9 +111,12 @@ public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder
 		@Override
 		public IFunctionBuilder add(String... instructions)
 		{
-			for (String instruction : instructions)
+			if (active)
 			{
-				this.instructions.add(indentString(instruction, this.indent));
+				for (String instruction : instructions)
+				{
+					this.instructions.add(indentString(instruction, this.indent));
+				}
 			}
 			return this;
 		}
@@ -96,5 +134,9 @@ public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder
 			return this;
 		}
 		
+		public Stream<String> instructions(int indent)
+		{
+			return this.instructions.stream().map(str -> indentString(str, indent));
+		}
 	}
 }

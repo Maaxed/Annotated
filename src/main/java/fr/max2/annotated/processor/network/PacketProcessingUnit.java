@@ -99,12 +99,15 @@ public class PacketProcessingUnit
 		
 		messageParameters.forEach(f -> this.tools.types.provideTypeImports(f.asType(), builder));
 		
+		Map<String, String> parameterValues = new HashMap<>();
 		for (DataCoder coder : dataCoders)
 		{
 			try
 			{
-				DataCoder.OutputExpressions paramOutput = coder.addInstructions(builder, "msg." + coder.uniqueName);
+				DataCoder.OutputExpressions paramOutput = builder.runCoder(coder, "msg." + coder.uniqueName, coder.uniqueName, "msg." + coder.uniqueName);
 				builder.decoder().add("msg." + coder.uniqueName + " = " + paramOutput.decoded + ";");
+				builder.internalizer().add("this." + coder.uniqueName + " = " + paramOutput.internalized + ";");
+				parameterValues.put(coder.uniqueName, paramOutput.externalized);
 				
 				coder.properties.checkUnusedProperties();
 			}
@@ -128,11 +131,12 @@ public class PacketProcessingUnit
 		replacements.put("networkClass", network.networkClassName.shortName());
 		replacements.put("allFields" , messageParameters.stream().map(p -> this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsDeclaration", dataCoders.stream().map(c -> "\tprivate " + this.tools.naming.computeFullName(c.getInternalType()) + " " + c.uniqueName + ";").collect(Collectors.joining(ls)));
-		replacements.put("fieldsInit", messageParameters.stream().map(p -> "\t\tthis." + p.getSimpleName() + " = " + p.getSimpleName() + ";").collect(Collectors.joining(ls)));
-		replacements.put("encode", builder.saveInstructions(2).collect(Collectors.joining(ls)));
-		replacements.put("decode", builder.loadInstructions(2).collect(Collectors.joining(ls)));
+		replacements.put("internalize", builder.internalizeFunction.instructions(2).collect(Collectors.joining(ls)));
+		replacements.put("externalize", builder.externalizeFunction.instructions(3).collect(Collectors.joining(ls)));
+		replacements.put("encode", builder.encodeFunction.instructions(2).collect(Collectors.joining(ls)));
+		replacements.put("decode", builder.decodeFunction.instructions(2).collect(Collectors.joining(ls)));
 		replacements.put("function", network.enclosingClassName.shortName() + "." + this.method.getSimpleName().toString());
-		replacements.put("parameters", parameters.stream().map(p -> this.specialValue(p.asType()).orElse("msg." + p.getSimpleName())).collect(Collectors.joining(", ")));
+		replacements.put("parameters", parameters.stream().map(p -> this.specialValue(p.asType()).orElse(parameterValues.get(p.getSimpleName().toString()))).collect(Collectors.joining(", ")));
 		replacements.put("messageParameters", messageParameters.stream().map(VariableElement::getSimpleName).collect(Collectors.joining(", ")));
 		replacements.put("imports", builder.imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		replacements.put("serverPacket", Boolean.toString(this.side.isServer()));

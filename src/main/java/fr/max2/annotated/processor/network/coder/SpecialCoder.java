@@ -69,9 +69,9 @@ public class SpecialCoder extends DataCoder
 	}
 	
 	@Override
-	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr)
+	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 	{
-		return this.actualCoder.addInstructions(builder, saveAccessExpr);
+		return builder.runCoder(this.actualCoder, saveAccessExpr, internalAccessExpr, externalAccessExpr);
 	}
 	
 	private static RuntimeException incompatibleType(String expected, TypeMirror actual)
