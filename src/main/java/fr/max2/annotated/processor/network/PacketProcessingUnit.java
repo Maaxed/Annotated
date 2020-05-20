@@ -17,10 +17,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.processor.network.coder.DataCoder;
+import fr.max2.annotated.processor.network.model.EnumSide;
 import fr.max2.annotated.processor.network.model.SimplePacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ClassRef;
-import fr.max2.annotated.processor.utils.EnumSide;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 

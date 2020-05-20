@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.utils;
+package fr.max2.annotated.processor.network.model;
 
 import fr.max2.annotated.api.processor.network.ClientPacket;
 import fr.max2.annotated.api.processor.network.ServerPacket;

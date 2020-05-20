@@ -15,9 +15,9 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.processor.network.model.ChannelProvider;
+import fr.max2.annotated.processor.network.model.EnumSide;
 import fr.max2.annotated.processor.network.model.SimpleImportClassBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
-import fr.max2.annotated.processor.utils.EnumSide;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 
 public class NetworkProcessingUnit

@@ -25,8 +25,8 @@ import fr.max2.annotated.api.processor.network.DelegateChannel;
 import fr.max2.annotated.api.processor.network.GenerateChannel;
 import fr.max2.annotated.api.processor.network.ServerPacket;
 import fr.max2.annotated.processor.network.model.ChannelProvider;
+import fr.max2.annotated.processor.network.model.EnumSide;
 import fr.max2.annotated.processor.utils.ClassRef;
-import fr.max2.annotated.processor.utils.EnumSide;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)

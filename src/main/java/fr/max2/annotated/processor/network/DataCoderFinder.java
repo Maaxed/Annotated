@@ -43,14 +43,14 @@ public class DataCoderFinder
 	
 	public DataCoder getDataType(Element field)
 	{
+		Element elem = this.tools.types.asElement(field.asType());
+		DataProperties typeData = elem == null ? null : elem.getAnnotation(DataProperties.class);
+		PropertyMap typeProperties = typeData == null ? PropertyMap.EMPTY_PROPERTIES : PropertyMap.fromArray(typeData.value());
+		
 		DataProperties customData = field.getAnnotation(DataProperties.class);
-		if (customData == null)
-		{
-			Element elem = this.tools.types.asElement(field.asType());
-			if (elem != null)
-				customData = elem.getAnnotation(DataProperties.class);
-		}
-		PropertyMap properties = customData == null ? PropertyMap.EMPTY_PROPERTIES : new PropertyMap(customData.value());
+		PropertyMap customProperties = customData == null ? PropertyMap.EMPTY_PROPERTIES : PropertyMap.fromArray(customData.value());
+		
+		PropertyMap properties = typeProperties.overrideWith(customProperties);
 		return this.getDataType(field.getSimpleName().toString(), field.asType(), properties);
 	}
 	
@@ -76,16 +76,12 @@ public class DataCoderFinder
 		if (handler == null)
 			return null;
 		
-		DataCoder coder = handler.createCoder(this.tools, uniqueName, type, properties);
-		return coder;
-		
-		
+		return handler.createCoder(this.tools, uniqueName, type, properties);
 	}
 	
 	public IDataHandler getDefaultDataType(TypeMirror type)
 	{
 		List<IDataHandler> validHandlers = this.typeMap.stream().filter(entry -> entry.canProcess(type)).collect(Collectors.toList());
-		
 		List<IDataHandler> prioritizedHandlers = HANDLER_PRIORITIES.getHighests(validHandlers);
 		
 		switch (prioritizedHandlers.size())
@@ -97,7 +93,6 @@ public class DataCoderFinder
 		default:
 			throw new IllegalArgumentException("The data handler of the '" + type.toString() + "' type couldn't be chosen: handler priorities are equal: " + prioritizedHandlers.stream().map(h -> h.getClass().getTypeName() + ":" + h.toString()).collect(Collectors.joining(", ")));
 		}
-		
 	}
 	
 	

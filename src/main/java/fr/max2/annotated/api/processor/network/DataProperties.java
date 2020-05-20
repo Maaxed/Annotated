@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.PARAMETER})
 public @interface DataProperties
 {

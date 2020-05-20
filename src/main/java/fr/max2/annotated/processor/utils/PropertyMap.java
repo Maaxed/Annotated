@@ -12,12 +12,14 @@ public class PropertyMap
 	private final Map<String, PropertyValue> properties = new HashMap<>();
 	
 	private PropertyMap()
-	{
-		this(new String[0]);
-	}
+	{ }
 	
-	public PropertyMap(String[] properties)
+	public static PropertyMap fromArray(String[] properties)
 	{
+		if (properties.length == 0)
+			return EMPTY_PROPERTIES;
+		
+		PropertyMap topLevelMap = new PropertyMap();
 		for (String property : properties)
 		{
 			int sep = property.indexOf('=');
@@ -27,7 +29,7 @@ public class PropertyMap
 			String[] identifiers = property.substring(0, sep).split("\\.");
 			String value = property.substring(sep + 1);
 			
-			PropertyMap map = this;
+			PropertyMap map = topLevelMap;
 			
 			for (int i = 0; i < identifiers.length - 1; i++)
 			{
@@ -36,6 +38,7 @@ public class PropertyMap
 			
 			map.createValue(identifiers[identifiers.length - 1], value);
 		}
+		return topLevelMap;
 	}
 	
 	private PropertyMap createSubProperties(String identifier)
@@ -60,6 +63,31 @@ public class PropertyMap
 			throw new InvalidParameterException("The property '" + identifier + "' is defined several times");
 		}
 		this.properties.put(identifier, new PropertyValue(identifier, value));
+	}
+
+	public PropertyMap overrideWith(PropertyMap other)
+	{
+		if (other.properties.isEmpty())
+			return this;
+		
+		if (this.properties.isEmpty())
+			return other;
+		
+		for (PropertyValue value : other.properties.values())
+		{
+			if (value.isPropertyMap() && this.properties.containsKey(value.identifier))
+			{
+				// Combine maps
+				this.properties.compute(value.identifier, (k, v) -> new PropertyValue(k, v.asPropertyMap().overrideWith(value.asPropertyMap())));
+			}
+			else
+			{
+				// Add value to map
+				this.properties.put(value.identifier, value);
+			}
+		}
+		
+		return this;
 	}
 	
 	private Optional<PropertyValue> getProperty(String identifier)
