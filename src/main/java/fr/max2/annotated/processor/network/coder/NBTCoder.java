@@ -66,7 +66,7 @@ public class NBTCoder
 		@Override
 		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 		{
-			ClassName typeName = tools.naming.buildClassName(tools.types.asElement(paramType));
+			ClassName typeName = this.tools.naming.buildClassName(this.tools.types.asElement(paramType));
 			
 			builder.addImport("net.minecraft.nbt.INBTType");
 			builder.addImport("net.minecraft.nbt.INBT");

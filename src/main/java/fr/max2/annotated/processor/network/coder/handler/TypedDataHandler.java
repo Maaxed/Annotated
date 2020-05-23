@@ -20,7 +20,7 @@ public abstract class TypedDataHandler implements IDataHandler
 	
 	public TypeMirror getType()
 	{
-		return type;
+		return this.type;
 	}
 	
 	@Override

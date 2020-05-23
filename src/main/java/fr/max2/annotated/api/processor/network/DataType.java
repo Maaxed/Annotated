@@ -38,9 +38,14 @@ public enum DataType
 	NBT_PRIMITIVE,
 	NBT_CONCRETE,
 	NBT_ABSTRACT,
-	//TODO [v2.0] Entity + EntityPlayer
+	ENTITY_ID,
+	PLAYER_ID,
+	//TODO [v2.1] Entity by copy type
+	//TODO [v2.1] IDynamicSerializable
+	//TODO [v2.1] Container
+	//TODO [v2.1] JsonDeserializer + JsonSerializer
+	//TODO [v2.1] Optional
 	//TODO [v2.2] other data/packet class
-	//TODO [v2.1] IDynamicSerializable, JsonDeserializer + JsonSerializer
 
 	//TODO [v2.1] test special types
 	// Special types

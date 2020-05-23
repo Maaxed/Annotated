@@ -15,6 +15,7 @@ import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.network.coder.ArrayCoder;
 import fr.max2.annotated.processor.network.coder.CollectionCoder;
 import fr.max2.annotated.processor.network.coder.DataCoder;
+import fr.max2.annotated.processor.network.coder.EntityCoder;
 import fr.max2.annotated.processor.network.coder.MapCoder;
 import fr.max2.annotated.processor.network.coder.NBTCoder;
 import fr.max2.annotated.processor.network.coder.PrimitiveCoder;
@@ -127,6 +128,8 @@ public class DataCoderFinder
 		TYPE_TO_HANDLER.put(DataType.BLOCK_RAY_TRACE, SimpleClassCoder.BLOCK_RAY_TRACE);
 		TYPE_TO_HANDLER.put(DataType.REGISTRY_ENTRY, RegistryEntryCoder.HANDLER);
 		TYPE_TO_HANDLER.put(DataType.NBT_SERIALIZABLE, SerializableCoder.NBT_SERIALISABLE);
+		TYPE_TO_HANDLER.put(DataType.ENTITY_ID, EntityCoder.ENTITY_ID);
+		TYPE_TO_HANDLER.put(DataType.PLAYER_ID, EntityCoder.PLAYER_ID);
 		
 		TYPE_TO_HANDLER.put(DataType.NBT_PRIMITIVE, NBTCoder.PRIMITIVE);
 		TYPE_TO_HANDLER.put(DataType.NBT_CONCRETE, NBTCoder.CONCRETE);
@@ -142,6 +145,10 @@ public class DataCoderFinder
 		
 		
 		HANDLER_PRIORITIES.prioritize(SimpleClassCoder.ITEM_STACK).over(SerializableCoder.NBT_SERIALISABLE);
+		
+		HANDLER_PRIORITIES.prioritize(EntityCoder.PLAYER_ID).over(EntityCoder.ENTITY_ID);
+		HANDLER_PRIORITIES.prioritize(EntityCoder.PLAYER_ID).over(SerializableCoder.NBT_SERIALISABLE);
+		HANDLER_PRIORITIES.prioritize(EntityCoder.ENTITY_ID).over(SerializableCoder.NBT_SERIALISABLE);
 
 		HANDLER_PRIORITIES.prioritize(NBTCoder.PRIMITIVE).over(NBTCoder.CONCRETE);
 		HANDLER_PRIORITIES.prioritize(NBTCoder.CONCRETE).over(NBTCoder.ABSTRACT);

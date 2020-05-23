@@ -20,7 +20,7 @@ public class NamedDataHandler extends TypedDataHandler
 	@Override
 	protected TypeMirror findType()
 	{
-		return tools.types.erasure(this.tools.elements.getTypeElement(this.typeName).asType());
+		return this.tools.types.erasure(this.tools.elements.getTypeElement(this.typeName).asType());
 	}
 	
 	@Override
@@ -35,7 +35,7 @@ public class NamedDataHandler extends TypedDataHandler
 			return false;
 		
 		default:
-			return tools.types.isAssignable(type, this.type);
+			return this.tools.types.isAssignable(type, this.type);
 		}
 	}
 

@@ -28,7 +28,7 @@ public class TemplateHelper
 {
 	private final ProcessingTools tools;
 	
-	//TODO [v2.0] imports in templates
+	//TODO [v2.1] imports in templates
 	public TemplateHelper(ProcessingTools tools) //TODO [v2.2] improve templates : method templates, for loop
 	{
 		this.tools = tools;

@@ -19,6 +19,8 @@ public class ClassRef
 		RESOURCE_LOCATION	= MINECRAFT_PACKAGE + ".util.ResourceLocation",
 		TEXT_COMPONENT		= MINECRAFT_PACKAGE + ".util.text.ITextComponent",
 		BLOCK_RAY_TRACE		= MINECRAFT_PACKAGE + ".util.math.BlockRayTraceResult",
+		ENTITY_BASE			= MINECRAFT_PACKAGE + ".entity.Entity",
+		PLAYER_BASE			= MINECRAFT_PACKAGE + ".entity.player.PlayerEntity",
 		SERVER_PLAYER		= MINECRAFT_PACKAGE + ".entity.player.ServerPlayerEntity";
 
 	public static final String

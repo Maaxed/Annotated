@@ -13,6 +13,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
@@ -91,6 +92,12 @@ public class PacketProcessingUnit
 			return false;
 		}
 		
+		if (this.method.getReturnType().getKind() != TypeKind.VOID)
+		{
+			this.tools.log(Kind.ERROR, "Packet handler must retrun void", this.method, this.annotation);
+			return false;
+		}
+		
 		List<? extends VariableElement> parameters = this.method.getParameters();
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
 		List<DataCoder> dataCoders = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
@@ -104,6 +111,7 @@ public class PacketProcessingUnit
 		{
 			try
 			{
+				this.tools.types.provideTypeImports(coder.getInternalType(), builder);
 				DataCoder.OutputExpressions paramOutput = builder.runCoder(coder, "msg." + coder.uniqueName, coder.uniqueName, "msg." + coder.uniqueName);
 				builder.decoder().add("msg." + coder.uniqueName + " = " + paramOutput.decoded + ";");
 				builder.internalizer().add("this." + coder.uniqueName + " = " + paramOutput.internalized + ";");

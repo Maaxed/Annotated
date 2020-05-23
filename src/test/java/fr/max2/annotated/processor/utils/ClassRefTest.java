@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBT;
@@ -35,6 +37,8 @@ public class ClassRefTest
 		assertEquals(ResourceLocation.class.getCanonicalName(), ClassRef.RESOURCE_LOCATION);
 		assertEquals(ITextComponent.class.getCanonicalName(), ClassRef.TEXT_COMPONENT);
 		assertEquals(BlockRayTraceResult.class.getCanonicalName(), ClassRef.BLOCK_RAY_TRACE);
+		assertEquals(Entity.class.getCanonicalName(), ClassRef.ENTITY_BASE);
+		assertEquals(PlayerEntity.class.getCanonicalName(), ClassRef.PLAYER_BASE);
 		assertEquals(ServerPlayerEntity.class.getCanonicalName(), ClassRef.SERVER_PLAYER);
 		//Forge
 		assertEquals(IForgeRegistryEntry.class.getCanonicalName(), ClassRef.REGISTRY_ENTRY);

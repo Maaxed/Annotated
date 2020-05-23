@@ -16,7 +16,7 @@ public class SerializableCoder extends DataCoder
 	public static final IDataHandler NBT_SERIALISABLE = new NamedDataHandler(ClassRef.NBT_SERIALIZABLE_INTERFACE, SerializableCoder::new);
 	
 	private final TypeMirror nbtType;
-	private final DataCoder nbtHandler;
+	private final DataCoder nbtCoder;
 	
 	public SerializableCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -28,7 +28,7 @@ public class SerializableCoder extends DataCoder
 		DataCoderUtils.requireDefaultConstructor(tools.types, paramType);
 		
 		this.nbtType = serialisableType.getTypeArguments().get(0);
-		this.nbtHandler = tools.handlers.getDataType(uniqueName + "Data", nbtType, properties.getSubPropertiesOrEmpty("nbt"));
+		this.nbtCoder = tools.handlers.getDataType(uniqueName + "Data", this.nbtType, properties.getSubPropertiesOrEmpty("nbt"));
 	}
 	
 	@Override
@@ -40,9 +40,10 @@ public class SerializableCoder extends DataCoder
 		
 		builder.encoder().add(this.tools.naming.computeFullName(this.nbtType) + " " + dataVarName + " = " + saveAccessExpr + ".serializeNBT()" + ";");
 		
+		//TODO use impl param
 		builder.decoder().add(this.tools.naming.computeFullName(this.paramType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.paramType) + "();");
 		
-		OutputExpressions nbtOutput = builder.runCoderWithoutConversion(this.nbtHandler, dataVarName);
+		OutputExpressions nbtOutput = builder.runCoderWithoutConversion(this.nbtCoder, dataVarName);
 		builder.decoder().add(this.uniqueName + ".deserializeNBT(" + nbtOutput.decoded + ");");
 		
 		return new OutputExpressions(this.uniqueName, internalAccessExpr, externalAccessExpr); 

@@ -13,6 +13,9 @@ import fr.max2.annotated.api.processor.network.ServerPacket;
 import fr.max2.annotated.test.ModTestAnnotated;
 import fr.max2.annotated.test.util.EnumTest;
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -93,6 +96,12 @@ public class TestData
 	
 	@ClientPacket
 	public static void otherMinecraftObjets(ItemStack myStack, CompoundNBT myTags, ListNBT nyTagList, LongNBT myLong, StringNBT myString, INBT anyNBT, BlockPos pos, ResourceLocation loc, FluidStack fluid, ITextComponent text, BlockRayTraceResult rayResult)
+	{
+		
+	}
+	
+	@ClientPacket
+	public static void entities(Entity entity, PlayerEntity player, PigEntity pig)
 	{
 		
 	}
