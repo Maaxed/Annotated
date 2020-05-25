@@ -93,7 +93,8 @@ public class TemplateHelper
 			{
 				String newLine = mapKeys(controls, line + System.lineSeparator(), i, replacements);
 				
-				lines.accept(newLine);
+				if (!newLine.isEmpty())
+					lines.accept(newLine);
 				i++;
 			}
 			
@@ -118,8 +119,10 @@ public class TemplateHelper
 		
 		StringBuffer sb = new StringBuffer();
 		StringBuffer devNull = new StringBuffer();
+		boolean hasSpecialCode = false;
 		while (m.find())
 		{
+			hasSpecialCode = true;
 			String key = m.group(1);
 			String[] parts = Stream.of(key.split(" ")).map(w -> w.trim()).filter(w -> w.length() > 0).toArray(String[]::new);
 			
@@ -196,7 +199,9 @@ public class TemplateHelper
 			m.appendTail(sb);
 		}
 		
-		return sb.toString();
+		String res = sb.toString();
+		// Remove unnecessary empty lines
+		return hasSpecialCode && res.trim().equals("") ? "" : res;
 	}
 	
 }

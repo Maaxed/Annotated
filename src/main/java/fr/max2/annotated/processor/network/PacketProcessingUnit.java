@@ -132,6 +132,7 @@ public class PacketProcessingUnit
 		}
 
 		String ls = System.lineSeparator();
+		String sheduled = this.tools.elements.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true");
 		
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", messageClassName.packageName());
@@ -140,7 +141,7 @@ public class PacketProcessingUnit
 		replacements.put("allFields" , messageParameters.stream().map(p -> this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsDeclaration", dataCoders.stream().map(c -> "\tprivate " + this.tools.naming.computeFullName(c.getInternalType()) + " " + c.uniqueName + ";").collect(Collectors.joining(ls)));
 		replacements.put("internalize", builder.internalizeFunction.instructions(2).collect(Collectors.joining(ls)));
-		replacements.put("externalize", builder.externalizeFunction.instructions(3).collect(Collectors.joining(ls)));
+		replacements.put("externalize", builder.externalizeFunction.instructions(sheduled.equals("true") ? 3 : 2).collect(Collectors.joining(ls)));
 		replacements.put("encode", builder.encodeFunction.instructions(2).collect(Collectors.joining(ls)));
 		replacements.put("decode", builder.decodeFunction.instructions(2).collect(Collectors.joining(ls)));
 		replacements.put("function", network.enclosingClassName.shortName() + "." + this.method.getSimpleName().toString());
@@ -150,7 +151,7 @@ public class PacketProcessingUnit
 		replacements.put("serverPacket", Boolean.toString(this.side.isServer()));
 		replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
 		replacements.put("receiveSide", this.side.getSimpleName().toUpperCase());
-		replacements.put("sheduled", this.tools.elements.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true"));
+		replacements.put("sheduled", sheduled);
 		replacements.put("modulesContent", builder.modules.stream().map(this::readModule).flatMap(List::stream).map(l -> '\t' + l).collect(Collectors.joining()));
 		
 		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);

@@ -25,7 +25,7 @@ ${fieldsDeclaration}
 ${internalize}
 	}
 	${end}
-
+	
 	private static void encode(${className} msg, PacketBuffer buf)
 	{
 ${encode}
@@ -43,16 +43,24 @@ ${decode}
 	private static void handle(${className} msg, Supplier<NetworkEvent.Context> ctxSup)
 	{
 		NetworkEvent.Context ctx = ctxSup.get();
-		if (ctx.getDirection().getReceptionSide() == LogicalSide.${receiveSide})
+		if (ctx.getDirection().getReceptionSide() != LogicalSide.${receiveSide})
+			return;
+		
+		${if sheduled}
+		${if externalize}
+		ctx.enqueueWork(() ->
 		{
 ${externalize}
-			${if sheduled}
-			ctx.enqueueWork(() -> ${function}(${parameters}));
-			${else}
 			${function}(${parameters});
-			${end}
-			ctx.setPacketHandled(true);
-		}
+		});
+		${else}
+		ctx.enqueueWork(() -> ${function}(${parameters}));
+		${end}
+		${else}
+${externalize}
+		${function}(${parameters});
+		${end}
+		ctx.setPacketHandled(true);
 	}
 	
 	static void registerTo(SimpleChannel channel, int index)
@@ -78,6 +86,5 @@ ${externalize}
 		send(PacketDistributor.PLAYER.with(() -> _targetPlayer)${if allFields}, ${end}${messageParameters});
 	}
 	${end}
-	
 ${modulesContent}
 }
