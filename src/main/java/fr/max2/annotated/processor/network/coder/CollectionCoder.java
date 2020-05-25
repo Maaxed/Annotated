@@ -17,7 +17,7 @@ public class CollectionCoder extends DataCoder
 	private static final String COLLECTION_TYPE = Collection.class.getCanonicalName();
 	public static final NamedDataHandler HANDLER = new NamedDataHandler(COLLECTION_TYPE, CollectionCoder::new);
 	
-	private final DataCoder contentHandler;
+	private final DataCoder contentCoder;
 	private final TypeMirror codedType, extType, implType, contentType, extContentType;
 	
 	public CollectionCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
@@ -30,11 +30,15 @@ public class CollectionCoder extends DataCoder
 
 		TypeMirror contentFullType = refinedType.getTypeArguments().get(0);
 		this.extContentType = tools.types.shallowErasure(contentFullType);
-		this.contentHandler = tools.handlers.getDataType(uniqueName + "Element", contentFullType, properties.getSubPropertiesOrEmpty("content"));
-		this.contentType = tools.types.shallowErasure(this.contentHandler.getInternalType());
+		this.contentCoder = tools.handlers.getDataType(uniqueName + "Element", contentFullType, properties.getSubPropertiesOrEmpty("content"));
+		TypeMirror contentType = this.contentCoder.getInternalType();
+		if (contentType.getKind().isPrimitive())
+			contentType = tools.types.boxedClass(tools.types.asPrimitive(contentType)).asType();
+		
+		this.contentType = tools.types.shallowErasure(contentType);
 
 		this.extType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.extContentType);
-		this.internalType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.contentHandler.getInternalType());
+		this.internalType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, contentType);
 		this.codedType = tools.types.replaceTypeArgument((DeclaredType)paramType, contentFullType, this.contentType);
 		TypeMirror implType = paramType;
 		
@@ -97,7 +101,7 @@ public class CollectionCoder extends DataCoder
 			"{");
 		
 		builder.indentAll(1);
-		OutputExpressions contentOutput = builder.runCoder(this.contentHandler, elementVarName);
+		OutputExpressions contentOutput = builder.runCoder(this.contentCoder, elementVarName);
 		builder.decoder().add(this.uniqueName + ".add(" + contentOutput.decoded + ");");
 		builder.internalizer().add(convertedName + ".add(" + contentOutput.internalized + ");");
 		builder.externalizer().add(convertedName + ".add(" + contentOutput.externalized + ");");

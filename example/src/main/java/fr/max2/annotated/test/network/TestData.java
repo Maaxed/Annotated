@@ -14,6 +14,7 @@ import fr.max2.annotated.test.ModTestAnnotated;
 import fr.max2.annotated.test.util.EnumTest;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -101,7 +102,7 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void entities(Entity entity, PlayerEntity player, PigEntity pig)
+	public static void entities(Entity entity, PlayerEntity player, PigEntity pig, List<PigEntity> morePigs, Map<? extends CowEntity, ? extends Item> cows)
 	{
 		
 	}

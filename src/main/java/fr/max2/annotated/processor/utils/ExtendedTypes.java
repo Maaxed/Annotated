@@ -38,6 +38,29 @@ public class ExtendedTypes implements Types
 		this.base = base;
 	}
 	
+	public PrimitiveType asPrimitive(TypeMirror type)
+	{
+		return type == null ? null : PrimitiveTypeCaster.INSTANCE.visit(type);
+	}
+	
+	private enum PrimitiveTypeCaster implements DefaultTypeVisitor<PrimitiveType, Void>
+	{
+		INSTANCE;
+		
+		@Override
+		public PrimitiveType visitPrimitive(PrimitiveType t, Void p)
+		{
+			return t;
+		}
+
+		@Override
+		public PrimitiveType visitDefault(TypeMirror t, Void p)
+		{
+			return null;
+		}
+		
+	}
+	
 	public ArrayType asArrayType(TypeMirror type)
 	{
 		return type == null ? null : ArrayTypeCaster.INSTANCE.visit(type);

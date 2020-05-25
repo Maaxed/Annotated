@@ -17,11 +17,11 @@ public class MapCoder extends DataCoder
 	private static final String MAP_TYPE = Map.class.getCanonicalName();
 	public static final NamedDataHandler HANDLER = new NamedDataHandler(MAP_TYPE, MapCoder::new);
 
-	private final DataCoder keyHandler, valueHandler;
+	private final DataCoder keyCoder, valueCoder;
 	private final TypeMirror
-		codedType, implType, extType,
-		keyFullType, keyType,
-		valueFullType, valueType;
+		erasureIntType, extType, implType,
+		keyExtType, keyIntType,
+		valueExtType, valueIntType;
 	
 	public MapCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 	{
@@ -32,17 +32,23 @@ public class MapCoder extends DataCoder
 		DeclaredType refinedType = tools.types.refineTo(paramType, mapType);
 		if (refinedType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + MAP_TYPE);
 		
-		this.keyFullType = refinedType.getTypeArguments().get(0);
-		this.keyHandler = tools.handlers.getDataType(uniqueName + "Key", this.keyFullType, properties.getSubPropertiesOrEmpty("keys"));
-		this.keyType = tools.types.shallowErasure(this.keyHandler.getInternalType());
+		this.keyExtType = refinedType.getTypeArguments().get(0);
+		this.keyCoder = tools.handlers.getDataType(uniqueName + "Key", this.keyExtType, properties.getSubPropertiesOrEmpty("keys"));
+		TypeMirror keyType = this.keyCoder.getInternalType();
+		if (keyType.getKind().isPrimitive())
+			keyType = tools.types.boxedClass(tools.types.asPrimitive(keyType)).asType();
+		this.keyIntType = keyType;
 
-		this.valueFullType = refinedType.getTypeArguments().get(1);
-		this.valueHandler = tools.handlers.getDataType(uniqueName + "Element", this.valueFullType, properties.getSubPropertiesOrEmpty("values"));
-		this.valueType = tools.types.shallowErasure(this.valueHandler.getInternalType());
+		this.valueExtType = refinedType.getTypeArguments().get(1);
+		this.valueCoder = tools.handlers.getDataType(uniqueName + "Element", this.valueExtType, properties.getSubPropertiesOrEmpty("values"));
+		TypeMirror valueType = this.valueCoder.getInternalType();
+		if (valueType.getKind().isPrimitive())
+			valueType = tools.types.boxedClass(tools.types.asPrimitive(valueType)).asType();
+		this.valueIntType = valueType;
 
-		this.extType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyFullType, tools.types.shallowErasure(this.keyFullType)), this.valueFullType, tools.types.shallowErasure(this.valueFullType));
-		this.internalType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyFullType, this.keyHandler.getInternalType()), this.valueFullType, this.valueHandler.getInternalType());
-		this.codedType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyFullType, this.keyType), this.valueFullType, this.valueType);
+		this.extType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyExtType, tools.types.shallowErasure(this.keyExtType)), this.valueExtType, tools.types.shallowErasure(this.valueExtType));
+		this.internalType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyExtType, keyType), this.valueExtType, valueType);
+		this.erasureIntType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)paramType, this.keyExtType, tools.types.shallowErasure(this.keyIntType)), this.valueExtType, tools.types.shallowErasure(this.valueIntType));
 		TypeMirror implType = paramType;
 		
 		String implName = properties.getValueOrEmpty("impl");
@@ -62,8 +68,8 @@ public class MapCoder extends DataCoder
 			
 			TypeMirror implKeyFullType = refinedImpl.getTypeArguments().get(0);
 			TypeMirror implValueFullType = refinedImpl.getTypeArguments().get(1);
-			DeclaredType revisedImplType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)implType, implKeyFullType, this.keyType), implValueFullType, this.valueType);
-			if (!tools.types.isAssignable(revisedImplType, this.codedType))
+			DeclaredType revisedImplType = tools.types.replaceTypeArgument(tools.types.replaceTypeArgument((DeclaredType)implType, implKeyFullType, tools.types.shallowErasure(this.keyIntType)), implValueFullType, tools.types.shallowErasure(this.valueIntType));
+			if (!tools.types.isAssignable(revisedImplType, this.erasureIntType))
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of '" + paramType + "'");
 		}
 		
@@ -79,42 +85,41 @@ public class MapCoder extends DataCoder
 		String lenghtVarName = this.uniqueName + "Length";
 		String indexVarName = this.uniqueName + "Index";
 		String convertedName = this.uniqueName + "Converted";
+		
+		TypeMirror erasedIntKey = this.tools.types.shallowErasure(this.keyIntType);
 
 		builder.addImport(this.tools.elements.asTypeElement(this.tools.types.asElement(this.implType)));
 		builder.addImport(this.tools.elements.getTypeElement(MAP_TYPE));
-		this.tools.types.provideTypeImports(this.keyType, builder);
-		this.tools.types.provideTypeImports(this.valueType, builder);
+		this.tools.types.provideTypeImports(this.keyIntType, builder);
+		this.tools.types.provideTypeImports(this.valueIntType, builder);
 		
 		builder.encoder().add(
 			DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".size()"),
-			"for (Map.Entry<" + this.tools.naming.computeFullName(this.keyFullType) + ", " +this. tools.naming.computeFullName(this.valueFullType) + "> " + entryVarName + " : " + saveAccessExpr + ".entrySet())",
+			"for (Map.Entry<" + this.tools.naming.computeFullName(this.keyIntType) + ", " +this. tools.naming.computeFullName(this.valueIntType) + "> " + entryVarName + " : " + saveAccessExpr + ".entrySet())",
 			"{");
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + DataCoderUtils.readBuffer("Int") + ";",
-			this.tools.naming.computeFullName(this.codedType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(implType) + "();",
+			this.tools.naming.computeFullName(this.erasureIntType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		
-		
 		builder.internalizer().add(
-			this.tools.naming.computeFullName(this.codedType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
-			"for (Map.Entry<" + this.tools.naming.computeFullName(this.keyFullType) + ", " + this.tools.naming.computeFullName(this.valueFullType) + "> " + entryVarName + " : " + internalAccessExpr + ".entrySet())",
+			this.tools.naming.computeFullName(this.erasureIntType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
+			"for (Map.Entry<" + this.tools.naming.computeFullName(this.keyExtType) + ", " + this.tools.naming.computeFullName(this.valueExtType) + "> " + entryVarName + " : " + internalAccessExpr + ".entrySet())",
 			"{");
 		builder.externalizer().add(
 			this.tools.naming.computeFullName(this.extType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
-			"for (Map.Entry<" + this.tools.naming.computeFullName(this.keyType) + ", " + this.tools.naming.computeFullName(this.valueType) + "> " + entryVarName + " : " + externalAccessExpr + ".entrySet())",
+			"for (Map.Entry<" + this.tools.naming.computeFullName(this.keyIntType) + ", " + this.tools.naming.computeFullName(this.valueIntType) + "> " + entryVarName + " : " + externalAccessExpr + ".entrySet())",
 			"{");
 
 		builder.indentAll(1);
-		OutputExpressions keyOutput = builder.runCoder(this.keyHandler, entryVarName + ".getKey()");
-		builder.decoder().add(this.tools.naming.computeFullName(this.keyType) + " " + keyVarTmpName + " = " + keyOutput.decoded + ";");
-		builder.internalizer().add(this.tools.naming.computeFullName(this.keyType) + " " + keyVarTmpName + " = " + keyOutput.internalized + ";");
-		builder.externalizer().add(this.tools.naming.computeFullName(this.keyFullType) + " " + keyVarTmpName + " = " + keyOutput.externalized + ";");
+		OutputExpressions keyOutput = builder.runCoder(this.keyCoder, entryVarName + ".getKey()");
+		builder.decoder().add(this.tools.naming.computeFullName(erasedIntKey) + " " + keyVarTmpName + " = " + keyOutput.decoded + ";");
 		
-		OutputExpressions valueOutput = builder.runCoder(this.valueHandler, entryVarName + ".getValue()");
+		OutputExpressions valueOutput = builder.runCoder(this.valueCoder, entryVarName + ".getValue()");
 		builder.decoder().add(this.uniqueName + ".put(" + keyVarTmpName + ", " + valueOutput.decoded + ");");
-		builder.internalizer().add(convertedName + ".put(" + keyVarTmpName + ", " + valueOutput.internalized + ");");
-		builder.externalizer().add(convertedName + ".put(" + keyVarTmpName + ", " + valueOutput.externalized + ");");
+		builder.internalizer().add(convertedName + ".put(" + keyOutput.internalized + ", " + valueOutput.internalized + ");");
+		builder.externalizer().add(convertedName + ".put(" + keyOutput.externalized + ", " + valueOutput.externalized + ");");
 		builder.indentAll(-1);
 		
 		builder.encoder().add("}");
