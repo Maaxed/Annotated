@@ -100,7 +100,7 @@ public class PacketProcessingUnit
 		
 		List<? extends VariableElement> parameters = this.method.getParameters();
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
-		List<DataCoder> dataCoders = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());
+		List<DataCoder> dataCoders = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());//TODO exception handling
 		
 		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools, messageClassName.packageName());
 		
