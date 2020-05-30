@@ -1,5 +1,6 @@
 package fr.max2.annotated.processor.network.coder;
 
+import javax.annotation.Nullable;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
@@ -49,17 +50,20 @@ public class DataCoderUtils
 		return simpleHandler(clazz.getTypeName(), typeName);
 	}
 	
-	public static void requireDefaultConstructor(Types typeHelper, TypeMirror type)
+	public static void requireDefaultConstructor(Types typeHelper, TypeMirror type, @Nullable String errorHelpInfo) throws IncompatibleTypeException
 	{
 		Element elem = typeHelper.asElement(type);
 		if (elem == null)
 			return; // Unknown type, assume it has a default constructor
 		
+		if (errorHelpInfo != null)
+			errorHelpInfo = ". " + errorHelpInfo;
+		
 		if (elem.getModifiers().contains(Modifier.ABSTRACT))
-			throw new IncompatibleTypeException("The type '" + type + "' is abstract and can't be instantiated");
+			throw new IncompatibleTypeException("The type '" + type + "' is abstract and can't be instantiated" + errorHelpInfo);
 		
 		if (!ElementFilter.constructorsIn(elem.getEnclosedElements()).stream().anyMatch(cons -> cons.getParameters().isEmpty()))
-			throw new IncompatibleTypeException("The type '" + type + "' doesn't have a default constructor");
+			throw new IncompatibleTypeException("The type '" + type + "' doesn't have a default constructor" + errorHelpInfo);
 	}
 	
 	public static class SimpleCoder extends DataCoder

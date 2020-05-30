@@ -34,20 +34,16 @@ public class TemplateHelper
 		this.tools = tools;
 	}
 	
-	public boolean writeFileWithLog(String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws IOException
+	public boolean writeFileWithLog(String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation)
 	{
 		try
 		{
 			writeFile(tools.filer, className, templateFile, replacements, originatingElement);
 			return true;
 		}
-		catch (IOException e)
-		{
-			tools.log(Kind.ERROR, "An IOException occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
-		}
 		catch (Exception e)
 		{
-			tools.log(Kind.ERROR, "An unexpected exception occured during the generation of the file '" + className + "' from template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
+			tools.log(Kind.ERROR, "Unable to write while the class file '" + className + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
 		}
 		return false;
 	}

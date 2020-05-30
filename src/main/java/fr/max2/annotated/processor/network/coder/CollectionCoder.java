@@ -6,11 +6,13 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.annotated.api.processor.network.DataProperties;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
+import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 
 public class CollectionCoder extends DataCoder
 {
@@ -20,7 +22,7 @@ public class CollectionCoder extends DataCoder
 	private final DataCoder contentCoder;
 	private final TypeMirror codedType, extType, implType, contentType, extContentType;
 	
-	public CollectionCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public CollectionCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties) throws CoderExcepetion
 	{
 		super(tools, uniqueName, paramType, properties);
 		
@@ -64,7 +66,7 @@ public class CollectionCoder extends DataCoder
 		}
 		
 		this.implType = implType;
-		DataCoderUtils.requireDefaultConstructor(tools.types, this.implType);
+		DataCoderUtils.requireDefaultConstructor(tools.types, this.implType, "Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'impl' property to specify a valid implementation");
 	}
 	
 	@Override

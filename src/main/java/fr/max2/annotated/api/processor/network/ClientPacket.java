@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+//TODO [v2.0] add comments
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD})
 public @interface ClientPacket

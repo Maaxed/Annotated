@@ -11,6 +11,7 @@ import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
+import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 
 public class EntityCoder
 {
@@ -24,14 +25,14 @@ public class EntityCoder
 		private final DataCoder idCoder;
 		private final TypeMirror expectedType;
 
-		public IdCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, TypeMirror expectedType, TypeMirror idType, String idGetter, String entityGetter)
+		public IdCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, TypeMirror expectedType, TypeMirror idType, String idGetter, String entityGetter) throws CoderExcepetion
 		{
 			super(tools, uniqueName, paramType, properties);
 			this.expectedType = expectedType;
 			this.internalType = idType;
 			this.idGetter = idGetter;
 			this.entityGetter = entityGetter;
-			this.idCoder = tools.handlers.getDataType(uniqueName + "ID", this.internalType, properties.getSubPropertiesOrEmpty("id"));
+			this.idCoder = tools.handlers.getDataType(uniqueName + "Id", this.internalType, properties.getSubPropertiesOrEmpty("id"));
 		}
 
 		@Override

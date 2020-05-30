@@ -1,7 +1,7 @@
 package fr.max2.annotated.processor.utils.exceptions;
 
 
-public class InvalidPropertyException extends RuntimeException
+public class InvalidPropertyException extends CoderExcepetion
 {
 
 	public InvalidPropertyException()

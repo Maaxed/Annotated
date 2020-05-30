@@ -1,6 +1,5 @@
 package fr.max2.annotated.processor.network.coder;
 
-import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -20,7 +19,7 @@ public class RegistryEntryCoder extends DataCoder
 	
 	private final TypeElement typeElement;
 	
-	public RegistryEntryCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public RegistryEntryCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties) throws IncompatibleTypeException
 	{
 		super(tools, uniqueName, paramType, properties);
 		
@@ -30,7 +29,7 @@ public class RegistryEntryCoder extends DataCoder
 		TypeMirror contentType = entryType.getTypeArguments().get(0);
 		if (contentType.getKind() != TypeKind.DECLARED)
 		{
-			throw new IncompatibleTypeException("The registry type is invalid");
+			throw new IncompatibleTypeException("The registry type '" + contentType + "' is invalid");
 		}
 		this.typeElement = tools.elements.asTypeElement(tools.types.asElement(contentType));
 	}
@@ -38,15 +37,12 @@ public class RegistryEntryCoder extends DataCoder
 	@Override
 	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 	{
-		
-		Name typeName = this.typeElement.getSimpleName();
-		
 		String registryName = getForgeRegistry(this.typeElement);
-		String forgeRegistry;
 		
+		String forgeRegistry;
 		if (registryName == null)
 		{
-			forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + typeName + ".class)";
+			forgeRegistry = "RegistryManager.ACTIVE.getRegistry(" + this.typeElement.getSimpleName() + ".class)";
 			builder.addImport(this.typeElement);
 			builder.addImport("net.minecraftforge.registries.RegistryManager");
 		}

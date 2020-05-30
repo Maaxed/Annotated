@@ -10,6 +10,7 @@ import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
+import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 
 public class ArrayCoder extends DataCoder
 {
@@ -18,7 +19,7 @@ public class ArrayCoder extends DataCoder
 	private final DataCoder contentCoder;
 	private final TypeMirror extContentType;
 	
-	public ArrayCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public ArrayCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties) throws CoderExcepetion
 	{
 		super(tools, uniqueName, paramType, properties);
 		

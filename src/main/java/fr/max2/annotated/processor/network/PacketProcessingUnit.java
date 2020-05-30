@@ -1,6 +1,5 @@
 package fr.max2.annotated.processor.network;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,7 @@ import fr.max2.annotated.processor.network.model.SimplePacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
-import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
+import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 
 public class PacketProcessingUnit
 {
@@ -73,42 +72,56 @@ public class PacketProcessingUnit
 			if (this.writePacket())
 				return;
         }
-        catch (IOException e)
-        {
-        	this.tools.log(Kind.ERROR, "An IOException occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getMessage(), this.method, this.annotation);
-        }
 		catch (Exception e)
 		{
-			this.tools.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.messageClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.method, this.annotation);
+			this.tools.log(Kind.ERROR, "Unexpected exception generating the '" + this.messageClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.method, this.annotation);
 		}
 		this.hasErrors = true;
 	}
 	
-	private boolean writePacket() throws IOException
+	private boolean writePacket()
 	{
 		if (!this.method.getModifiers().contains(Modifier.STATIC))
 		{
-			this.tools.log(Kind.ERROR, "Packet handler must be static", this.method, this.annotation);
+			this.tools.log(Kind.ERROR, "The packet method must be static", this.method, this.annotation);
 			return false;
 		}
 		
 		if (this.method.getReturnType().getKind() != TypeKind.VOID)
 		{
-			this.tools.log(Kind.ERROR, "Packet handler must retrun void", this.method, this.annotation);
+			this.tools.log(Kind.ERROR, "The packet method must retrun void", this.method, this.annotation);
 			return false;
 		}
 		
 		List<? extends VariableElement> parameters = this.method.getParameters();
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
-		List<DataCoder> dataCoders = messageParameters.stream().map(p -> this.tools.handlers.getDataType(p)).collect(Collectors.toList());//TODO exception handling
 		
 		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools, messageClassName.packageName());
 		
-		messageParameters.forEach(f -> this.tools.types.provideTypeImports(f.asType(), builder));
+		List<DataCoder> dataCoders = new ArrayList<>();
 		
 		Map<String, String> parameterValues = new HashMap<>();
-		for (DataCoder coder : dataCoders)
+		for (VariableElement param : messageParameters)
 		{
+			DataCoder coder;
+			try
+			{
+				coder = this.tools.handlers.getDataType(param);
+				dataCoders.add(coder);
+			}
+			catch (CoderExcepetion e)
+			{
+				this.tools.log(Kind.ERROR, e.getMessage(), param);
+				return false;
+			}
+			catch (Exception e)
+			{
+				this.tools.log(Kind.ERROR, "Unable to create a coder: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), param);
+				return false;
+			}
+			
+			this.tools.types.provideTypeImports(param.asType(), builder);
+			
 			try
 			{
 				this.tools.types.provideTypeImports(coder.getInternalType(), builder);
@@ -119,14 +132,9 @@ public class PacketProcessingUnit
 				
 				coder.properties.checkUnusedProperties();
 			}
-			catch (IncompatibleTypeException e)
-			{
-				this.tools.log(Kind.ERROR, "An IncompatibleTypeException occured on the '" + coder.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
-				return false;
-			}
 			catch (Exception e)
 			{
-				this.tools.log(Kind.ERROR, "A '" + e.getClass().getCanonicalName() + "' exception occured during the processing of the '" + coder.uniqueName + "" + "' parameter: " + e.getMessage(), this.method, this.annotation);
+				this.tools.log(Kind.ERROR, "Unable to produce code : " + e.getClass().getCanonicalName() + ": " + e.getMessage(), param);
 				return false;
 			}
 		}

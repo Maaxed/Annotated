@@ -27,7 +27,7 @@ import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.utils.PriorityManager;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
-import fr.max2.annotated.processor.utils.exceptions.InvalidPropertyException;
+import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 
 public class DataCoderFinder
 {
@@ -42,7 +42,7 @@ public class DataCoderFinder
 		this.typeMap.forEach(data -> data.init(this.tools));
 	}
 	
-	public DataCoder getDataType(Element field)
+	public DataCoder getDataType(Element field) throws CoderExcepetion
 	{
 		Element elem = this.tools.types.asElement(field.asType());
 		DataProperties typeData = elem == null ? null : elem.getAnnotation(DataProperties.class);
@@ -55,17 +55,17 @@ public class DataCoderFinder
 		return this.getDataType(field.getSimpleName().toString(), field.asType(), properties);
 	}
 	
-	public DataCoder getDataType(String uniqueName, TypeMirror type, PropertyMap properties)
+	public DataCoder getDataType(String uniqueName, TypeMirror type, PropertyMap properties) throws CoderExcepetion
 	{
 		DataCoder params = this.getDataTypeOrNull(uniqueName, type, properties);
 		
 		if (params == null)
-			throw new IncompatibleTypeException("No data handler can process the type '" + type.toString() + "'");
+			throw new IncompatibleTypeException("No data coder found to process the type '" + type.toString() + "'. Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'type' property to specify a DataType");
 		
 		return params;
 	}
 	
-	public DataCoder getDataTypeOrNull(String uniqueName, TypeMirror type, PropertyMap properties)
+	public DataCoder getDataTypeOrNull(String uniqueName, TypeMirror type, PropertyMap properties) throws CoderExcepetion
 	{
 		IDataHandler handler = properties.getValue("type")
 			.map(DataCoderFinder::dataTypeToHandler)
@@ -165,7 +165,7 @@ public class DataCoderFinder
 		}
 		catch (IllegalArgumentException e)
 		{
-			throw new InvalidPropertyException("The type '" + typeName + "' is invalid", e);
+			throw new IllegalArgumentException("The type '" + typeName + "' is invalid", e);
 		}
 		return TYPE_TO_HANDLER.get(type);
 	}

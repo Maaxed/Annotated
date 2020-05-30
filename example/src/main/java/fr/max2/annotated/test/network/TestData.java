@@ -158,7 +158,7 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void strangeTypes(CustomList<? extends Item, ? extends Item> items, @DataProperties({"impl=fr.max2.annotated.test.network.TestData.CustomList"}) List<? extends Item> items2)
+	public static void strangeTypes(CustomList<? extends Item, ? extends Item> items, @DataProperties("impl=fr.max2.annotated.test.network.TestData.CustomList") List<? extends Item> items2)
 	{
 		
 	}

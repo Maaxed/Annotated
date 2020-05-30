@@ -1,6 +1,5 @@
 package fr.max2.annotated.processor.network;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,18 +66,14 @@ public class NetworkProcessingUnit
 			if (this.writeNetwork())
 				return;
 	    }
-	    catch (IOException e)
-	    {
-	    	this.tools.log(Kind.ERROR, "An IOException occured during the generation of the '" + this.networkClassName.qualifiedName() + "' class: " + e.getMessage(), this.enclosingClass, this.annotation);
-	    }
 		catch (Exception e)
 		{
-			this.tools.log(Kind.ERROR, "An unexpected exception occured during the generation of the '" + this.networkClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.enclosingClass, this.annotation);
+			this.tools.log(Kind.ERROR, "Unexpected exception while generating the '" + this.networkClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), this.enclosingClass, this.annotation);
 		}
 		this.hasErrors = true;
 	}
 	
-	private boolean writeNetwork() throws IOException
+	private boolean writeNetwork()
 	{
 		List<String> registerPackets = new ArrayList<>();
 		

@@ -7,6 +7,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
+import fr.max2.annotated.api.processor.network.DataProperties;
 import fr.max2.annotated.processor.network.coder.handler.IDataCoderProvider;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;
@@ -17,6 +18,7 @@ import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 
 public class SpecialCoder extends DataCoder
 {
+	//TODO [v2.0] add subtype property
 	public static final IDataHandler WILDCRD = handler(TypeKind.WILDCARD, (tools, uniqueName, paramType, properties) ->
 	{
 		WildcardType wildcardType = tools.types.asWildcardType(paramType);
@@ -24,7 +26,7 @@ public class SpecialCoder extends DataCoder
 		
 		TypeMirror extendsBound = wildcardType.getExtendsBound();
 		
-		if (extendsBound == null) throw new IncompatibleTypeException("The wildcard type '" + paramType + "' has no extends bound");
+		if (extendsBound == null) throw new IncompatibleTypeException("The wildcard type '" + paramType + "' has no extends bound so it cannot be handled");
 		
 		return tools.handlers.getDataType(uniqueName, extendsBound, properties);
 	}),
@@ -47,17 +49,15 @@ public class SpecialCoder extends DataCoder
 				return newParams;
 		}
 		
-		throw new IncompatibleTypeException("None of the bounds of the interaction type '" + paramType + "' is serializable");
+		throw new IncompatibleTypeException("No data coder found for any of the bounds of the interaction type '" + paramType + "'");
 	}),
 	DEFAULT = handler(null, (tools, uniqueName, paramType, properties) ->
 	{
-		DataCoder coder = tools.handlers.getDefaultDataType(paramType)
-			.createCoder(tools, uniqueName, paramType, properties);
-		return coder;
+		return tools.handlers.getDefaultDataType(paramType).createCoder(tools, uniqueName, paramType, properties);
 	}),
 	CUSTOM = handler(null, (tools, uniqueName, paramType, properties) ->
 	{
-		throw new IncompatibleTypeException("No data handler can process the type '" + paramType.toString() + "'");
+		throw new IncompatibleTypeException("No data coder found to process the '" + paramType + "' type. Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'type' property to specify a DataType");
 	});
 	
 	protected DataCoder actualCoder;
@@ -74,9 +74,9 @@ public class SpecialCoder extends DataCoder
 		return builder.runCoder(this.actualCoder, saveAccessExpr, internalAccessExpr, externalAccessExpr);
 	}
 	
-	private static RuntimeException incompatibleType(String expected, TypeMirror actual)
+	private static RuntimeException incompatibleType(String expected, TypeMirror actual) throws IncompatibleTypeException
 	{
-		throw new IncompatibleTypeException("The type '" + actual + "' is not a " + expected + " type");
+		throw new IncompatibleTypeException("The type '" + actual + "' is not a valid " + expected + " type");
 	}
 	
 	private static IDataHandler handler(@Nullable TypeKind kind, IDataCoderProvider coderProvider)

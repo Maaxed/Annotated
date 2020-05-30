@@ -4,6 +4,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.annotated.api.processor.network.DataProperties;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
@@ -11,6 +12,7 @@ import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
 import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
+import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 
 public class SerializableCoder extends DataCoder
 {
@@ -19,14 +21,13 @@ public class SerializableCoder extends DataCoder
 	private final TypeMirror nbtType, implType;
 	private final DataCoder nbtCoder;
 	
-	public SerializableCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
+	public SerializableCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties) throws CoderExcepetion
 	{
 		super(tools, uniqueName, paramType, properties);
 		
 		String typeName = ClassRef.NBT_SERIALIZABLE_INTERFACE;
 		DeclaredType serialisableType = tools.types.refineTo(paramType, tools.elements.getTypeElement(typeName).asType());
 		if (serialisableType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + typeName);
-		DataCoderUtils.requireDefaultConstructor(tools.types, paramType);
 		
 		this.nbtType = serialisableType.getTypeArguments().get(0);
 		this.nbtCoder = tools.handlers.getDataType(uniqueName + "Data", this.nbtType, properties.getSubPropertiesOrEmpty("nbt"));
@@ -52,7 +53,7 @@ public class SerializableCoder extends DataCoder
 		}
 
 		this.implType = implType;
-		DataCoderUtils.requireDefaultConstructor(tools.types, this.implType);
+		DataCoderUtils.requireDefaultConstructor(tools.types, this.implType, "Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'impl' property to specify a valid implementation");
 	}
 	
 	@Override

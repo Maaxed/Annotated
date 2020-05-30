@@ -1,9 +1,10 @@
 package fr.max2.annotated.processor.utils;
 
-import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import fr.max2.annotated.processor.utils.exceptions.InvalidPropertyException;
 
 public class PropertyMap
 {
@@ -14,7 +15,7 @@ public class PropertyMap
 	private PropertyMap()
 	{ }
 	
-	public static PropertyMap fromArray(String[] properties)
+	public static PropertyMap fromArray(String[] properties) throws InvalidPropertyException
 	{
 		if (properties.length == 0)
 			return EMPTY_PROPERTIES;
@@ -24,7 +25,7 @@ public class PropertyMap
 		{
 			int sep = property.indexOf('=');
 			if (sep == -1)
-				throw new InvalidParameterException("The property '" + property + "' is invalid");
+				throw new InvalidPropertyException("The property '" + property + "' is invalid");
 			
 			String[] identifiers = property.substring(0, sep).split("\\.");
 			String value = property.substring(sep + 1);
@@ -41,13 +42,13 @@ public class PropertyMap
 		return topLevelMap;
 	}
 	
-	private PropertyMap createSubProperties(String identifier)
+	private PropertyMap createSubProperties(String identifier) throws InvalidPropertyException
 	{
 		if (this.properties.containsKey(identifier))
 		{
 			PropertyValue prop = this.properties.get(identifier);
 			if (!prop.isPropertyMap())
-				throw new InvalidParameterException("The property '" + identifier + "' has a value and sub values");
+				throw new InvalidPropertyException("The property '" + identifier + "' has a value and sub values");
 			
 			return prop.asPropertyMap();
 		}
@@ -56,16 +57,16 @@ public class PropertyMap
 		return newMap;
 	}
 	
-	private void createValue(String identifier, String value)
+	private void createValue(String identifier, String value) throws InvalidPropertyException
 	{
 		if (this.properties.containsKey(identifier))
 		{
-			throw new InvalidParameterException("The property '" + identifier + "' is defined several times");
+			throw new InvalidPropertyException("The property '" + identifier + "' is defined several times");
 		}
 		this.properties.put(identifier, new PropertyValue(identifier, value));
 	}
 
-	public PropertyMap overrideWith(PropertyMap other)
+	public PropertyMap overrideWith(PropertyMap other) throws InvalidPropertyException
 	{
 		if (other.properties.isEmpty())
 			return this;
@@ -78,7 +79,13 @@ public class PropertyMap
 			if (value.isPropertyMap() && this.properties.containsKey(value.identifier))
 			{
 				// Combine maps
-				this.properties.compute(value.identifier, (k, v) -> new PropertyValue(k, v.asPropertyMap().overrideWith(value.asPropertyMap())));
+				PropertyValue v2 = this.properties.get(value.identifier);
+				
+				if (!v2.isPropertyMap())
+				{
+					throw new InvalidPropertyException("The type of the property '" + value.identifier + "' doesn't match");
+				}
+				this.properties.put(value.identifier, new PropertyValue(value.identifier, v2.asPropertyMap().overrideWith(value.asPropertyMap())));
 			}
 			else
 			{
@@ -95,46 +102,48 @@ public class PropertyMap
 		return Optional.ofNullable(this.properties.get(identifier)).map(PropertyValue::setUsed);
 	}
 	
-	public Optional<String> getValue(String identifier)
+	public Optional<String> getValue(String identifier) throws InvalidPropertyException
 	{
-		return getProperty(identifier).map(PropertyValue::asString);
+		Optional<PropertyValue> prop = getProperty(identifier);
+		return prop.isPresent() ? Optional.of(prop.get().asString()) : Optional.empty();
 	}
 	
-	public Optional<PropertyMap> getSubProperties(String identifier)
+	public Optional<PropertyMap> getSubProperties(String identifier) throws InvalidPropertyException
 	{
-		return getProperty(identifier).map(PropertyValue::asPropertyMap);
+		Optional<PropertyValue> prop = getProperty(identifier);
+		return prop.isPresent() ? Optional.of(prop.get().asPropertyMap()) : Optional.empty();
 	}
 	
-	public String getValueOrEmpty(String identifier)
+	public String getValueOrEmpty(String identifier) throws InvalidPropertyException
 	{
 		return getValue(identifier).orElse("");
 	}
 	
-	public PropertyMap getSubPropertiesOrEmpty(String identifier)
+	public PropertyMap getSubPropertiesOrEmpty(String identifier) throws InvalidPropertyException
 	{
 		return getSubProperties(identifier).orElse(EMPTY_PROPERTIES);
 	}
 
-	public String requireValue(String identifier)
+	public String requireValue(String identifier) throws InvalidPropertyException
 	{
-		return getValue(identifier).orElseThrow(() -> new InvalidParameterException("The mandatory property '" + identifier + "' is missing"));
+		return getValue(identifier).orElseThrow(() -> new InvalidPropertyException("The mandatory property '" + identifier + "' is missing"));
 	}
 	
-	public PropertyMap requireSubProperties(String identifier)
+	public PropertyMap requireSubProperties(String identifier) throws InvalidPropertyException
 	{
-		return getSubProperties(identifier).orElseThrow(() -> new InvalidParameterException("The mandatory properties under '" + identifier + "' are missing"));
+		return getSubProperties(identifier).orElseThrow(() -> new InvalidPropertyException("The mandatory properties under '" + identifier + "' are missing"));
 	}
 
-	public void checkUnusedProperties()
+	public void checkUnusedProperties() throws InvalidPropertyException
 	{
-		this.properties.values().stream()
-		.filter(prop -> !prop.used)
-		.findAny().ifPresent(prop ->
-		{
-			throw new InvalidParameterException("The property identifier '" + prop.identifier + "' is invalid");
-		});
+		Optional<PropertyValue> p = this.properties.values().stream().filter(prop -> !prop.used).findAny();
+		if (p.isPresent())
+			throw new InvalidPropertyException("The property identifier '" + p.get().identifier + "' is invalid");
 		
-		this.properties.values().forEach(PropertyValue::checkUnusedProperties);
+		for (PropertyValue property : this.properties.values())
+		{
+			property.checkUnusedProperties();
+		}
 	}
 	
 	private static class PropertyValue
@@ -159,18 +168,18 @@ public class PropertyMap
 			return value instanceof PropertyMap;
 		}
 
-		private String asString()
+		private String asString() throws InvalidPropertyException
 		{
 			if (!this.isString())
-				throw new InvalidParameterException("The value of the property property '" + this.identifier + "' is should be a string");
+				throw new InvalidPropertyException("The value of the property '" + this.identifier + "' should be a string but is a permerty map");
 			
 			return (String)value;
 		}
 		
-		private PropertyMap asPropertyMap()
+		private PropertyMap asPropertyMap() throws InvalidPropertyException
 		{
 			if (!isPropertyMap())
-				throw new InvalidParameterException("The value of the property property '" + this.identifier + "' is should be a property map");
+				throw new InvalidPropertyException("The value of the property '" + this.identifier + "' should be a property map but is a string");
 			
 			return (PropertyMap)value;
 		}
@@ -181,7 +190,7 @@ public class PropertyMap
 			return this;
 		}
 
-		private void checkUnusedProperties()
+		private void checkUnusedProperties() throws InvalidPropertyException
 		{
 			if (value instanceof PropertyMap)
 			{

@@ -1,6 +1,6 @@
 package fr.max2.annotated.processor.utils.exceptions;
 
-public class IncompatibleTypeException extends IllegalArgumentException
+public class IncompatibleTypeException extends CoderExcepetion
 {
 
 	public IncompatibleTypeException()

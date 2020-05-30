@@ -55,7 +55,8 @@ public class PacketProcessor extends AbstractProcessor
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
 	{
-		if (roundEnv.processingOver()) return true;
+		if (roundEnv.processingOver())
+			return true;
 		
 		Collection<NetworkProcessingUnit> networks;
 		try
@@ -64,7 +65,7 @@ public class PacketProcessor extends AbstractProcessor
 		}
 		catch (Exception e)
 		{
-			this.processingEnv.getMessager().printMessage(Kind.ERROR, "An exception occured during the processing units building phase: " + e.getMessage());
+			this.processingEnv.getMessager().printMessage(Kind.ERROR, "Unexpected exception while building of the processing units : " + e.getMessage());
 			return true;
 		}
 		

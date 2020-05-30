@@ -1,6 +1,6 @@
 package fr.max2.annotated.api.processor.network;
 
-
+// TODO [v2.0] use static strings instead
 public enum DataType
 {
 	// Integers
