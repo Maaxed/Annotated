@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import fr.max2.annotated.api.processor.network.ClientPacket;
 import fr.max2.annotated.api.processor.network.DataProperties;
+import fr.max2.annotated.api.processor.network.DataType;
 import fr.max2.annotated.api.processor.network.GenerateChannel;
 import fr.max2.annotated.api.processor.network.ServerPacket;
 import fr.max2.annotated.test.ModTestAnnotated;
@@ -164,13 +165,13 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void withCustomData(@DataProperties("type=INT") Integer myCustomInt, @DataProperties("type=NBT_CONCRETE") ListNBT list1, @DataProperties("type=COLLECTION") ListNBT list2)
+	public static void withCustomData(@DataProperties("type=" + DataType.INT) Integer myCustomInt, @DataProperties("type=" + DataType.NBT_CONCRETE) ListNBT list1, @DataProperties("type=" + DataType.COLLECTION) ListNBT list2)
 	{
 		
 	}
 	
 	@ClientPacket
-	public static void complexCustomData(@DataProperties({"impl=java.util.TreeMap", "keys.type=COLLECTION", "values.impl=java.util.ArrayList", "values.content.type=COLLECTION"}) Map<ListNBT, List<ListNBT>> map)
+	public static void complexCustomData(@DataProperties({"impl=java.util.TreeMap", "keys.type=" + DataType.COLLECTION, "values.impl=java.util.ArrayList", "values.content.type=" + DataType.COLLECTION}) Map<ListNBT, List<ListNBT>> map)
 	{
 		
 	}

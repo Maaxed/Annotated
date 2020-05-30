@@ -1,6 +1,6 @@
 package fr.max2.annotated.processor.network;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
@@ -97,7 +97,7 @@ public class DataCoderFinder
 	}
 	
 	
-	private static final Map<DataType, IDataHandler> TYPE_TO_HANDLER = new EnumMap<>(DataType.class);
+	private static final Map<String, IDataHandler> TYPE_TO_HANDLER = new HashMap<>();
 	private static final PriorityManager<IDataHandler> HANDLER_PRIORITIES = new PriorityManager<>();
 	
 	static
@@ -158,16 +158,11 @@ public class DataCoderFinder
 	
 	private static IDataHandler dataTypeToHandler(String typeName)
 	{
-		DataType type;
-		try
-		{
-			type = DataType.valueOf(typeName.toUpperCase());
-		}
-		catch (IllegalArgumentException e)
-		{
-			throw new IllegalArgumentException("The type '" + typeName + "' is invalid", e);
-		}
-		return TYPE_TO_HANDLER.get(type);
+		IDataHandler handler = TYPE_TO_HANDLER.get(typeName);
+		if (handler == null)
+			throw new IllegalArgumentException("The type '" + typeName + "' is invalid");
+		
+		return handler;
 	}
 	
 }
