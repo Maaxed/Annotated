@@ -32,7 +32,7 @@ public class EntityCoder
 			this.internalType = idType;
 			this.idGetter = idGetter;
 			this.entityGetter = entityGetter;
-			this.idCoder = tools.handlers.getDataType(uniqueName + "Id", this.internalType, properties.getSubPropertiesOrEmpty("id"));
+			this.idCoder = tools.coders.getCoder(uniqueName + "Id", this.internalType, properties.getSubPropertiesOrEmpty("id"));
 		}
 
 		@Override

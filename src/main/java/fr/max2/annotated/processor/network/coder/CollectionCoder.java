@@ -32,7 +32,7 @@ public class CollectionCoder extends DataCoder
 
 		TypeMirror contentFullType = refinedType.getTypeArguments().get(0);
 		this.extContentType = tools.types.shallowErasure(contentFullType);
-		this.contentCoder = tools.handlers.getDataType(uniqueName + "Element", contentFullType, properties.getSubPropertiesOrEmpty("content"));
+		this.contentCoder = tools.coders.getCoder(uniqueName + "Element", contentFullType, properties.getSubPropertiesOrEmpty("content"));
 		TypeMirror contentType = this.contentCoder.getInternalType();
 		if (contentType.getKind().isPrimitive())
 			contentType = tools.types.boxedClass(tools.types.asPrimitive(contentType)).asType();

@@ -21,7 +21,7 @@ public class ProcessingTools
 	public final ExtendedTypes types;
 	public final Filer filer;
 	public final NamingUtils naming;
-	public final DataCoderFinder handlers;
+	public final DataCoderFinder coders;
 	public final TemplateHelper templates;
 	
 	public ProcessingTools(ProcessingEnvironment env)
@@ -31,7 +31,7 @@ public class ProcessingTools
 		this.elements = new ExtendedElements(this, env.getElementUtils());
 		this.types = new ExtendedTypes(this, env.getTypeUtils());
 		this.naming = new NamingUtils(this);
-		this.handlers = new DataCoderFinder(this);
+		this.coders = new DataCoderFinder(this);
 		this.templates = new TemplateHelper(this);
 	}
 	

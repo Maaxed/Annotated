@@ -30,7 +30,7 @@ public class SerializableCoder extends DataCoder
 		if (serialisableType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + typeName);
 		
 		this.nbtType = serialisableType.getTypeArguments().get(0);
-		this.nbtCoder = tools.handlers.getDataType(uniqueName + "Data", this.nbtType, properties.getSubPropertiesOrEmpty("nbt"));
+		this.nbtCoder = tools.coders.getCoder(uniqueName + "Data", this.nbtType, properties.getSubPropertiesOrEmpty("nbt"));
 		
 		String implName = properties.getValueOrEmpty("impl");
 		

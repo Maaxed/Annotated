@@ -27,7 +27,7 @@ public class ArrayCoder extends DataCoder
 		if (arrayType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not an array");
 		this.extContentType = arrayType.getComponentType();
 		
-		this.contentCoder = tools.handlers.getDataType(uniqueName + "Element", this.extContentType, properties.getSubPropertiesOrEmpty("content"));
+		this.contentCoder = tools.coders.getCoder(uniqueName + "Element", this.extContentType, properties.getSubPropertiesOrEmpty("content"));
 		this.internalType = tools.types.getArrayType(this.contentCoder.getInternalType());
 	}
 	

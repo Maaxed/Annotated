@@ -13,7 +13,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code byte}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code byte}
 	 * <li>{@link java.lang.Byte}
@@ -26,7 +26,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code Short}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code short}
 	 * <li>{@link java.lang.Short}
@@ -39,7 +39,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code int}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code int}
 	 * <li>{@link java.lang.Integer}
@@ -52,7 +52,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code long}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code long}
 	 * <li>{@link java.lang.Long}
@@ -68,7 +68,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code float}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code float}
 	 * <li>{@link java.lang.Float}
@@ -81,7 +81,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code double}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code double}
 	 * <li>{@link java.lang.Double}
@@ -97,7 +97,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code boolean}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code boolean}
 	 * <li>{@link java.lang.Boolean}
@@ -110,7 +110,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code char}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@code char}
 	 * <li>{@link java.lang.Character}
@@ -123,7 +123,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any array of a serializable type.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>Every array
 	 * </ul>
@@ -137,7 +137,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link java.lang.String}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link java.lang.String}
 	 * </ul>
@@ -149,7 +149,7 @@ public class DataType
 	/**
 	 * This type is applicable for: every enums.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>Every enums
 	 * </ul>
@@ -161,7 +161,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any class implementing or any interface extending {@link java.util.Collection}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link java.util.Collection}
 	 * <li>{@link java.util.List}
@@ -184,7 +184,7 @@ public class DataType
 	/**
 	 * This type is applicable for: any class implementing or any interface extending {@link java.util.Map}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link java.util.Map}
 	 * <li>any class or interface extending {@link java.util.Map}
@@ -206,7 +206,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link java.util.UUID}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link java.util.UUID}
 	 * </ul>
@@ -218,7 +218,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link java.util.Date}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link java.util.Date}
 	 * </ul>
@@ -233,7 +233,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.math.BlockPos}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link net.minecraft.util.math.BlockPos}
 	 * </ul>
@@ -245,7 +245,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.ResourceLocation}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link net.minecraft.util.ResourceLocation}
 	 * </ul>
@@ -257,7 +257,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link net.minecraft.item.ItemStack}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link net.minecraft.item.ItemStack}
 	 * </ul>
@@ -269,7 +269,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link net.minecraftforge.fluids.FluidStack}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link net.minecraftforge.fluids.FluidStack}
 	 * </ul>
@@ -281,7 +281,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.text.ITextComponent}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link net.minecraft.util.text.ITextComponent}
 	 * </ul>
@@ -293,7 +293,7 @@ public class DataType
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.math.BlockRayTraceResult}.
 	 * <p>
-	 * This is the default type for:
+	 * This is the default serializer for:
 	 * <ul>
 	 * <li>{@link net.minecraft.util.math.BlockRayTraceResult}
 	 * </ul>
@@ -405,70 +405,21 @@ public class DataType
 	 * The data will be saved as a UUID (16 bytes)
 	 */
 	public static final String  PLAYER_ID = "PLAYER_ID";
-	//TODO [v2.0] TileEntity
+	
 	//TODO [v2.1] Entity by copy type
 	//TODO [v2.1] IDynamicSerializable
+	//TODO [v2.1] TileEntity
 	//TODO [v2.1] Container
 	//TODO [v2.1] JsonDeserializer + JsonSerializer
 	//TODO [v2.1] Optional
-	//TODO [v2.2] other data/packet class
-
-	//TODO [v2.1] test special types
+	//TODO [v2.2] custom data class
+	
 	// Special types
-	/**
-	 * This type is applicable for: any wildcard type.
-	 * <p>
-	 * This is the default type for:
-	 * <ul>
-	 * <li>{@code <?>}
-	 * <li>{@code <? extends Map>}
-	 * <li>any wildcard type
-	 * </ul>
-	 * 
-	 * <p>
-	 * The data will be saved as the extends bound of the wildcard
-	 */
-	public static final String  WILDCARD = "WILDCARD";
-	/**
-	 * This type is applicable for: any variable type.
-	 * <p>
-	 * This is the default type for:
-	 * <ul>
-	 * <li>{@code <T>}
-	 * <li>{@code <T extends Map>}
-	 * <li>any variable type
-	 * </ul>
-	 * 
-	 * <p>
-	 * The data will be saved as the extends bound of the variable
-	 */
-	public static final String  TYPE_VARIABLE = "TYPE_VARIABLE";
-	/**
-	 * This type is applicable for: any intersection type.
-	 * <p>
-	 * This is the default type for:
-	 * <ul>
-	 * <li>{@code Block & Map} 
-	 * <li>any intersection type
-	 * </ul>
-	 * 
-	 * <p>
-	 * The data will be saved as the first serialized type of the intersection
-	 */
-	public static final String  INTERSECTION = "INTERSECTION";
+	
 	/**
 	 * This type is applicable for: any type.
 	 * <p>
-	 * This is the default type for: nothing
-	 * 
-	 * <p>
-	 * This type represents a custom type that cannot be handled by any other serializer
-	 */
-	public static final String  CUSTOM = "CUSTOM";
-	/**
-	 * This type is applicable for: any type.
-	 * <p>
-	 * This is the default type for: nothing
+	 * This is the default serializer for: nothing
 	 * 
 	 * <p>
 	 * This data will be saved using the default serializer for the type

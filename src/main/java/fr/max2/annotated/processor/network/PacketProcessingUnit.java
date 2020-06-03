@@ -106,7 +106,7 @@ public class PacketProcessingUnit
 			DataCoder coder;
 			try
 			{
-				coder = this.tools.handlers.getDataType(param);
+				coder = this.tools.coders.getCoder(param);
 				dataCoders.add(coder);
 			}
 			catch (CoderExcepetion e)

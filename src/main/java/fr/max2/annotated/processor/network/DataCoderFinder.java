@@ -1,6 +1,7 @@
 package fr.max2.annotated.processor.network;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
@@ -38,11 +39,12 @@ public class DataCoderFinder
 	{
 		this.tools = tools;
 		
-		this.typeMap = TYPE_TO_HANDLER.values();
+		this.typeMap = new HashSet<>(HANDLERS.values());
+		this.typeMap.addAll(SPACIAL_HANDLERS);
 		this.typeMap.forEach(data -> data.init(this.tools));
 	}
 	
-	public DataCoder getDataType(Element field) throws CoderExcepetion
+	public DataCoder getCoder(Element field) throws CoderExcepetion
 	{
 		Element elem = this.tools.types.asElement(field.asType());
 		DataProperties typeData = elem == null ? null : elem.getAnnotation(DataProperties.class);
@@ -52,12 +54,12 @@ public class DataCoderFinder
 		PropertyMap customProperties = customData == null ? PropertyMap.EMPTY_PROPERTIES : PropertyMap.fromArray(customData.value());
 		
 		PropertyMap properties = typeProperties.overrideWith(customProperties);
-		return this.getDataType(field.getSimpleName().toString(), field.asType(), properties);
+		return this.getCoder(field.getSimpleName().toString(), field.asType(), properties);
 	}
 	
-	public DataCoder getDataType(String uniqueName, TypeMirror type, PropertyMap properties) throws CoderExcepetion
+	public DataCoder getCoder(String uniqueName, TypeMirror type, PropertyMap properties) throws CoderExcepetion
 	{
-		DataCoder params = this.getDataTypeOrNull(uniqueName, type, properties);
+		DataCoder params = this.getCoderOrNull(uniqueName, type, properties);
 		
 		if (params == null)
 			throw new IncompatibleTypeException("No data coder found to process the type '" + type.toString() + "'. Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'type' property to specify a DataType");
@@ -65,22 +67,20 @@ public class DataCoderFinder
 		return params;
 	}
 	
-	public DataCoder getDataTypeOrNull(String uniqueName, TypeMirror type, PropertyMap properties) throws CoderExcepetion
+	public DataCoder getCoderOrNull(String uniqueName, TypeMirror type, PropertyMap properties) throws CoderExcepetion
 	{
-		IDataHandler handler = properties.getValue("type")
-			.map(DataCoderFinder::dataTypeToHandler)
-			.orElseGet(() ->
-			{
-				IDataHandler defaultHandler = this.getDefaultDataType(type);
-				return defaultHandler == SpecialCoder.CUSTOM ? null : defaultHandler;
-			});
+		IDataHandler handler = getSpecialHandler(type);
+		if (handler == null)
+			handler = properties.getValue("type")
+				.map(DataCoderFinder::handlerFromName)
+				.orElseGet(() -> this.getDefaultHandler(type));
 		if (handler == null)
 			return null;
 		
 		return handler.createCoder(this.tools, uniqueName, type, properties);
 	}
 	
-	public IDataHandler getDefaultDataType(TypeMirror type)
+	public IDataHandler getDefaultHandler(TypeMirror type)
 	{
 		List<IDataHandler> validHandlers = this.typeMap.stream().filter(entry -> entry.canProcess(type)).collect(Collectors.toList());
 		List<IDataHandler> prioritizedHandlers = HANDLER_PRIORITIES.getHighests(validHandlers);
@@ -88,7 +88,7 @@ public class DataCoderFinder
 		switch (prioritizedHandlers.size())
 		{
 		case 0:
-			return SpecialCoder.CUSTOM;
+			return null;
 		case 1:
 			return prioritizedHandlers.get(0);
 		default:
@@ -96,52 +96,57 @@ public class DataCoderFinder
 		}
 	}
 	
+	public IDataHandler getSpecialHandler(TypeMirror type)
+	{
+		return SPACIAL_HANDLERS.stream().filter(entry -> entry.canProcess(type)).findAny().orElse(null);
+	}
 	
-	private static final Map<String, IDataHandler> TYPE_TO_HANDLER = new HashMap<>();
+	
+	private static final Map<String, IDataHandler> HANDLERS = new HashMap<>();
+	private static final Collection<IDataHandler> SPACIAL_HANDLERS = new HashSet<>();
 	private static final PriorityManager<IDataHandler> HANDLER_PRIORITIES = new PriorityManager<>();
 	
 	static
 	{
-		TYPE_TO_HANDLER.put(DataType.BYTE, PrimitiveCoder.BYTE);
-		TYPE_TO_HANDLER.put(DataType.SHORT, PrimitiveCoder.SHORT);
-		TYPE_TO_HANDLER.put(DataType.INT, PrimitiveCoder.INT);
-		TYPE_TO_HANDLER.put(DataType.LONG, PrimitiveCoder.LONG);
-		TYPE_TO_HANDLER.put(DataType.FLOAT, PrimitiveCoder.FLOAT);
-		TYPE_TO_HANDLER.put(DataType.DOUBLE, PrimitiveCoder.DOUBLE);
-		TYPE_TO_HANDLER.put(DataType.BOOLEAN, PrimitiveCoder.BOOLEAN);
-		TYPE_TO_HANDLER.put(DataType.CHAR, PrimitiveCoder.CHAR);
+		HANDLERS.put(DataType.BYTE, PrimitiveCoder.BYTE);
+		HANDLERS.put(DataType.SHORT, PrimitiveCoder.SHORT);
+		HANDLERS.put(DataType.INT, PrimitiveCoder.INT);
+		HANDLERS.put(DataType.LONG, PrimitiveCoder.LONG);
+		HANDLERS.put(DataType.FLOAT, PrimitiveCoder.FLOAT);
+		HANDLERS.put(DataType.DOUBLE, PrimitiveCoder.DOUBLE);
+		HANDLERS.put(DataType.BOOLEAN, PrimitiveCoder.BOOLEAN);
+		HANDLERS.put(DataType.CHAR, PrimitiveCoder.CHAR);
 		
-		TYPE_TO_HANDLER.put(DataType.ARRAY, ArrayCoder.HANDLER);
+		HANDLERS.put(DataType.ARRAY, ArrayCoder.HANDLER);
 		
-		TYPE_TO_HANDLER.put(DataType.STRING, SimpleClassCoder.STRING);
-		TYPE_TO_HANDLER.put(DataType.ENUM, SimpleClassCoder.ENUM);
-		TYPE_TO_HANDLER.put(DataType.COLLECTION, CollectionCoder.HANDLER);
-		TYPE_TO_HANDLER.put(DataType.MAP, MapCoder.HANDLER);
-		TYPE_TO_HANDLER.put(DataType.UUID, SimpleClassCoder.UUID);
-		TYPE_TO_HANDLER.put(DataType.TIME, SimpleClassCoder.DATE);
+		HANDLERS.put(DataType.STRING, SimpleClassCoder.STRING);
+		HANDLERS.put(DataType.ENUM, SimpleClassCoder.ENUM);
+		HANDLERS.put(DataType.COLLECTION, CollectionCoder.HANDLER);
+		HANDLERS.put(DataType.MAP, MapCoder.HANDLER);
+		HANDLERS.put(DataType.UUID, SimpleClassCoder.UUID);
+		HANDLERS.put(DataType.TIME, SimpleClassCoder.DATE);
 		
-		TYPE_TO_HANDLER.put(DataType.BLOCK_POS, SimpleClassCoder.BLOCK_POS);
-		TYPE_TO_HANDLER.put(DataType.RESOURCE_LOCATION, SimpleClassCoder.RESOURCE_LOCATION);
-		TYPE_TO_HANDLER.put(DataType.ITEM_STACK, SimpleClassCoder.ITEM_STACK);
-		TYPE_TO_HANDLER.put(DataType.FLUID_STACK, SimpleClassCoder.FLUID_STACK);
-		TYPE_TO_HANDLER.put(DataType.TEXT_COMPONENT, SimpleClassCoder.TEXT_COMPONENT);
-		TYPE_TO_HANDLER.put(DataType.BLOCK_RAY_TRACE, SimpleClassCoder.BLOCK_RAY_TRACE);
-		TYPE_TO_HANDLER.put(DataType.REGISTRY_ENTRY, RegistryEntryCoder.HANDLER);
-		TYPE_TO_HANDLER.put(DataType.NBT_SERIALIZABLE, SerializableCoder.NBT_SERIALISABLE);
-		TYPE_TO_HANDLER.put(DataType.ENTITY_ID, EntityCoder.ENTITY_ID);
-		TYPE_TO_HANDLER.put(DataType.PLAYER_ID, EntityCoder.PLAYER_ID);
+		HANDLERS.put(DataType.BLOCK_POS, SimpleClassCoder.BLOCK_POS);
+		HANDLERS.put(DataType.RESOURCE_LOCATION, SimpleClassCoder.RESOURCE_LOCATION);
+		HANDLERS.put(DataType.ITEM_STACK, SimpleClassCoder.ITEM_STACK);
+		HANDLERS.put(DataType.FLUID_STACK, SimpleClassCoder.FLUID_STACK);
+		HANDLERS.put(DataType.TEXT_COMPONENT, SimpleClassCoder.TEXT_COMPONENT);
+		HANDLERS.put(DataType.BLOCK_RAY_TRACE, SimpleClassCoder.BLOCK_RAY_TRACE);
+		HANDLERS.put(DataType.REGISTRY_ENTRY, RegistryEntryCoder.HANDLER);
+		HANDLERS.put(DataType.NBT_SERIALIZABLE, SerializableCoder.NBT_SERIALISABLE);
+		HANDLERS.put(DataType.ENTITY_ID, EntityCoder.ENTITY_ID);
+		HANDLERS.put(DataType.PLAYER_ID, EntityCoder.PLAYER_ID);
 		
-		TYPE_TO_HANDLER.put(DataType.NBT_PRIMITIVE, NBTCoder.PRIMITIVE);
-		TYPE_TO_HANDLER.put(DataType.NBT_CONCRETE, NBTCoder.CONCRETE);
-		TYPE_TO_HANDLER.put(DataType.NBT_ABSTRACT, NBTCoder.ABSTRACT);
+		HANDLERS.put(DataType.NBT_PRIMITIVE, NBTCoder.PRIMITIVE);
+		HANDLERS.put(DataType.NBT_CONCRETE, NBTCoder.CONCRETE);
+		HANDLERS.put(DataType.NBT_ABSTRACT, NBTCoder.ABSTRACT);
 		
 		
-		TYPE_TO_HANDLER.put(DataType.WILDCARD, SpecialCoder.WILDCRD);
-		TYPE_TO_HANDLER.put(DataType.TYPE_VARIABLE, SpecialCoder.VARIABLE_TYPE);
-		TYPE_TO_HANDLER.put(DataType.INTERSECTION, SpecialCoder.INTERSECTION);
+		SPACIAL_HANDLERS.add(SpecialCoder.WILDCRD);
+		SPACIAL_HANDLERS.add(SpecialCoder.VARIABLE_TYPE);
+		SPACIAL_HANDLERS.add(SpecialCoder.INTERSECTION);
 		
-		TYPE_TO_HANDLER.put(DataType.DEFAULT, SpecialCoder.DEFAULT);
-		TYPE_TO_HANDLER.put(DataType.CUSTOM, SpecialCoder.CUSTOM);
+		HANDLERS.put(DataType.DEFAULT, SpecialCoder.DEFAULT);
 		
 		
 		HANDLER_PRIORITIES.prioritize(SimpleClassCoder.ITEM_STACK).over(SerializableCoder.NBT_SERIALISABLE);
@@ -156,11 +161,11 @@ public class DataCoderFinder
 		HANDLER_PRIORITIES.prioritize(NBTCoder.ABSTRACT).over(CollectionCoder.HANDLER);
 	}
 	
-	private static IDataHandler dataTypeToHandler(String typeName)
+	private static IDataHandler handlerFromName(String handlerName)
 	{
-		IDataHandler handler = TYPE_TO_HANDLER.get(typeName);
+		IDataHandler handler = HANDLERS.get(handlerName);
 		if (handler == null)
-			throw new IllegalArgumentException("The type '" + typeName + "' is invalid");
+			throw new IllegalArgumentException("The type '" + handlerName + "' is invalid");
 		
 		return handler;
 	}

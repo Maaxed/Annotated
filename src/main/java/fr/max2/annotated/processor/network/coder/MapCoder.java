@@ -35,14 +35,14 @@ public class MapCoder extends DataCoder
 		if (refinedType == null) throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + MAP_TYPE);
 		
 		this.keyExtType = refinedType.getTypeArguments().get(0);
-		this.keyCoder = tools.handlers.getDataType(uniqueName + "Key", this.keyExtType, properties.getSubPropertiesOrEmpty("keys"));
+		this.keyCoder = tools.coders.getCoder(uniqueName + "Key", this.keyExtType, properties.getSubPropertiesOrEmpty("keys"));
 		TypeMirror keyType = this.keyCoder.getInternalType();
 		if (keyType.getKind().isPrimitive())
 			keyType = tools.types.boxedClass(tools.types.asPrimitive(keyType)).asType();
 		this.keyIntType = keyType;
 
 		this.valueExtType = refinedType.getTypeArguments().get(1);
-		this.valueCoder = tools.handlers.getDataType(uniqueName + "Element", this.valueExtType, properties.getSubPropertiesOrEmpty("values"));
+		this.valueCoder = tools.coders.getCoder(uniqueName + "Element", this.valueExtType, properties.getSubPropertiesOrEmpty("values"));
 		TypeMirror valueType = this.valueCoder.getInternalType();
 		if (valueType.getKind().isPrimitive())
 			valueType = tools.types.boxedClass(tools.types.asPrimitive(valueType)).asType();

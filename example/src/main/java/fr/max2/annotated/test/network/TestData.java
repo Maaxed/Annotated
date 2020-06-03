@@ -165,7 +165,7 @@ public class TestData
 	}
 	
 	@ClientPacket
-	public static void withCustomData(@DataProperties("type=" + DataType.INT) Integer myCustomInt, @DataProperties("type=" + DataType.NBT_CONCRETE) ListNBT list1, @DataProperties("type=" + DataType.COLLECTION) ListNBT list2)
+	public static void withCustomData(@DataProperties("type=" + DataType.INT) Integer myCustomInt, @DataProperties("type=" + DataType.NBT_CONCRETE) ListNBT list1, @DataProperties("type=" + DataType.COLLECTION) ListNBT list2, @DataProperties("content.type=" + DataType.COLLECTION) List<? extends ListNBT> list3)
 	{
 		
 	}
