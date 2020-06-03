@@ -4,7 +4,10 @@ import fr.max2.annotated.test.network.SimpleData_onServerReceive;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class GuiTest extends Screen
 {
 	public GuiTest()
