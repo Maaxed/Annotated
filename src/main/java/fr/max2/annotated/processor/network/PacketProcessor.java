@@ -104,10 +104,14 @@ public class PacketProcessor extends AbstractProcessor
 					parent = this.tools.elements.asTypeElement(parent.getEnclosingElement());
 				}
 				
-				if (enclosingClass == null) //TODO [v2.0] also error when no channel detected
+				if (enclosingClass == null)
 				{
-					this.tools.log(Kind.ERROR, "Couldn't find the enclosing class of the method", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
+					this.tools.log(Kind.ERROR, "Unable find the enclosing class of the method", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
 					continue; // Skip this packet
+				}
+				else if (!networks.containsKey(enclosingClass))
+				{
+					this.tools.log(Kind.ERROR, "Unable find the enclosing channel of the method, use " + GenerateChannel.class.getCanonicalName() + " or " + DelegateChannel.class.getCanonicalName() + " on the enclosing class to define the channel to use", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
 				}
 				
 				NetworkProcessingUnit networkUnit = networks.computeIfAbsent(enclosingClass, clazz -> new NetworkProcessingUnit(this.tools, clazz, null, findModAnnotationId(clazz)));

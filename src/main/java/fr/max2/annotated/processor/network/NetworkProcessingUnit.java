@@ -86,7 +86,7 @@ public class NetworkProcessingUnit
 		
 		SimpleImportClassBuilder<?> imports = new SimpleImportClassBuilder<>(this.tools, this.networkClassName.packageName());
 		List<String> content = new ArrayList<>();
-		if (!this.channelProvider.getNetworkClassContent(this.tools, imports, content::add, this.enclosingClass, this.enclosingClassName, this.networkClassName, this.modId, this.annotation))
+		if (this.channelProvider != null && !this.channelProvider.getNetworkClassContent(this.tools, imports, content::add, this.enclosingClass, this.enclosingClassName, this.networkClassName, this.modId, this.annotation))
 			return false;
 		
 		String ls = System.lineSeparator();
