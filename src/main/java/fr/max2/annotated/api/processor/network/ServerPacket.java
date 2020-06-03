@@ -5,6 +5,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Each method annotated with this annotation will generate a corresponding packet class.
+ * The packet can be sent from a client to the server with the 'sendToServer' method.
+ * When the packet is received in the server, the method on which this annotation is on will be called using the arguments passed to 'sendToServer'.
+ * <p>
+ * The enclosing class of the annotated method should be annotated with a Channel annotation.
+ * The generated packet will automatically be registered to the enclosing channel.
+ * @see GenerateChannel
+ * @see DelegateChannel
+ */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD})
 public @interface ServerPacket

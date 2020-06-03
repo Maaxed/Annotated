@@ -104,7 +104,7 @@ public class PacketProcessor extends AbstractProcessor
 					parent = this.tools.elements.asTypeElement(parent.getEnclosingElement());
 				}
 				
-				if (enclosingClass == null)
+				if (enclosingClass == null) //TODO [v2.0] also error when no channel detected
 				{
 					this.tools.log(Kind.ERROR, "Couldn't find the enclosing class of the method", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
 					continue; // Skip this packet
