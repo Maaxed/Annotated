@@ -5,7 +5,7 @@ import java.util.UUID;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
@@ -15,9 +15,9 @@ import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 
 public class EntityCoder
 {
-	public static final IDataHandler
-		ENTITY_ID = new NamedDataHandler(ClassRef.ENTITY_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.ENTITY_BASE).asType(), tools.types.getPrimitiveType(TypeKind.INT), "getEntityId", "getEntityByID")),
-		PLAYER_ID = new NamedDataHandler(ClassRef.PLAYER_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.PLAYER_BASE).asType(), tools.elements.getTypeElement(UUID.class.getCanonicalName()).asType(), "getUniqueID", "getPlayerByUuid"));
+	public static final IHandlerProvider
+		ENTITY_ID = NamedDataHandler.provider(ClassRef.ENTITY_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.ENTITY_BASE).asType(), tools.types.getPrimitiveType(TypeKind.INT), "getEntityId", "getEntityByID")),
+		PLAYER_ID = NamedDataHandler.provider(ClassRef.PLAYER_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.PLAYER_BASE).asType(), tools.elements.getTypeElement(UUID.class.getCanonicalName()).asType(), "getUniqueID", "getPlayerByUuid"));
 	
 	private static class IdCoder extends DataCoder
 	{

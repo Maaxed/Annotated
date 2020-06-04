@@ -5,6 +5,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassRef;
@@ -15,7 +16,7 @@ import fr.max2.annotated.processor.utils.exceptions.IncompatibleTypeException;
 public class RegistryEntryCoder extends DataCoder
 {
 	private static final String ENTRY_TYPE = ClassRef.REGISTRY_ENTRY;
-	public static final NamedDataHandler HANDLER = new NamedDataHandler(ENTRY_TYPE, RegistryEntryCoder::new);
+	public static final IHandlerProvider HANDLER = NamedDataHandler.provider(ENTRY_TYPE, RegistryEntryCoder::new);
 	
 	private final TypeElement typeElement;
 	

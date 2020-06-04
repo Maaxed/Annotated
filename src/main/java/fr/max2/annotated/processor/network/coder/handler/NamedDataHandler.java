@@ -12,16 +12,11 @@ public class NamedDataHandler extends TypedDataHandler
 	public final String typeName;
 	protected final IDataCoderProvider coderProvider;
 	
-	public NamedDataHandler(String typaName, IDataCoderProvider coderProvider)
+	public NamedDataHandler(ProcessingTools tools, String typeName, IDataCoderProvider coderProvider)
 	{
-		this.typeName = typaName;
+		super(tools, tools.types.erasure(tools.elements.getTypeElement(typeName).asType()));
+		this.typeName = typeName;
 		this.coderProvider = coderProvider;
-	}
-	
-	@Override
-	protected TypeMirror findType()
-	{
-		return this.tools.types.erasure(this.tools.elements.getTypeElement(this.typeName).asType());
 	}
 	
 	@Override
@@ -50,5 +45,10 @@ public class NamedDataHandler extends TypedDataHandler
 	public String toString()
 	{
 		return "NamedHandler:" + this.typeName;
+	}
+	
+	public static IHandlerProvider provider(String typeName, IDataCoderProvider coderProvider)
+	{
+		return (tools) -> new NamedDataHandler(tools, typeName, coderProvider);
 	}
 }

@@ -7,6 +7,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.api.processor.network.DataProperties;
+import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -17,7 +18,7 @@ import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 public class MapCoder extends DataCoder
 {
 	private static final String MAP_TYPE = Map.class.getCanonicalName();
-	public static final NamedDataHandler HANDLER = new NamedDataHandler(MAP_TYPE, MapCoder::new);
+	public static final IHandlerProvider HANDLER = NamedDataHandler.provider(MAP_TYPE, MapCoder::new);
 
 	private final DataCoder keyCoder, valueCoder;
 	private final TypeMirror

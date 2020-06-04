@@ -6,17 +6,14 @@ import fr.max2.annotated.processor.utils.ProcessingTools;
 
 public abstract class TypedDataHandler implements IDataHandler
 {
-	protected TypeMirror type;
-	protected ProcessingTools tools;
+	protected final TypeMirror type;
+	protected final ProcessingTools tools;
 
-	@Override
-	public void init(ProcessingTools tools)
+	public TypedDataHandler(ProcessingTools tools, TypeMirror type)
 	{
 		this.tools = tools;
-		this.type = findType();
+		this.type = type;
 	}
-	
-	protected abstract TypeMirror findType();
 	
 	public TypeMirror getType()
 	{

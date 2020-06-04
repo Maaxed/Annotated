@@ -5,7 +5,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
@@ -15,8 +15,8 @@ import fr.max2.annotated.processor.utils.PropertyMap;
 
 public class NBTCoder
 {
-	public static final IDataHandler
-		PRIMITIVE = new NamedDataHandler(ClassRef.NBT_NUMBER, (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
+	public static final IHandlerProvider
+		PRIMITIVE = (t) -> new NamedDataHandler(t, ClassRef.NBT_NUMBER, (tools, uniqueName, paramType, properties) -> new DataCoder(tools, uniqueName, paramType, properties)
 		{
 			@Override
 			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
@@ -36,7 +36,7 @@ public class NBTCoder
 				return (this.tools.types.isAssignable(type, this.type) && !this.tools.types.isSameType(type, this.type)) || this.tools.types.isAssignable(type, stringType);
 			}
 		},
-		CONCRETE = new NamedDataHandler(ClassRef.NBT_BASE, (tools, uniqueName, paramType, properties) -> new Coder(tools, uniqueName, paramType, properties, "Concrete"))
+		CONCRETE = (t) -> new NamedDataHandler(t, ClassRef.NBT_BASE, (tools, uniqueName, paramType, properties) -> new Coder(tools, uniqueName, paramType, properties, "Concrete"))
 		{
 			@Override
 			public boolean canProcess(TypeMirror type)
@@ -51,7 +51,7 @@ public class NBTCoder
 				return ElementFilter.fieldsIn(elem.getEnclosedElements()).stream().anyMatch(var -> var.getModifiers().contains(Modifier.STATIC) && var.getSimpleName().contentEquals("TYPE"));
 			}
 		},
-		ABSTRACT = new NamedDataHandler(ClassRef.NBT_BASE, (tools, uniqueName, paramType, properties) -> new Coder(tools, uniqueName, paramType, properties, "Abstract"));
+		ABSTRACT = NamedDataHandler.provider(ClassRef.NBT_BASE, (tools, uniqueName, paramType, properties) -> new Coder(tools, uniqueName, paramType, properties, "Abstract"));
 	
 	private static class Coder extends DataCoder
 	{

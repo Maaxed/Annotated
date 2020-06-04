@@ -7,6 +7,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.api.processor.network.DataProperties;
+import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -17,7 +18,7 @@ import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 public class CollectionCoder extends DataCoder
 {
 	private static final String COLLECTION_TYPE = Collection.class.getCanonicalName();
-	public static final NamedDataHandler HANDLER = new NamedDataHandler(COLLECTION_TYPE, CollectionCoder::new);
+	public static final IHandlerProvider HANDLER = NamedDataHandler.provider(COLLECTION_TYPE, CollectionCoder::new);
 	
 	private final DataCoder contentCoder;
 	private final TypeMirror codedType, extType, implType, contentType, extContentType;
@@ -25,8 +26,9 @@ public class CollectionCoder extends DataCoder
 	public CollectionCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties) throws CoderExcepetion
 	{
 		super(tools, uniqueName, paramType, properties);
-		
-		DeclaredType refinedType = tools.types.refineTo(paramType, HANDLER.getType());
+
+		TypeMirror collectionType = tools.elements.getTypeElement(COLLECTION_TYPE).asType();
+		DeclaredType refinedType = tools.types.refineTo(paramType, collectionType);
 		if (refinedType == null)
 			throw new IncompatibleTypeException("The type '" + paramType + "' is not a sub type of " + COLLECTION_TYPE);
 
@@ -55,7 +57,7 @@ public class CollectionCoder extends DataCoder
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + COLLECTION_TYPE);
 
 			implType = elem.asType();
-			DeclaredType refinedImpl = tools.types.refineTo(implType, HANDLER.getType());
+			DeclaredType refinedImpl = tools.types.refineTo(implType, collectionType);
 			if (refinedImpl == null)
 				throw new IncompatibleTypeException("The type '" + implName + "' is not a sub type of " + COLLECTION_TYPE);
 			

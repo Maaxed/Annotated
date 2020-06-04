@@ -3,43 +3,41 @@ package fr.max2.annotated.processor.network.coder;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.PropertyMap;
 
 public class PrimitiveCoder
 {
-	public static final IDataHandler
+	public static final IHandlerProvider
 		// Integers
-		BYTE = new Handler("Byte"),
-		SHORT = new Handler("Short"),
-		INT = new Handler("Int"),
-		LONG = new Handler("Long"),
+		BYTE = provider("Byte"),
+		SHORT = provider("Short"),
+		INT = provider("Int"),
+		LONG = provider("Long"),
 		
 		//Floats
-		FLOAT = new Handler("Float"),
-		DOUBLE = new Handler("Double"),
+		FLOAT = provider("Float"),
+		DOUBLE = provider("Double"),
 		
 		// Other primitives
-		BOOLEAN = new Handler("Boolean"),
-		CHAR = new Handler("Char");
+		BOOLEAN = provider("Boolean"),
+		CHAR = provider("Char");
+	
+	private static IHandlerProvider provider(String name)
+	{
+		return (tools) -> new Handler(tools, name);
+	}
 	
 	private static class Handler extends TypedDataHandler
 	{
 		private final String primitiveName;
-		private final TypeKind kind;
 		
-		public Handler(String name)
+		public Handler(ProcessingTools tools, String name)
 		{
+			super(tools, tools.types.getPrimitiveType(TypeKind.valueOf(name.toUpperCase())));
 			this.primitiveName = name;
-			this.kind = TypeKind.valueOf(name.toUpperCase());
-		}
-		
-		@Override
-		protected TypeMirror findType()
-		{
-			return this.tools.types.getPrimitiveType(this.kind);
 		}
 
 		@Override

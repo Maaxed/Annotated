@@ -8,7 +8,7 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 
 import fr.max2.annotated.processor.network.coder.handler.IDataCoderProvider;
-import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
 import fr.max2.annotated.processor.utils.ProcessingTools;
@@ -40,12 +40,12 @@ public class DataCoderUtils
 		return (tools, uniqueName, paramType, properties) -> new SimpleCoder(tools, uniqueName, paramType, properties, type);
 	}
 	
-	public static IDataHandler simpleHandler(String className, String typeName)
+	public static IHandlerProvider simpleHandler(String className, String typeName)
 	{
-		return new NamedDataHandler(className, simpleCoder(typeName));
+		return NamedDataHandler.provider(className, simpleCoder(typeName));
 	}
 	
-	public static IDataHandler simpleHandler(Class<?> clazz, String typeName)
+	public static IHandlerProvider simpleHandler(Class<?> clazz, String typeName)
 	{
 		return simpleHandler(clazz.getTypeName(), typeName);
 	}
