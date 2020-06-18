@@ -1,6 +1,12 @@
 package fr.max2.annotated.processor.utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -12,15 +18,66 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
+import javax.tools.Diagnostic.Kind;
 
 public class NamingUtils
 {
 	private final ProcessingTools tools;
+	private final HashMap<String, String> methods = new HashMap<>();
+	private final HashMap<String, String> fields = new HashMap<>();
 	
 	NamingUtils(ProcessingTools tools)
 	{
 		this.tools = tools;
+		loadMappings("methods.csv", this.methods::put);
+		tools.log(Kind.NOTE, "Loaded " + this.methods.size() + " method mappings from methods.csv");
+		loadMappings("fields.csv", this.fields::put);
+		this.tools.log(Kind.NOTE, "Loaded " + this.fields.size() + " field mappings from fields.csv");
 	}
+	
+	// MCP mappings from SRG names
+	
+	public String getMapping(String domain, String srgName, String defaultName)
+	{
+		switch (domain.toLowerCase())
+		{
+		case "class":
+			return srgName;
+		case "field":
+			return this.getFieldMapping(srgName, defaultName);
+		case "method":
+			return this.getMethodMapping(srgName, defaultName);
+		}
+		return srgName;
+	}
+	
+	public String getMethodMapping(String srgName, String defaultName)
+	{
+		return this.methods.getOrDefault(srgName, defaultName == null ? srgName : defaultName);
+	}
+	
+	public String getFieldMapping(String srgName, String defaultName)
+	{
+		return this.fields.getOrDefault(srgName, defaultName == null ? srgName : defaultName);
+	}
+	
+	private void loadMappings(final String mappingFileName, BiConsumer<String, String> mapStore)
+	{
+		URL mappingPath = NamingUtils.class.getClassLoader().getResource(mappingFileName);
+		if (mappingPath == null)
+			return;
+		
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(mappingPath.openStream())))
+		{
+			reader.lines().skip(1).map(line -> line.split(",")).forEach(entry -> mapStore.accept(entry[0], entry[1]));
+		}
+		catch (IOException e)
+		{
+			this.tools.log(Kind.NOTE, "Error reading mappings: " + e.getClass().getTypeName() + ": " + e.getMessage());
+		}
+	}
+	
+	// Class naming from mirrors
 	
 	public ClassName buildClassName(Element type)
 	{

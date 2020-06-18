@@ -406,6 +406,9 @@ public class DataType
 	 */
 	public static final String  PLAYER_ID = "PLAYER_ID";
 	
+	//TODO [v2.0] AABB, ChunkPos, GlobalPos, MutableBoundingBox, SectionPos, Vec3d, Vec3i
+	//TODO [v2.1] DamageSource, VoxelShape
+	//TODO [v2.1] Rotations, Size2i, Vec2f
 	//TODO [v2.1] Entity by copy type
 	//TODO [v2.1] IDynamicSerializable
 	//TODO [v2.1] TileEntity

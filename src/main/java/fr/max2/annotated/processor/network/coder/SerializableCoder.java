@@ -62,13 +62,9 @@ public class SerializableCoder extends DataCoder
 	{
 		tools.types.provideTypeImports(this.nbtType, builder);
 		
-		String dataVarName = this.uniqueName + "Data";
-		
-		builder.encoder().add(this.tools.naming.computeFullName(this.nbtType) + " " + dataVarName + " = " + saveAccessExpr + ".serializeNBT()" + ";");
-		
 		builder.decoder().add(this.tools.naming.computeFullName(this.paramType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();");
 		
-		OutputExpressions nbtOutput = builder.runCoderWithoutConversion(this.nbtCoder, dataVarName);
+		OutputExpressions nbtOutput = builder.runCoderWithoutConversion(this.nbtCoder, saveAccessExpr + ".serializeNBT()");
 		builder.decoder().add(this.uniqueName + ".deserializeNBT(" + nbtOutput.decoded + ");");
 		
 		return new OutputExpressions(this.uniqueName, internalAccessExpr, externalAccessExpr); 

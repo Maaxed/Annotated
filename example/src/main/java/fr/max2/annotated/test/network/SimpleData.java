@@ -20,7 +20,7 @@ public class SimpleData
 		SimpleData_clientNumber.sendTo(sender, myInt);
 	}
 
-	@ClientPacket(runInMainThread = false)
+	@ClientPacket
 	@OnlyIn(Dist.CLIENT)
 	public static void clientNumber(int myInt)
 	{

@@ -35,6 +35,11 @@ public class ProcessingTools
 		this.templates = new TemplateHelper(this);
 	}
 	
+	public void log(Diagnostic.Kind kind, CharSequence msg)
+	{
+		this.messager.printMessage(kind, msg);
+	}
+	
 	public void log(Diagnostic.Kind kind, CharSequence msg, Element e)
 	{
 		this.messager.printMessage(kind, msg, e);
