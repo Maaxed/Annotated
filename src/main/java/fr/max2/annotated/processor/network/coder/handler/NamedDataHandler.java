@@ -49,6 +49,6 @@ public class NamedDataHandler extends TypedDataHandler
 	
 	public static IHandlerProvider provider(String typeName, IDataCoderProvider coderProvider)
 	{
-		return (tools) -> new NamedDataHandler(tools, typeName, coderProvider);
+		return tools -> new NamedDataHandler(tools, typeName, coderProvider);
 	}
 }

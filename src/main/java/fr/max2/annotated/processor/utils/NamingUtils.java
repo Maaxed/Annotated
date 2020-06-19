@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.Map;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -23,16 +23,14 @@ import javax.tools.Diagnostic.Kind;
 public class NamingUtils
 {
 	private final ProcessingTools tools;
-	private final HashMap<String, String> methods = new HashMap<>();
-	private final HashMap<String, String> fields = new HashMap<>();
+	private final Map<String, String> methods;
+	private final Map<String, String> fields;
 	
 	NamingUtils(ProcessingTools tools)
 	{
 		this.tools = tools;
-		loadMappings("methods.csv", this.methods::put);
-		tools.log(Kind.NOTE, "Loaded " + this.methods.size() + " method mappings from methods.csv");
-		loadMappings("fields.csv", this.fields::put);
-		this.tools.log(Kind.NOTE, "Loaded " + this.fields.size() + " field mappings from fields.csv");
+		this.methods = loadMappings("methods.csv");
+		this.fields = loadMappings("fields.csv");
 	}
 	
 	// MCP mappings from SRG names
@@ -53,27 +51,37 @@ public class NamingUtils
 	
 	public String getMethodMapping(String srgName, String defaultName)
 	{
-		return this.methods.getOrDefault(srgName, defaultName == null ? srgName : defaultName);
+		if (this.methods == null)
+			return defaultName;
+		
+		return this.methods.getOrDefault(srgName, srgName);
 	}
 	
 	public String getFieldMapping(String srgName, String defaultName)
 	{
-		return this.fields.getOrDefault(srgName, defaultName == null ? srgName : defaultName);
+		if (this.fields == null)
+			return defaultName;
+		
+		return this.fields.getOrDefault(srgName, srgName);
 	}
 	
-	private void loadMappings(final String mappingFileName, BiConsumer<String, String> mapStore)
+	private Map<String, String> loadMappings(final String mappingFileName)
 	{
 		URL mappingPath = NamingUtils.class.getClassLoader().getResource(mappingFileName);
 		if (mappingPath == null)
-			return;
+			return null;
 		
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(mappingPath.openStream())))
 		{
-			reader.lines().skip(1).map(line -> line.split(",")).forEach(entry -> mapStore.accept(entry[0], entry[1]));
+			Map<String, String> mappings = new HashMap<>();
+			reader.lines().skip(1).map(line -> line.split(",")).forEach(entry -> mappings.put(entry[0], entry[1]));
+			this.tools.log(Kind.NOTE, "Loaded " + mappings.size() + " mappings from " + mappingFileName);
+			return mappings;
 		}
 		catch (IOException e)
 		{
 			this.tools.log(Kind.NOTE, "Error reading mappings: " + e.getClass().getTypeName() + ": " + e.getMessage());
+			return null;
 		}
 	}
 	

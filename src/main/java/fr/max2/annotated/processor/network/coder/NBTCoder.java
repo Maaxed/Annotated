@@ -24,8 +24,8 @@ public class NBTCoder
 				Element elem = this.tools.types.asElement(paramType);
 				String className = elem.getSimpleName().toString();
 				String primitive = className.substring(0, className.length() - 3);
-				String decodedOutput = DataCoderUtils.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", builder);
-				return new OutputExpressions(className + ".valueOf(" + decodedOutput + ")", internalAccessExpr, externalAccessExpr);
+				String decodedOutput = this.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", null, null, builder);
+				return new OutputExpressions(className + "." + findValueOfMethodName(this.tools, className) + "(" + decodedOutput + ")", internalAccessExpr, externalAccessExpr);
 			}
 		})
 		{
@@ -87,7 +87,91 @@ public class NBTCoder
 			}
 
 			builder.encoder().add("write" + this.mode + "NBT(buf, " + saveAccessExpr + ");");
-			return new OutputExpressions("read" + this.mode + "NBT(buf, " + typeName.shortName() + "." + (this.mode.equals("Abstract") ? "class" : "TYPE") + ")", internalAccessExpr, externalAccessExpr);
+			return new OutputExpressions("read" + this.mode + "NBT(buf, " + typeName.shortName() + "." + (this.mode.equals("Abstract") ? "class" : findTypeFieldName(this.tools, typeName.shortName())) + ")", internalAccessExpr, externalAccessExpr);
 		}
+	}
+	
+	private static String findValueOfMethodName(ProcessingTools tools, String typeName)
+	{
+		String srgName;
+		switch (typeName)
+		{
+		case "StringNBT":
+			srgName = "func_229705_a_";
+			break;
+		case "ByteNBT":
+			srgName = "func_229671_a_";
+			break;
+		case "DoubleNBT":
+			srgName = "func_229684_a_";
+			break;
+		case "FloatNBT":
+			srgName = "func_229689_a_";
+			break;
+		case "IntNBT":
+			srgName = "func_229692_a_";
+			break;
+		case "LongNBT":
+			srgName = "func_229698_a_";
+			break;
+		case "ShortNBT":
+			srgName = "func_229701_a_";
+			break;
+		default:
+			return "valueOf";
+		}
+		
+		return tools.naming.getMethodMapping(srgName, "valueOf");
+	}
+	
+	private static String findTypeFieldName(ProcessingTools tools, String typeName)
+	{
+		String srgName;
+		switch (typeName)
+		{
+		case "ByteArrayNBT":
+			srgName = "field_229667_a_";
+			break;
+		case "IntArrayNBT":
+			srgName = "field_229690_a_";
+			break;
+		case "ListNBT":
+			srgName = "field_229694_a_";
+			break;
+		case "LongArrayNBT":
+			srgName = "field_229696_a_";
+			break;
+		case "CompoundNBT":
+			srgName = "field_229675_a_";
+			break;
+		case "EndNBT":
+			srgName = "field_229685_a_";
+			break;
+		case "StringNBT":
+			srgName = "field_229703_a_";
+			break;
+		case "ByteNBT":
+			srgName = "field_229668_a_";
+			break;
+		case "DoubleNBT":
+			srgName = "field_229683_b_";
+			break;
+		case "FloatNBT":
+			srgName = "field_229688_b_";
+			break;
+		case "IntNBT":
+			srgName = "field_229691_a_";
+			break;
+		case "LongNBT":
+			srgName = "field_229697_a_";
+			break;
+		case "ShortNBT":
+			srgName = "field_229700_a_";
+			break;
+		default:
+			return "TYPE";
+		}
+		
+		return tools.naming.getFieldMapping(srgName, "TYPE");
 	}
 }

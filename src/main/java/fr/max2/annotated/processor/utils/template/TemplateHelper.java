@@ -38,12 +38,12 @@ public class TemplateHelper
 	{
 		try
 		{
-			writeFile(tools.filer, className, templateFile, replacements, originatingElement);
+			this.writeFile(this.tools.filer, className, templateFile, replacements, originatingElement);
 			return true;
 		}
 		catch (Exception e)
 		{
-			tools.log(Kind.ERROR, "Unable to write while the class file '" + className + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
+			this.tools.log(Kind.ERROR, "Unable to write while the class file '" + className + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
 		}
 		return false;
 	}
@@ -52,31 +52,31 @@ public class TemplateHelper
 	{
 		try
 		{
-			readTemplate(templateFile, replacements, lines);
+			this.readTemplate(templateFile, replacements, lines);
 			return true;
 		}
 		catch (IOException e)
 		{
-			tools.log(Kind.ERROR, "An IOException occured during the reading of the template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
+			this.tools.log(Kind.ERROR, "An IOException occured during the reading of the template '" + templateFile + "': " + e.getMessage(), originatingElement, annotation);
 		}
 		catch (Exception e)
 		{
-			tools.log(Kind.ERROR, "An unexpected exception occured during the reading of the template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
+			this.tools.log(Kind.ERROR, "An unexpected exception occured during the reading of the template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), originatingElement, annotation);
 		}
 		return false;
 	}
 	
-	public static void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException
+	public void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException
 	{
 		JavaFileObject file = filer.createSourceFile(className, originatingElements);
 		try (Writer writer = file.openWriter())
 		{
-			readTemplate(templateFile, replacements, writer::write);
+			this.readTemplate(templateFile, replacements, writer::write);
 		}
 		
 	}
 	
-	public static void readTemplate(String templateFile, Map<String, String> replacements, IOConsumer<String> lines) throws IOException
+	public void readTemplate(String templateFile, Map<String, String> replacements, IOConsumer<String> lines) throws IOException
 	{
 		try (InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile);
 			 Reader streamReader = new InputStreamReader(fileStream);
@@ -87,7 +87,7 @@ public class TemplateHelper
 			int i = 0;
 			while ((line = reader.readLine()) != null)
 			{
-				String newLine = mapKeys(controls, line + System.lineSeparator(), i, replacements);
+				String newLine = this.mapKeys(controls, line + System.lineSeparator(), i, replacements);
 				
 				if (!newLine.isEmpty())
 					lines.accept(newLine);
@@ -108,7 +108,7 @@ public class TemplateHelper
 	 * @param replacements the map used to find the replacements
 	 * @return the generated string
 	 */
-	public static String mapKeys(ArrayDeque<ITemplateControl> controls, String content, int line, Map<String, String> replacements)
+	public String mapKeys(ArrayDeque<ITemplateControl> controls, String content, int line, Map<String, String> replacements)
 	{
 		Pattern p = Pattern.compile("\\$\\{(.+?)\\}");
 		Matcher m = p.matcher(content);
@@ -175,6 +175,16 @@ public class TemplateHelper
 				
 				controls.pop();
 				break;
+			case "method":
+			case "field":
+				if (parts.length < 2 || parts.length > 3)
+					throw new TemplateException("Invalid number of parameters for " + parts[0] + " control in '" + key + "' in line " + line + " '" + content + "'");
+				
+				if (!controls.isEmpty() && !controls.peek().shouldPrint())
+					break;
+				
+				sb.append(Matcher.quoteReplacement(this.tools.naming.getMapping(parts[0], parts[1], parts.length >= 3 ? parts[2] : null)));
+				break;
 			default:
 				if (parts.length != 1)
 					throw new TemplateException("Unrecognised control '" + key + "' in line '" + content + "'");
@@ -188,6 +198,7 @@ public class TemplateHelper
 					throw new TemplateException("Unable to find replacement for the key '" + key + "' in line '" + content + "'");
 				
 				sb.append(Matcher.quoteReplacement(rep));
+				break;
 			}
 		}
 		if (controls.isEmpty() || controls.peek().shouldPrint())

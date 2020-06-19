@@ -68,7 +68,7 @@ public class CollectionCoder extends DataCoder
 		}
 		
 		this.implType = implType;
-		DataCoderUtils.requireDefaultConstructor(tools.types, this.implType, "Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'impl' property to specify a valid implementation");
+		requireDefaultConstructor(tools.types, this.implType, "Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'impl' property to specify a valid implementation");
 	}
 	
 	@Override
@@ -86,11 +86,11 @@ public class CollectionCoder extends DataCoder
 		String convertedName = uniqueName + "Converted";
 		
 		builder.encoder().add(
-			DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".size()"),
+			this.writeBuffer("Int", saveAccessExpr + ".size()", null),
 			"for (" + contentTypeName + " " + elementVarName + " : " + saveAccessExpr + ")",
 			"{");
 		builder.decoder().add(
-			"int " + lenghtVarName + " = " + DataCoderUtils.readBuffer("Int") + ";",
+			"int " + lenghtVarName + " = " + this.readBuffer("Int", null) + ";",
 			tools.naming.computeFullName(this.codedType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");

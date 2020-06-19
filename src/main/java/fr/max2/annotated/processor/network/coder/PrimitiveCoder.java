@@ -27,7 +27,7 @@ public class PrimitiveCoder
 	
 	private static IHandlerProvider provider(String name)
 	{
-		return (tools) -> new Handler(tools, name);
+		return tools -> new Handler(tools, name);
 	}
 	
 	private static class Handler extends TypedDataHandler
@@ -49,7 +49,7 @@ public class PrimitiveCoder
 		@Override
 		public DataCoder createCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties)
 		{
-			return new DataCoderUtils.SimpleCoder(tools, uniqueName, paramType, properties, this.primitiveName);
+			return new SimpleDataCoder(tools, uniqueName, paramType, properties, this.primitiveName, null, null);
 		}
 	}
 }

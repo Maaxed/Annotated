@@ -50,11 +50,11 @@ public class ArrayCoder extends DataCoder
 		for (extFirstBrackets = extArrayTypeName.length() - 2; extFirstBrackets >= 2 && extArrayTypeName.substring(extFirstBrackets - 2, extFirstBrackets).equals("[]"); extFirstBrackets-=2);
 
 		builder.encoder().add(
-			DataCoderUtils.writeBuffer("Int", saveAccessExpr + ".length"),
+			this.writeBuffer("Int", saveAccessExpr + ".length", null),
 			"for (" + contentTypeName + " " + elementVarName + " : " + saveAccessExpr + ")",
 			"{");
 		builder.decoder().add(
-			arrayTypeName + " " + this.uniqueName + " = new " + arrayTypeName.substring(0, firstBrackets + 1) + DataCoderUtils.readBuffer("Int") + arrayTypeName.substring(firstBrackets + 1) + ";",
+			arrayTypeName + " " + this.uniqueName + " = new " + arrayTypeName.substring(0, firstBrackets + 1) + this.readBuffer("Int", null) + arrayTypeName.substring(firstBrackets + 1) + ";",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + this.uniqueName + ".length; " + indexVarName + "++)",
 			"{");
 		

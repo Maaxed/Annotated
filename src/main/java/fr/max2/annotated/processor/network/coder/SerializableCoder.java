@@ -54,7 +54,7 @@ public class SerializableCoder extends DataCoder
 		}
 
 		this.implType = implType;
-		DataCoderUtils.requireDefaultConstructor(tools.types, this.implType, "Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'impl' property to specify a valid implementation");
+		requireDefaultConstructor(tools.types, this.implType, "Use the " + DataProperties.class.getCanonicalName() + " annotation with the 'impl' property to specify a valid implementation");
 	}
 	
 	@Override

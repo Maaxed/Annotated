@@ -1,6 +1,5 @@
 package fr.max2.annotated.processor.utils;
 
-import static fr.max2.annotated.processor.utils.template.TemplateHelper.*;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
@@ -29,10 +28,12 @@ import org.junit.Test;
 
 import fr.max2.annotated.processor.utils.exceptions.TemplateException;
 import fr.max2.annotated.processor.utils.template.ITemplateControl;
+import fr.max2.annotated.processor.utils.template.TemplateHelper;
 
 
 public class TemplateHelperTest
 {
+	private TemplateHelper helper = new TemplateHelper(null);
 	
 	@Test
 	public void testWriteFileFromTemplate()
@@ -41,20 +42,20 @@ public class TemplateHelperTest
 		Map<String, String> replacements = new HashMap<>();
 		
 		assertThrows(TemplateException.class, () ->
-			writeFile(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
+			helper.writeFile(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer2 = new FakeFiler("Output2");
 		replacements.put("blue", "violets");
 		
 		assertThrows(TemplateException.class, () ->
-			writeFile(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
+			helper.writeFile(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer3 = new FakeFiler("Output3");
 		replacements.put("red", "roses");
 		
 		try
 		{
-			writeFile(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
+			helper.writeFile(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
 			assertArrayEquals(new Object[] {"This is a test template.",
 											"The value of \"red\" is roses.",
 											"The value of \"blue\" is violets."},
@@ -74,29 +75,29 @@ public class TemplateHelperTest
 		
 		ArrayDeque<ITemplateControl> controls = new ArrayDeque<>();
 		
-		assertEquals("test", mapKeys(controls, "test", 0, replacements));
-		assertEquals("$test", mapKeys(controls, "$test", 0, replacements));
-		assertEquals("$}test{", mapKeys(controls, "$}test{", 0, replacements));
-		assertThrows(TemplateException.class, () -> mapKeys(controls, "${test}", 0, replacements));
-		//assertThrows(TemplateException.class, () -> mapKeys(controls, "${${test}}", 0, replacements));
-		assertThrows(TemplateException.class, () -> mapKeys(controls, "${test1}a${test2}", 0, replacements));
+		assertEquals("test", helper.mapKeys(controls, "test", 0, replacements));
+		assertEquals("$test", helper.mapKeys(controls, "$test", 0, replacements));
+		assertEquals("$}test{", helper.mapKeys(controls, "$}test{", 0, replacements));
+		assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${test}", 0, replacements));
+		//assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${${test}}", 0, replacements));
+		assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${test1}a${test2}", 0, replacements));
 		
 		replacements.put("test", "value");
 
-		assertEquals("test", mapKeys(controls, "test", 0, replacements));
-		assertEquals("$test", mapKeys(controls, "$test", 0, replacements));
-		assertEquals("$}test{", mapKeys(controls, "$}test{", 0, replacements));
-		assertEquals("value", mapKeys(controls, "${test}", 0, replacements));
-		assertEquals("value", mapKeys(controls, "${  test	}", 0, replacements));
+		assertEquals("test", helper.mapKeys(controls, "test", 0, replacements));
+		assertEquals("$test", helper.mapKeys(controls, "$test", 0, replacements));
+		assertEquals("$}test{", helper.mapKeys(controls, "$}test{", 0, replacements));
+		assertEquals("value", helper.mapKeys(controls, "${test}", 0, replacements));
+		assertEquals("value", helper.mapKeys(controls, "${  test	}", 0, replacements));
 		//assertEquals("${test}", mapKeys("${${test}}", 0, replacements));
-		assertEquals("valueavalue", mapKeys(controls, "${test}a${test}", 0, replacements));
+		assertEquals("valueavalue", helper.mapKeys(controls, "${test}a${test}", 0, replacements));
 		
 		replacements.put("test1", "VALUE");
 
-		assertEquals("value", mapKeys(controls, "${test}", 0, replacements));
-		assertEquals("VALUE", mapKeys(controls, "${test1}", 0, replacements));
-		assertEquals("VALUEavalue", mapKeys(controls, "${test1}a${test}", 0, replacements));
-		assertEquals("valueaVALUE", mapKeys(controls, "${test}a${test1}", 0, replacements));
+		assertEquals("value", helper.mapKeys(controls, "${test}", 0, replacements));
+		assertEquals("VALUE", helper.mapKeys(controls, "${test1}", 0, replacements));
+		assertEquals("VALUEavalue", helper.mapKeys(controls, "${test1}a${test}", 0, replacements));
+		assertEquals("valueaVALUE", helper.mapKeys(controls, "${test}a${test1}", 0, replacements));
 	}
 	
 	private static class FakeFiler implements Filer

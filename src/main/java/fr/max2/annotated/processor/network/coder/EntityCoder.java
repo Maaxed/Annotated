@@ -16,8 +16,8 @@ import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 public class EntityCoder
 {
 	public static final IHandlerProvider
-		ENTITY_ID = NamedDataHandler.provider(ClassRef.ENTITY_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.ENTITY_BASE).asType(), tools.types.getPrimitiveType(TypeKind.INT), "getEntityId", "getEntityByID")),
-		PLAYER_ID = NamedDataHandler.provider(ClassRef.PLAYER_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.PLAYER_BASE).asType(), tools.elements.getTypeElement(UUID.class.getCanonicalName()).asType(), "getUniqueID", "getPlayerByUuid"));
+		ENTITY_ID = NamedDataHandler.provider(ClassRef.ENTITY_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.ENTITY_BASE).asType(), tools.types.getPrimitiveType(TypeKind.INT), "func_145782_y", "getEntityId", "func_73045_a", "getEntityByID")),
+		PLAYER_ID = NamedDataHandler.provider(ClassRef.PLAYER_BASE, (tools, uniqueName, paramType, properties) -> new IdCoder(tools, uniqueName, paramType, properties, tools.elements.getTypeElement(ClassRef.PLAYER_BASE).asType(), tools.elements.getTypeElement(UUID.class.getCanonicalName()).asType(), "func_110124_au", "getUniqueID", "func_217371_b", "getPlayerByUuid"));
 	
 	private static class IdCoder extends DataCoder
 	{
@@ -25,13 +25,13 @@ public class EntityCoder
 		private final DataCoder idCoder;
 		private final TypeMirror expectedType;
 
-		public IdCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, TypeMirror expectedType, TypeMirror idType, String idGetter, String entityGetter) throws CoderExcepetion
+		public IdCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties, TypeMirror expectedType, TypeMirror idType, String idGetterSRG, String idGetter, String entityGetterSRG, String entityGetter) throws CoderExcepetion
 		{
 			super(tools, uniqueName, paramType, properties);
 			this.expectedType = expectedType;
 			this.internalType = idType;
-			this.idGetter = idGetter;
-			this.entityGetter = entityGetter;
+			this.idGetter = tools.naming.getMethodMapping(idGetterSRG, idGetter);
+			this.entityGetter = tools.naming.getMethodMapping(entityGetterSRG, entityGetter);
 			this.idCoder = tools.coders.getCoder(uniqueName + "Id", this.internalType, properties.getSubPropertiesOrEmpty("id"));
 		}
 
@@ -39,7 +39,7 @@ public class EntityCoder
 		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 		{
 			OutputExpressions idOutput = builder.runCoderWithoutConversion(this.idCoder, saveAccessExpr);
-			String entityGetter = "ctx.getSender().getEntityWorld()." + this.entityGetter + "(" + externalAccessExpr + ")";
+			String entityGetter = "ctx.getSender()." + this.tools.naming.getMethodMapping("func_130014_f_", "getEntityWorld") + "()." + this.entityGetter + "(" + externalAccessExpr + ")";
 			if (!this.tools.types.isAssignable(this.expectedType, this.paramType))
 			{
 				String uncheckedName = this.uniqueName + "Unchecked";
