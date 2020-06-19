@@ -21,7 +21,14 @@ public class ClassRef
 		BLOCK_RAY_TRACE		= MINECRAFT_PACKAGE + ".util.math.BlockRayTraceResult",
 		ENTITY_BASE			= MINECRAFT_PACKAGE + ".entity.Entity",
 		PLAYER_BASE			= MINECRAFT_PACKAGE + ".entity.player.PlayerEntity",
-		SERVER_PLAYER		= MINECRAFT_PACKAGE + ".entity.player.ServerPlayerEntity";
+		SERVER_PLAYER		= MINECRAFT_PACKAGE + ".entity.player.ServerPlayerEntity",
+		AXIS_ALIGNED_BB		= MINECRAFT_PACKAGE + ".util.math.AxisAlignedBB",
+		MUTABLE_BB			= MINECRAFT_PACKAGE + ".util.math.MutableBoundingBox",
+		CHUNK_POS			= MINECRAFT_PACKAGE + ".util.math.ChunkPos",
+		SECTION_POS			= MINECRAFT_PACKAGE + ".util.math.SectionPos",
+		VECTOR_3D			= MINECRAFT_PACKAGE + ".util.math.Vec3d",
+		VECTOR_3I			= MINECRAFT_PACKAGE + ".util.math.Vec3i";
+		
 
 	public static final String
 		REGISTRY_ENTRY				= FORGE_PACKAGE + ".registries.IForgeRegistryEntry",

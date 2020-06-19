@@ -12,8 +12,14 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NumberNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MutableBoundingBox;
+import net.minecraft.util.math.SectionPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
@@ -40,6 +46,12 @@ public class ClassRefTest
 		assertEquals(Entity.class.getCanonicalName(), ClassRef.ENTITY_BASE);
 		assertEquals(PlayerEntity.class.getCanonicalName(), ClassRef.PLAYER_BASE);
 		assertEquals(ServerPlayerEntity.class.getCanonicalName(), ClassRef.SERVER_PLAYER);
+		assertEquals(AxisAlignedBB.class.getCanonicalName(), ClassRef.AXIS_ALIGNED_BB);
+		assertEquals(MutableBoundingBox.class.getCanonicalName(), ClassRef.MUTABLE_BB);
+		assertEquals(ChunkPos.class.getCanonicalName(), ClassRef.CHUNK_POS);
+		assertEquals(SectionPos.class.getCanonicalName(), ClassRef.SECTION_POS);
+		assertEquals(Vec3d.class.getCanonicalName(), ClassRef.VECTOR_3D);
+		assertEquals(Vec3i.class.getCanonicalName(), ClassRef.VECTOR_3I);
 		//Forge
 		assertEquals(IForgeRegistryEntry.class.getCanonicalName(), ClassRef.REGISTRY_ENTRY);
 		assertEquals(FluidStack.class.getCanonicalName(), ClassRef.FLUID_STACK);

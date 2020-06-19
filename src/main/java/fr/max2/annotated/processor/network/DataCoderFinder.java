@@ -17,6 +17,7 @@ import fr.max2.annotated.processor.network.coder.ArrayCoder;
 import fr.max2.annotated.processor.network.coder.CollectionCoder;
 import fr.max2.annotated.processor.network.coder.DataCoder;
 import fr.max2.annotated.processor.network.coder.EntityCoder;
+import fr.max2.annotated.processor.network.coder.VectorClassCoder;
 import fr.max2.annotated.processor.network.coder.MapCoder;
 import fr.max2.annotated.processor.network.coder.NBTCoder;
 import fr.max2.annotated.processor.network.coder.PrimitiveCoder;
@@ -61,11 +62,12 @@ public class DataCoderFinder
 		handlers.put(DataType.UUID, SimpleClassCoder.UUID.createHandler(tools));
 		handlers.put(DataType.TIME, SimpleClassCoder.DATE.createHandler(tools));
 
+		IDataHandler blockPos = SimpleClassCoder.BLOCK_POS.createHandler(tools);
 		IDataHandler itemStack = SimpleClassCoder.ITEM_STACK.createHandler(tools);
 		IDataHandler nbtSerializable = SerializableCoder.NBT_SERIALIZABLE.createHandler(tools);
 		IDataHandler entityId = EntityCoder.ENTITY_ID.createHandler(tools);
 		IDataHandler playerId = EntityCoder.PLAYER_ID.createHandler(tools);
-		handlers.put(DataType.BLOCK_POS, SimpleClassCoder.BLOCK_POS.createHandler(tools));
+		handlers.put(DataType.BLOCK_POS, blockPos);
 		handlers.put(DataType.RESOURCE_LOCATION, SimpleClassCoder.RESOURCE_LOCATION.createHandler(tools));
 		handlers.put(DataType.ITEM_STACK, itemStack);
 		handlers.put(DataType.FLUID_STACK, SimpleClassCoder.FLUID_STACK.createHandler(tools));
@@ -75,6 +77,15 @@ public class DataCoderFinder
 		handlers.put(DataType.NBT_SERIALIZABLE, nbtSerializable);
 		handlers.put(DataType.ENTITY_ID, entityId);
 		handlers.put(DataType.PLAYER_ID, playerId);
+
+		IDataHandler sectionPos = VectorClassCoder.SECTION_POS.createHandler(tools);
+		IDataHandler vec3i = VectorClassCoder.VECTOR_3I.createHandler(tools);
+		handlers.put(DataType.AXIS_ALIGNED_BB, VectorClassCoder.AXIS_ALIGNED_BB.createHandler(tools));
+		handlers.put(DataType.MUTABLE_BB, VectorClassCoder.MUTABLE_BB.createHandler(tools));
+		handlers.put(DataType.CHUNK_POS, VectorClassCoder.CHUNK_POS.createHandler(tools));
+		handlers.put(DataType.SECTION_POS, sectionPos);
+		handlers.put(DataType.VECTOR_3D, VectorClassCoder.VECTOR_3D.createHandler(tools));
+		handlers.put(DataType.VECTOR_3I, vec3i);
 		
 		IDataHandler nbtPrimitive = NBTCoder.PRIMITIVE.createHandler(tools);
 		IDataHandler nbtConcrete = NBTCoder.CONCRETE.createHandler(tools);
@@ -91,12 +102,14 @@ public class DataCoderFinder
 		spacialHandlers.add(SpecialCoder.INTERSECTION);
 		
 		
+		handlerPriorities.prioritize(blockPos).over(vec3i);
+		handlerPriorities.prioritize(sectionPos).over(vec3i);
 		handlerPriorities.prioritize(itemStack).over(nbtSerializable);
 		
 		handlerPriorities.prioritize(playerId).over(entityId);
 		handlerPriorities.prioritize(playerId).over(nbtSerializable);
 		handlerPriorities.prioritize(entityId).over(nbtSerializable);
-
+		
 		handlerPriorities.prioritize(nbtPrimitive).over(nbtConcrete);
 		handlerPriorities.prioritize(nbtConcrete).over(nbtAbstract);
 		handlerPriorities.prioritize(nbtConcrete).over(collection);

@@ -405,10 +405,81 @@ public class DataType
 	 * The data will be saved as a UUID (16 bytes)
 	 */
 	public static final String  PLAYER_ID = "PLAYER_ID";
+	/**
+	 * This type is applicable for: {@link net.minecraft.util.math.AxisAlignedBB}.
+	 * <p>
+	 * This is the default serializer for:
+	 * <ul>
+	 * <li>{@link net.minecraft.util.math.AxisAlignedBB}
+	 * </ul>
+	 * 
+	 * <p>
+	 * The data will be saved to 6 doubles (48 bytes)
+	 */
+	public static final String AXIS_ALIGNED_BB = "AXIS_ALIGNED_BB";
+	/**
+	 * This type is applicable for: {@link net.minecraft.util.math.MutableBoundingBox}.
+	 * <p>
+	 * This is the default serializer for:
+	 * <ul>
+	 * <li>{@link net.minecraft.util.math.MutableBoundingBox}
+	 * </ul>
+	 * 
+	 * <p>
+	 * The data will be saved to 6 integers (24 bytes)
+	 */
+	public static final String MUTABLE_BB = "MUTABLE_BB";
+	/**
+	 * This type is applicable for: {@link net.minecraft.util.math.ChunkPos}.
+	 * <p>
+	 * This is the default serializer for:
+	 * <ul>
+	 * <li>{@link net.minecraft.util.math.ChunkPos}
+	 * </ul>
+	 * 
+	 * <p>
+	 * The data will be saved to 2 integers (8 bytes)
+	 */
+	public static final String CHUNK_POS = "CHUNK_POS";
+	/**
+	 * This type is applicable for: {@link net.minecraft.util.math.SectionPos}.
+	 * <p>
+	 * This is the default serializer for:
+	 * <ul>
+	 * <li>{@link net.minecraft.util.math.SectionPos}
+	 * </ul>
+	 * 
+	 * <p>
+	 * The data will be saved to 3 integers (12 bytes)
+	 */
+	public static final String SECTION_POS = "SECTION_POS";
+	/**
+	 * This type is applicable for: {@link net.minecraft.util.math.Vec3d}.
+	 * <p>
+	 * This is the default serializer for:
+	 * <ul>
+	 * <li>{@link net.minecraft.util.math.Vec3d}
+	 * </ul>
+	 * 
+	 * <p>
+	 * The data will be saved to 3 doubles (24 bytes)
+	 */
+	public static final String VECTOR_3D = "VECTOR_3D";
+	/**
+	 * This type is applicable for: {@link net.minecraft.util.math.Vec3i}.
+	 * <p>
+	 * This is the default serializer for:
+	 * <ul>
+	 * <li>{@link net.minecraft.util.math.Vec3i}
+	 * </ul>
+	 * 
+	 * <p>
+	 * The data will be saved to 3 integers (12 bytes)
+	 */
+	public static final String VECTOR_3I = "VECTOR_3I";
 	
-	//TODO [v2.0] AABB, ChunkPos, GlobalPos, MutableBoundingBox, SectionPos, Vec3d, Vec3i
 	//TODO [v2.1] DamageSource, VoxelShape
-	//TODO [v2.1] Rotations, Size2i, Vec2f
+	//TODO [v2.1] Rotations, Size2i, Vec2f, GlobalPos
 	//TODO [v2.1] Entity by copy type
 	//TODO [v2.1] IDynamicSerializable
 	//TODO [v2.1] TileEntity

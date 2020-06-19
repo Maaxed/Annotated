@@ -52,7 +52,7 @@ public class NamingUtils
 	public String getMethodMapping(String srgName, String defaultName)
 	{
 		if (this.methods == null)
-			return defaultName;
+			return defaultName == null ? srgName : defaultName;
 		
 		return this.methods.getOrDefault(srgName, srgName);
 	}
@@ -60,7 +60,7 @@ public class NamingUtils
 	public String getFieldMapping(String srgName, String defaultName)
 	{
 		if (this.fields == null)
-			return defaultName;
+			return defaultName == null ? srgName : defaultName;
 		
 		return this.fields.getOrDefault(srgName, srgName);
 	}
