@@ -28,6 +28,22 @@ public class ClassName
 	}
 	
 	@Override
+	public int hashCode()
+	{
+		return 31 * (31 + packageName.hashCode()) + shortName.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof ClassName))
+			return false;
+		
+		ClassName other = (ClassName)obj;
+		return this.packageName.equals(other.packageName) && this.shortName.contains(other.shortName);
+	}
+
+	@Override
 	public String toString()
 	{
 		return this.packageName + ":" + this.shortName;

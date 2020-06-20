@@ -3,6 +3,7 @@ package fr.max2.annotated.processor.network;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import fr.max2.annotated.api.processor.network.GenerateChannel;
 import fr.max2.annotated.api.processor.network.ServerPacket;
 import fr.max2.annotated.processor.network.model.ChannelProvider;
 import fr.max2.annotated.processor.network.model.EnumSide;
+import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 
@@ -38,6 +40,7 @@ public class PacketProcessor extends AbstractProcessor
 		).map(Class::getCanonicalName).collect(Collectors.toSet()));
 	
 	private ProcessingTools tools;
+	private Set<ClassName> processedClasses = new HashSet<>();
 	
 	@Override
 	public Set<String> getSupportedAnnotationTypes()
@@ -50,13 +53,15 @@ public class PacketProcessor extends AbstractProcessor
 	{
 		super.init(processingEnv);
 		this.tools = new ProcessingTools(this.processingEnv);
+		this.processedClasses.clear();
 	}
 	
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
 	{
 		if (roundEnv.processingOver())
-			return true;
+			return false;
+		
 		
 		Collection<NetworkProcessingUnit> networks;
 		try
@@ -65,11 +70,20 @@ public class PacketProcessor extends AbstractProcessor
 		}
 		catch (Exception e)
 		{
-			this.processingEnv.getMessager().printMessage(Kind.ERROR, "Unexpected exception while building of the processing units : " + e.getMessage());
+			this.processingEnv.getMessager().printMessage(Kind.ERROR, "Unexpected exception while building of the processing units : " + e.getClass().getCanonicalName() + ": " + e.getMessage());
 			return true;
 		}
 		
-		networks.forEach(NetworkProcessingUnit::processNetwork);
+		for (NetworkProcessingUnit network : networks)
+		{
+			if (this.processedClasses.contains(network.enclosingClassName))
+				continue; // Skip the class if it has already been processed in a previous round
+			
+			network.processNetwork();
+			
+			if (!network.hasErrors())
+				this.processedClasses.add(network.enclosingClassName);
+		}
 		
 		return true;
 	}

@@ -162,7 +162,7 @@ public class PacketProcessingUnit
 		replacements.put("sheduled", sheduled);
 		replacements.put("modulesContent", builder.modules.stream().map(this::readModule).flatMap(List::stream).map(l -> '\t' + l).collect(Collectors.joining()));
 		
-		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation);
+		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation, this.network.enclosingClass);
 	}
 	
 	private List<String> readModule(String module)

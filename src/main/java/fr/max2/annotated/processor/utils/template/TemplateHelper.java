@@ -34,11 +34,11 @@ public class TemplateHelper
 		this.tools = tools;
 	}
 	
-	public boolean writeFileWithLog(String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation)
+	public boolean writeFileWithLog(String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation, Element... originatingClasses)
 	{
 		try
 		{
-			this.writeFile(this.tools.filer, className, templateFile, replacements, originatingElement);
+			this.writeFile(this.tools.filer, className, templateFile, replacements, originatingClasses);
 			return true;
 		}
 		catch (Exception e)
@@ -66,9 +66,9 @@ public class TemplateHelper
 		return false;
 	}
 	
-	public void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingElements) throws IOException
+	public void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingClasses) throws IOException
 	{
-		JavaFileObject file = filer.createSourceFile(className, originatingElements);
+		JavaFileObject file = filer.createSourceFile(className, originatingClasses);
 		try (Writer writer = file.openWriter())
 		{
 			this.readTemplate(templateFile, replacements, writer::write);

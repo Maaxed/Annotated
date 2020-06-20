@@ -22,7 +22,7 @@ import fr.max2.annotated.processor.utils.ProcessingTools;
 public class NetworkProcessingUnit
 {
 	private final ProcessingTools tools;
-	private final TypeElement enclosingClass;
+	public final TypeElement enclosingClass;
 	private final ChannelProvider channelProvider;
 	private final Optional<? extends AnnotationMirror> annotation;
 	private final @Nullable String modId;
@@ -98,7 +98,7 @@ public class NetworkProcessingUnit
 		replacements.put("registerPackets", registerPackets.stream().collect(Collectors.joining(ls)));
 		replacements.put("classContent", content.stream().map(l -> '\t' + l).collect(Collectors.joining()));
 		
-		return this.tools.templates.writeFileWithLog(this.networkClassName.qualifiedName(), "templates/TemplateNetwork.jvtp", replacements, this.enclosingClass, this.annotation);
+		return this.tools.templates.writeFileWithLog(this.networkClassName.qualifiedName(), "templates/TemplateNetwork.jvtp", replacements, this.enclosingClass, this.annotation, this.enclosingClass);
 	}
 
 	
