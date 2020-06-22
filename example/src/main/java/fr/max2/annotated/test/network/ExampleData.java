@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-@DelegateChannel("fr.max2.annotated.test.network.TestData")
+@DelegateChannel(TestData.class)
 public class ExampleData
 {
 	@ServerPacket(className = "ExampleMessage", runInMainThread = false)

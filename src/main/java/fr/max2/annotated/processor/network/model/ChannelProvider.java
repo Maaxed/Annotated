@@ -7,7 +7,9 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.api.processor.network.DelegateChannel;
@@ -64,12 +66,17 @@ public enum ChannelProvider
 		@Override
 		public boolean getNetworkClassContent(ProcessingTools tools, IImportClassBuilder<?> imports, IOConsumer<String> content, TypeElement enclosingClass, ClassName enclosingClassName, ClassName networkClassName, @Nullable String modId, Optional<? extends AnnotationMirror> annotation)
 		{
-			DelegateChannel delegatorData = enclosingClass.getAnnotation(DelegateChannel.class);
-			TypeElement delegatedClass = tools.elements.getTypeElement(delegatorData.value());
+			Object value = tools.elements.getAnnotationValue(enclosingClass, DelegateChannel.class.getCanonicalName(), "value").map(AnnotationValue::getValue).orElse(null);
+			TypeElement delegatedClass = value instanceof TypeMirror ? tools.elements.asTypeElement(tools.types.asElement((TypeMirror)value)) : null;
 			
 			if (delegatedClass == null)
 			{
-				tools.log(Kind.ERROR, "Unable to find the delegated class '" + delegatorData.value() + "'", enclosingClass, annotation, "value");
+				tools.log(Kind.ERROR, "Unable to find the delegated class '" + value + "'", enclosingClass, annotation, "value");
+				return false;
+			}
+			else if (delegatedClass.getAnnotation(GenerateChannel.class) == null)
+			{
+				tools.log(Kind.ERROR, "The delegated class '" + delegatedClass + "' must define a channel with @GenerateChannel", enclosingClass, annotation, "value");
 				return false;
 			}
 			
