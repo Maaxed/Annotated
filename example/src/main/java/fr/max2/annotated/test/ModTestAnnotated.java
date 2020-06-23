@@ -14,8 +14,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class ModTestAnnotated
 {
 	public static final String MOD_ID = "annotatedexample";
-	public static final String MOD_NAME = "Annotated Example Mod";
-	public static final String VERSION = "@VERSION@";
 	
 	public ModTestAnnotated()
 	{

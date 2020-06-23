@@ -18,6 +18,8 @@ allprojects {
 	apply plugin: 'net.minecraftforge.gradle'
 }
 
+apply plugin: 'maven-publish'
+
 jacoco {
 	toolVersion = '0.8.3'
 }
@@ -31,18 +33,12 @@ sonarqube {
 
 ext {
 	mcVersion = '1.15.2'
-	processorVersion = "$mcVersion-2.0"
+	processorVersion = "MC$mcVersion-2.0"
 }
 
 version = processorVersion
 group = 'fr.max2.annotated'
 archivesBaseName = 'Annotated'
-
-project(':AnnotatedExample') {
-	version = "$mcVersion-1.0"
-	group = 'fr.max2.annotated.example'
-	archivesBaseName = 'AnnotatedExample'
-}
 
 allprojects {
 	apply plugin: 'eclipse'
@@ -51,48 +47,6 @@ allprojects {
 	
 	minecraft {
 		mappings channel: 'snapshot', version: '20200425-1.15.1'
-		runs {
-			client {
-				workingDirectory project.file('run/client')
-
-				property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-				property 'forge.logging.console.level', 'debug'
-
-				mods {
-					annotated {
-						source sourceSets.main
-					}
-				}
-			}
-
-			server {
-				workingDirectory project.file('run/server')
-
-				property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-				property 'forge.logging.console.level', 'debug'
-
-				mods {
-					annotated {
-						source sourceSets.main
-					}
-				}
-			}
-		}
-	}
-	
-	processResources {
-		inputs.property 'version', project.version
-		inputs.property 'mcversion', rootProject.mcVersion
-		
-		from(sourceSets.main.resources.srcDirs) {
-			include 'META-INF/mods.toml'
-			
-			expand 'version': project.version, 'mcversion': rootProject.mcVersion
-		}
-
-		from(sourceSets.main.resources.srcDirs) {
-			exclude 'META-INF/mods.toml'
-		}
 	}
 	
 	repositories {
@@ -108,9 +62,9 @@ allprojects {
 jar {
 	manifest {
 		attributes([
-			'Specification-Title': 'TextureCombiner',
+			'Specification-Title': 'Annotated',
 			'Specification-Vendor': 'LeBossMax2',
-			'Specification-Version': '1',
+			'Specification-Version': '2',
 			'Implementation-Title': project.name,
 			'Implementation-Version': "${version}",
 			'Implementation-Vendor' :'LeBossMax2',
@@ -119,20 +73,29 @@ jar {
 	}
 }
 
-task deobfJar(type: Jar) {
-	from sourceSets.main.output
-	classifier = 'deobf'
-}
-
 task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 	classifier = 'sources'
 }
 
-tasks.assemble.dependsOn 'deobfJar'
 tasks.assemble.dependsOn 'sourcesJar'
 
-artifacts {
-	archives deobfJar
-	archives sourcesJar
+publishing {
+	repositories {
+	}
+	publications {
+		mavenJava(MavenPublication) {
+			from(components.java)
+			artifact sourcesJar
+			pom {
+				description = 'An annotation processor for creating Minecraft Forge mods'
+				
+				withXml {
+					// Remove the dependencies from the pom
+					def mainNode = asNode()
+					mainNode.remove(mainNode.dependencies)
+				}
+			}
+		}
+	}
 }

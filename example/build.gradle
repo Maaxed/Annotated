@@ -6,6 +6,37 @@ version = "$rootProject.mcVersion-1.0"
 group = 'fr.max2.annotated.example'
 archivesBaseName = 'AnnotatedExample'
 
+
+minecraft {
+	runs {
+		client {
+			workingDirectory project.file('run/client')
+
+			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+			property 'forge.logging.console.level', 'debug'
+
+			mods {
+				annotatedexample {
+					source sourceSets.main
+				}
+			}
+		}
+
+		server {
+			workingDirectory project.file('run/server')
+
+			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+			property 'forge.logging.console.level', 'debug'
+
+			mods {
+				annotatedexample {
+					source sourceSets.main
+				}
+			}
+		}
+	}
+}
+
 dependencies {
 	compileOnly rootProject
 	annotationProcessor rootProject
@@ -26,12 +57,19 @@ eclipse {
 }
 
 processResources {
-	from(sourceSets.main.java.srcDirs) {
-		include 'fr/max2/annotated/test/ModTestAnnotated.java'
-		expand '@VERSION@': project.version
+	inputs.property 'version', project.version
+	inputs.property 'mcversion', rootProject.mcVersion
+	
+	from(sourceSets.main.resources.srcDirs) {
+		include 'META-INF/mods.toml'
+		
+		expand 'version': project.version, 'mcversion': rootProject.mcVersion
+	}
+
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'META-INF/mods.toml'
 	}
 }
-
 
 jar {
 	manifest {
