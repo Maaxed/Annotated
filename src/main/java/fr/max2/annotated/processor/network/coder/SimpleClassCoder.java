@@ -10,8 +10,20 @@ import fr.max2.annotated.processor.utils.ClassRef;
 
 public class SimpleClassCoder
 {
-	public static IHandlerProvider
-		STRING = SimpleDataCoder.handler(String.class, "String", "func_180714_a", "func_218666_n"),
+	public static final IHandlerProvider
+		STRING = NamedDataHandler.provider(String.class.getCanonicalName(), (tools, uniqueName, paramType, properties) -> 
+		{
+			int maxLength = properties.getValue("maxLength").map(Integer::valueOf).orElse(32767);
+			return new DataCoder(tools, uniqueName, paramType, properties)
+			{
+				@Override
+				public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
+				{
+					builder.encoder().add("buf." + this.tools.naming.getMethodMapping("func_211400_a", "writeString") + "(" + saveAccessExpr + ", " + maxLength + ");");
+					return new OutputExpressions("buf." + this.tools.naming.getMethodMapping("func_150789_c", "readString") + "(" + maxLength + ")", internalAccessExpr, externalAccessExpr);
+				}
+			};
+		}),
 		UUID = SimpleDataCoder.handler(UUID.class, "UniqueId", "func_179252_a", "func_179253_g"),
 		DATE = SimpleDataCoder.handler(Date.class, "Time", "func_192574_a", "func_192573_m"),
 		BLOCK_POS = SimpleDataCoder.handler(ClassRef.BLOCK_POS, "BlockPos", "func_179255_a", "func_179259_c"),
@@ -27,7 +39,7 @@ public class SimpleClassCoder
 			{
 				builder.encoder().add(this.writeBuffer("Int", saveAccessExpr + ".ordinal()", null));
 				
-				return new OutputExpressions(tools.naming.computeFullName(paramType) + ".values()[buf.readInt()]", internalAccessExpr, externalAccessExpr);
+				return new OutputExpressions(tools.naming.computeFullName(paramType) + ".values()[" + this.readBuffer("Int", null) + "]", internalAccessExpr, externalAccessExpr);
 			}
 		});
 }

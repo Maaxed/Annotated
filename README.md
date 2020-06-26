@@ -16,8 +16,8 @@ Adding a channel annotation to a class will create a network associated with the
 Annotated allows you to define very quickly and easily packets.  
 To do so, first create in your network class the function you want to call on the target side.
 Annotate it with either ``@ClientPacket`` if the target is the client side or ``@ServerPacket`` if it is the server side.  
-A now packet class is generated and is automatically registered to the network.
-The class contains a ``send`` method that takes in parameters a target and parameters and that will send the packet to the target. Once the packet is received on the target, the annotated function is called with the parameters passed to send.
+A new packet class is generated and is automatically registered to the network.
+The class contains a ``send`` method that takes in parameters a target and parameters and that will send the packet to the target. Once the packet is received on the target, the annotated function is called with the parameters passed to ``send``.
 Client packets contain a ``sendTo`` method to send the packet to a single player and server packets contain ``sendToServer`` to send the packet to the server.
 
 Some types in parameter of the annotated method have special meanings, won't be required in the ``send`` function and a value will automatically be assigned:  
@@ -42,8 +42,8 @@ repositories {
 * Add Annotated to your dependencies:
 
 ```groovy
-compileOnly 'com.github.LeBossMax2:Annotated:v2.0'
-annotationProcessor 'com.github.LeBossMax2:Annotated:v2.0'
+compileOnly 'com.github.LeBossMax2:Annotated:MC1.15.2-v2.0'
+annotationProcessor 'com.github.LeBossMax2:Annotated:MC1.15.2-v2.0'
 ```
 
 * Add the Minecraft libraries to the path for the annotation processor:
@@ -70,12 +70,12 @@ The output path of the annotation processor should also be configured like so:
 eclipse {
 	jdt {
 		apt {
-			genSrcDir = file('src/generated/java') // Set the path for the generated code (optional)
+			genSrcDir = file('src/generated/java') // Set the path for the generated source code (optional)
 		}
 	}
 	classpath.file {
 		whenMerged {
-			entries.findAll { it.kind == 'output' } *.path = 'bin/main' // Set the path for the generated classes to be accessible by forge
+			entries.findAll { it.kind == 'output' } *.path = 'bin/main' // Set the path for the generated classes to be accessible by Forge
 		}
 	}
 			

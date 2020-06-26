@@ -144,6 +144,12 @@ public class DataType
 	 * 
 	 * <p>
 	 * The data will be saved to an UTF-8 string
+	 * 
+	 * <p>
+	 * Valid properties:
+	 * <ul>
+	 * <li>{@code "maxLength"}: the maximum size of the encoded string. Default : 32767.
+	 * </ul>
 	 */
 	public static final String  STRING = "STRING";
 	/**
