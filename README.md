@@ -68,18 +68,11 @@ The output path of the annotation processor should also be configured like so:
 
 ```groovy
 eclipse {
-	jdt {
-		apt {
-			genSrcDir = file('src/generated/java') // Set the path for the generated source code (optional)
-		}
+	jdt.apt.genSrcDir = file('src/generated/java') // Set the path for the generated source code (optional)
+	classpath.file.whenMerged {
+		entries.findAll { it.kind == 'output' } *.path = 'bin/main' // Set the path for the generated classes to be accessible by Forge
 	}
-	classpath.file {
-		whenMerged {
-			entries.findAll { it.kind == 'output' } *.path = 'bin/main' // Set the path for the generated classes to be accessible by Forge
-		}
-	}
-			
 }
 ```
 
-Then running ``./gradlew eclipse`` will configure eclipse to use the annotation processor.
+Then running ``./gradlew eclipseJdtApt eclipseFactorypath`` will configure eclipse to use the annotation processor.

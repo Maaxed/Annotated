@@ -43,17 +43,10 @@ dependencies {
 }
 
 eclipse {
-	jdt {
-		apt {
-			genSrcDir = file('src/generated/java')
-		}
-	}
-	classpath.file {
-		whenMerged {
-			entries.findAll { it.kind == 'output' } *.path = 'bin/main'
-		}
-	}
-			
+	jdt.apt.genSrcDir = file('src/generated/java')
+	classpath.file.whenMerged {
+		entries.findAll { it.kind == 'output' } *.path = 'bin/main'
+	}	
 }
 
 processResources {
