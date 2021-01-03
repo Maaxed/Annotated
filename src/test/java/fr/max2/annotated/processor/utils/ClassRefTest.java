@@ -18,8 +18,8 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.math.SectionPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
@@ -50,8 +50,8 @@ public class ClassRefTest
 		assertEquals(MutableBoundingBox.class.getCanonicalName(), ClassRef.MUTABLE_BB);
 		assertEquals(ChunkPos.class.getCanonicalName(), ClassRef.CHUNK_POS);
 		assertEquals(SectionPos.class.getCanonicalName(), ClassRef.SECTION_POS);
-		assertEquals(Vec3d.class.getCanonicalName(), ClassRef.VECTOR_3D);
-		assertEquals(Vec3i.class.getCanonicalName(), ClassRef.VECTOR_3I);
+		assertEquals(Vector3d.class.getCanonicalName(), ClassRef.VECTOR_3D);
+		assertEquals(Vector3i.class.getCanonicalName(), ClassRef.VECTOR_3I);
 		//Forge
 		assertEquals(IForgeRegistryEntry.class.getCanonicalName(), ClassRef.REGISTRY_ENTRY);
 		assertEquals(FluidStack.class.getCanonicalName(), ClassRef.FLUID_STACK);

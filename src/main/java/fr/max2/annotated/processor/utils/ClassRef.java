@@ -26,8 +26,8 @@ public class ClassRef
 		MUTABLE_BB			= MINECRAFT_PACKAGE + ".util.math.MutableBoundingBox",
 		CHUNK_POS			= MINECRAFT_PACKAGE + ".util.math.ChunkPos",
 		SECTION_POS			= MINECRAFT_PACKAGE + ".util.math.SectionPos",
-		VECTOR_3D			= MINECRAFT_PACKAGE + ".util.math.Vec3d",
-		VECTOR_3I			= MINECRAFT_PACKAGE + ".util.math.Vec3i";
+		VECTOR_3D			= MINECRAFT_PACKAGE + ".util.math.vector.Vector3d",
+		VECTOR_3I			= MINECRAFT_PACKAGE + ".util.math.vector.Vector3i";
 		
 
 	public static final String

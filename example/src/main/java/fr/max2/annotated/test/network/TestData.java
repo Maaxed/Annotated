@@ -33,8 +33,8 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.math.SectionPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.ItemStackHandler;
@@ -183,7 +183,7 @@ public class TestData
 	}
 
 	@ClientPacket
-	public static void vectorClasses(AxisAlignedBB aabb, MutableBoundingBox mbb, ChunkPos chunkPos, Vec3d vecd, Vec3i veci, SectionPos sectorPos)
+	public static void vectorClasses(AxisAlignedBB aabb, MutableBoundingBox mbb, ChunkPos chunkPos, Vector3d vecd, Vector3i veci, SectionPos sectorPos)
 	{
 		
 	}

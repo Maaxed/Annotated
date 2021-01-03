@@ -67,6 +67,8 @@ public class NamingUtils
 	
 	private Map<String, String> loadMappings(final String mappingFileName)
 	{
+		//TODO [v*] try using Filer.getResource instead !
+		// Filer.getResource(StandardLocation.CLASS_PATH, "", mappingFileName);
 		URL mappingPath = NamingUtils.class.getClassLoader().getResource(mappingFileName);
 		if (mappingPath == null)
 			return null;
@@ -75,7 +77,7 @@ public class NamingUtils
 		{
 			Map<String, String> mappings = new HashMap<>();
 			reader.lines().skip(1).map(line -> line.split(",")).forEach(entry -> mappings.put(entry[0], entry[1]));
-			this.tools.log(Kind.NOTE, "Loaded " + mappings.size() + " mappings from " + mappingFileName);
+			this.tools.log(Kind.NOTE, "Loaded " + mappings.size() + " mappings from " + mappingFileName + " (" + mappingPath.toString() + ")");
 			return mappings;
 		}
 		catch (IOException e)

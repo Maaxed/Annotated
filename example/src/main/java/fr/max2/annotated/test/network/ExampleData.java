@@ -9,6 +9,8 @@ import fr.max2.annotated.api.processor.network.ServerPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -18,13 +20,13 @@ public class ExampleData
 	@ServerPacket(className = "ExampleMessage", runInMainThread = false)
 	public static void doExampleData(int someNumber, ItemStack aStack, String[] aStringArray, ArrayList<UUID> collectionOfIds, ServerPlayerEntity sender)
 	{
-		sender.sendMessage(new StringTextComponent("The number is " + someNumber));
+		sender.sendMessage(new StringTextComponent("The number is " + someNumber), Util.DUMMY_UUID);
 	}
 	
 	@ClientPacket(className = "ExampleMessageClient", runInMainThread = false)
 	public static void doExampleClientData(int someNumber, ItemStack aStack, String[] aStringArray, ArrayList<UUID> collectionOfIds, NetworkEvent.Context context)
 	{
-		Minecraft.getInstance().player.sendMessage(new StringTextComponent("The number is " + someNumber));
+		Minecraft.getInstance().player.sendMessage(new StringTextComponent("The number is " + someNumber), Util.DUMMY_UUID);
 	}
 }
 

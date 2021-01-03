@@ -21,7 +21,7 @@ public class GuiTest extends Screen
 		for (int i = 1; i <= 4; i++)
 		{
 			final int index = i;
-			this.addButton(new Button(this.width / 2, this.height / 5 * i, 200, 20, "Send packet " + i, (b) ->
+			this.addButton(new Button(this.width / 2, this.height / 5 * i, 200, 20, new StringTextComponent("Send packet " + i), (b) ->
 			{
 				SimpleData_onServerReceive.sendToServer(index);
 			}));

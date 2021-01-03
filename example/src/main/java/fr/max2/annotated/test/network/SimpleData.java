@@ -6,6 +6,7 @@ import fr.max2.annotated.api.processor.network.ServerPacket;
 import fr.max2.annotated.test.ModTestAnnotated;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -16,7 +17,7 @@ public class SimpleData
 	@ServerPacket
 	public static void onServerReceive(int myInt, ServerPlayerEntity sender)
 	{
-		sender.sendMessage(new StringTextComponent("Server receive number " + myInt));
+		sender.sendMessage(new StringTextComponent("Server receive number " + myInt), Util.DUMMY_UUID);
 		SimpleData_clientNumber.sendTo(sender, myInt);
 	}
 
@@ -24,7 +25,7 @@ public class SimpleData
 	@OnlyIn(Dist.CLIENT)
 	public static void clientNumber(int myInt)
 	{
-		Minecraft.getInstance().player.sendMessage(new StringTextComponent("Client receive number " + myInt));
+		Minecraft.getInstance().player.sendMessage(new StringTextComponent("Client receive number " + myInt), Util.DUMMY_UUID);
 	}
 	
 }
