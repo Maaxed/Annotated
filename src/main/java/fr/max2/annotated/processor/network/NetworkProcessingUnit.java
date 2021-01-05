@@ -76,12 +76,12 @@ public class NetworkProcessingUnit
 	private boolean writeNetwork()
 	{
 		List<String> registerPackets = new ArrayList<>();
-		
-		for (int i = 0; i < this.packets.size(); i++)
-		{
-			PacketProcessingUnit packet = this.packets.get(i);
+
+		for (PacketProcessingUnit packet : this.packets) {
 			if (!packet.hasErrors()) // Don't include packets with errors in the network
 				registerPackets.add("\t\t" + packet.messageClassName.shortName() + ".registerTo(CHANNEL, index.getAndIncrement());");
+			else
+				registerPackets.add("\t\tindex.getAndIncrement();");
 		}
 		
 		SimpleImportClassBuilder<?> imports = new SimpleImportClassBuilder<>(this.tools, this.networkClassName.packageName());
@@ -95,7 +95,7 @@ public class NetworkProcessingUnit
 		replacements.put("package", this.networkClassName.packageName());
 		replacements.put("imports", imports.imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
 		replacements.put("className", this.networkClassName.shortName());
-		replacements.put("registerPackets", registerPackets.stream().collect(Collectors.joining(ls)));
+		replacements.put("registerPackets", String.join(ls, registerPackets));
 		replacements.put("classContent", content.stream().map(l -> '\t' + l).collect(Collectors.joining()));
 		
 		return this.tools.templates.writeFileWithLog(this.networkClassName.qualifiedName(), "templates/TemplateNetwork.jvtp", replacements, this.enclosingClass, this.annotation, this.enclosingClass);

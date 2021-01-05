@@ -39,6 +39,7 @@ public enum ChannelProvider
 			{
 				if (modId == null)
 				{
+					//TODO [v2.1] Find the modId at runtime using FML mod loading context
 					tools.log(Kind.ERROR, "Couldn't find @Mod annotation in the package '" + enclosingClassName.packageName() + "'", enclosingClass, annotation);
 					return false;
 				}

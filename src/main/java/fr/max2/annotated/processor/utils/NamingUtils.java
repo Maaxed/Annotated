@@ -3,6 +3,9 @@ package fr.max2.annotated.processor.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +22,8 @@ import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.UnionType;
 import javax.lang.model.type.WildcardType;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 
 public class NamingUtils
 {
@@ -67,17 +72,49 @@ public class NamingUtils
 	
 	private Map<String, String> loadMappings(final String mappingFileName)
 	{
-		//TODO [v*] try using Filer.getResource instead !
-		// Filer.getResource(StandardLocation.CLASS_PATH, "", mappingFileName);
-		URL mappingPath = NamingUtils.class.getClassLoader().getResource(mappingFileName);
-		if (mappingPath == null)
-			return null;
+		Reader fileReader = null;
+		URI path = null;
+		try
+		{
+			// Try to find the mapping file using the Filer tool
+			FileObject file = this.tools.filer.getResource(StandardLocation.CLASS_PATH, "", mappingFileName);
+			fileReader = file.openReader(true);
+			path = file.toUri();
+		}
+		catch (IOException | IllegalArgumentException e)
+		{
+			this.tools.log(Kind.NOTE, "Errors opening mapping file from filer: " + e.getClass().getTypeName() + ": " + e.getMessage());
+		}
+
+		if (fileReader == null)
+		{
+			// Try to find the mapping file using the ClassLoader
+			URL mappingPath = NamingUtils.class.getClassLoader().getResource(mappingFileName);
+			if (mappingPath == null)
+				return null;
+			try
+			{
+				fileReader = new InputStreamReader(mappingPath.openStream());
+				path = mappingPath.toURI();
+			}
+			catch (IOException e)
+			{
+				this.tools.log(Kind.NOTE, "Errors opening mapping file from class loader: "
+					+ e.getClass().getTypeName() + ": " + e.getMessage());
+				return null;
+			}
+			catch (URISyntaxException e)
+			{
+				this.tools.log(Kind.NOTE, "Error opening mapping file: " + e.getClass().getTypeName() + ": " + e.getMessage());
+				return null;
+			}
+		}
 		
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(mappingPath.openStream())))
+		try (BufferedReader reader = new BufferedReader(fileReader))
 		{
 			Map<String, String> mappings = new HashMap<>();
 			reader.lines().skip(1).map(line -> line.split(",")).forEach(entry -> mappings.put(entry[0], entry[1]));
-			this.tools.log(Kind.NOTE, "Loaded " + mappings.size() + " mappings from " + mappingFileName + " (" + mappingPath.toString() + ")");
+			this.tools.log(Kind.NOTE, "Loaded " + mappings.size() + " mappings from " + mappingFileName + " (" + path.toString() + ")");
 			return mappings;
 		}
 		catch (IOException e)
