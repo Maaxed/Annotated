@@ -8,21 +8,22 @@ import fr.max2.annotated.api.network.ServerPacket;
 /**
  * Represents the logical sides a packet can be sent to
  */
-public enum EnumSide
+public enum PacketDirection
 {
+	// TODO [v3.0] Rename enum values
 	CLIENT("Client", ClientPacket.class),
 	SERVER("Server", ServerPacket.class);
 	
 	private final String name;
 	private final Class<? extends Annotation> annotation;
 	
-	private EnumSide(String name, Class<? extends Annotation> annotation)
+	private PacketDirection(String name, Class<? extends Annotation> annotation)
 	{
 		this.name = name;
 		this.annotation = annotation;
 	}
 	
-	public EnumSide opposite()
+	public PacketDirection opposite()
 	{
 		switch (this)
 		{
@@ -31,7 +32,7 @@ public enum EnumSide
 		case SERVER:
 			return CLIENT;
 		default:
-			throw new IllegalStateException("Unknown side '" + this.toString() + "'");
+			throw new IllegalStateException("Unknown logical side '" + this.toString() + "'");
 		}
 	}
 	

@@ -1,6 +1,6 @@
 package fr.max2.annotated.processor.utils;
 
-import static fr.max2.annotated.processor.network.model.EnumSide.*;
+import static fr.max2.annotated.processor.network.model.PacketDirection.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

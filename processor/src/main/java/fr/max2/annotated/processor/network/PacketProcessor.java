@@ -1,7 +1,6 @@
 package fr.max2.annotated.processor.network;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,30 +13,23 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.api.network.ClientPacket;
-import fr.max2.annotated.api.network.DelegateChannel;
-import fr.max2.annotated.api.network.GenerateChannel;
 import fr.max2.annotated.api.network.ServerPacket;
-import fr.max2.annotated.processor.network.model.ChannelProvider;
-import fr.max2.annotated.processor.network.model.EnumSide;
+import fr.max2.annotated.processor.network.model.PacketDirection;
 import fr.max2.annotated.processor.utils.ClassName;
-import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class PacketProcessor extends AbstractProcessor
 {
-	private static final Set<String> SUPPORTED_ANNOTATIONS = Collections.unmodifiableSet(Stream.of(
-			GenerateChannel.class, DelegateChannel.class,
+	private static final Set<String> SUPPORTED_ANNOTATIONS = Stream.of(
 			ClientPacket.class, ServerPacket.class
-		).map(Class::getCanonicalName).collect(Collectors.toSet()));
+		).map(Class::getCanonicalName).collect(Collectors.toUnmodifiableSet());
 	
 	private ProcessingTools tools;
 	private Set<ClassName> processedClasses = new HashSet<>();
@@ -63,10 +55,10 @@ public class PacketProcessor extends AbstractProcessor
 			return false;
 		
 		
-		Collection<NetworkProcessingUnit> networks;
+		Collection<PacketProcessingContext> contexts;
 		try
 		{
-			networks = buildProcessingUnits(roundEnv);
+			contexts = buildProcessingUnits(roundEnv);
 		}
 		catch (Exception e)
 		{
@@ -74,98 +66,47 @@ public class PacketProcessor extends AbstractProcessor
 			return true;
 		}
 		
-		for (NetworkProcessingUnit network : networks)
+		for (PacketProcessingContext context : contexts)
 		{
-			if (this.processedClasses.contains(network.enclosingClassName))
+			if (this.processedClasses.contains(context.enclosingClassName))
 				continue; // Skip the class if it has already been processed in a previous round
 			
-			network.processNetwork();
+			context.processPackets();
 			
-			if (!network.hasErrors())
-				this.processedClasses.add(network.enclosingClassName);
+			if (!context.hasErrors())
+				this.processedClasses.add(context.enclosingClassName);
 		}
 		
 		return true;
 	}
 	
-	private Collection<NetworkProcessingUnit> buildProcessingUnits(RoundEnvironment roundEnv)
+	private Collection<PacketProcessingContext> buildProcessingUnits(RoundEnvironment roundEnv)
 	{
-		Map<TypeElement, NetworkProcessingUnit> networks = new HashMap<>();
+		Map<TypeElement, PacketProcessingContext> contexts = new HashMap<>();
 		
-		for(ChannelProvider provider : ChannelProvider.values())
+		for (PacketDirection dir : PacketDirection.values())
 		{
-			for (TypeElement elem : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(provider.getAnnotationClass())))
+			for (ExecutableElement method : ElementFilter.methodsIn(roundEnv.getElementsAnnotatedWith(dir.getAnnotationClass())))
 			{
-				networks.put(elem, new NetworkProcessingUnit(this.tools, elem, provider, findModAnnotationId(elem)));
-			}
-		}
-		
-		for (EnumSide side : EnumSide.values())
-		{
-			for (ExecutableElement method : ElementFilter.methodsIn(roundEnv.getElementsAnnotatedWith(side.getAnnotationClass())))
-			{
-				if (method.getAnnotation(side.opposite().getAnnotationClass()) != null)
-				{
-					this.tools.log(Kind.ERROR, "Packets can only be send to a single logical side", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
-					continue; // Skip this packet
-				}
-				
 				TypeElement enclosingClass = this.tools.elements.asTypeElement(method.getEnclosingElement());
-				TypeElement parent = enclosingClass;
-				while (!networks.containsKey(enclosingClass) && parent != null)
+				if (enclosingClass.getNestingKind().isNested())
 				{
-					enclosingClass = parent;
-					parent = this.tools.elements.asTypeElement(parent.getEnclosingElement());
-				}
-				
-				if (enclosingClass == null)
-				{
-					this.tools.log(Kind.ERROR, "Unable find the enclosing class of the method", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
+					this.tools.log(Kind.ERROR, "Nested / anonymous classes are not supported !", method, this.tools.elements.getAnnotationMirror(method, dir.getAnnotationClass().getCanonicalName()));
 					continue; // Skip this packet
 				}
-				else if (!networks.containsKey(enclosingClass))
+				
+				if (method.getAnnotation(dir.opposite().getAnnotationClass()) != null)
 				{
-					this.tools.log(Kind.ERROR, "Unable find the enclosing channel of the method, use " + GenerateChannel.class.getCanonicalName() + " or " + DelegateChannel.class.getCanonicalName() + " on the enclosing class to define the channel to use", method, this.tools.elements.getAnnotationMirror(method, side.getAnnotationClass().getCanonicalName()));
+					this.tools.log(Kind.ERROR, "A packet cannot be used in both directions !", method, this.tools.elements.getAnnotationMirror(method, dir.getAnnotationClass().getCanonicalName()));
+					continue; // Skip this packet
 				}
 				
-				NetworkProcessingUnit networkUnit = networks.computeIfAbsent(enclosingClass, clazz -> new NetworkProcessingUnit(this.tools, clazz, null, findModAnnotationId(clazz)));
-				networkUnit.addPacket(method, side);
+				PacketProcessingContext networkUnit = contexts.computeIfAbsent(enclosingClass, clazz -> new PacketProcessingContext(this.tools, clazz));
+				networkUnit.addPacket(method, dir);
 			}
 		}
 		
-		return networks.values();
-	}
-	
-	public String findModAnnotationId(Element elem)
-	{
-		PackageElement pkg = this.tools.elements.getPackageOf(elem);
-		String packageName = pkg.getQualifiedName().toString();
-		
-		while (pkg != null)
-		{
-			for (Element e : pkg.getEnclosedElements())
-			{
-				String id = extractModId(e);
-				if (id != null)
-					return id;
-			}
-			
-			int separator = packageName.lastIndexOf('.');
-			if (separator < 0)
-				break;
-			
-			packageName = packageName.substring(0, separator);
-			pkg = this.tools.elements.getPackageElement(packageName);
-		}
-		
-		return null;
-	}
-	
-	private String extractModId(Element elem)
-	{
-		return this.tools.elements.getAnnotationValue(elem, ClassRef.FORGE_MOD_ANNOTATION, "value")
-						 .map(an -> an.getValue().toString())
-						 .orElse(null);
+		return contexts.values();
 	}
 	//TODO [v2.1] Add code completion
 }

@@ -17,7 +17,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.processor.network.coder.DataCoder;
-import fr.max2.annotated.processor.network.model.EnumSide;
+import fr.max2.annotated.processor.network.model.PacketDirection;
 import fr.max2.annotated.processor.network.model.SimplePacketBuilder;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ClassRef;
@@ -27,17 +27,17 @@ import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
 public class PacketProcessingUnit
 {
 	private final ProcessingTools tools;
-	private final NetworkProcessingUnit network;
+	private final PacketProcessingContext context;
 	private final ExecutableElement method;
-	private final EnumSide side;
+	private final PacketDirection side;
 	private final Optional<? extends AnnotationMirror> annotation;
 	public final ClassName messageClassName;
 	private boolean hasErrors = false;
 
-	public PacketProcessingUnit(ProcessingTools tools, NetworkProcessingUnit context, ExecutableElement packetMethod, EnumSide side)
+	public PacketProcessingUnit(ProcessingTools tools, PacketProcessingContext context, ExecutableElement packetMethod, PacketDirection side)
 	{
 		this.tools = tools;
-		this.network = context;
+		this.context = context;
 		this.method = packetMethod;
 		this.side = side;
 		this.annotation = tools.elements.getAnnotationMirror(packetMethod, this.side.getAnnotationClass().getCanonicalName());
@@ -145,14 +145,13 @@ public class PacketProcessingUnit
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", this.messageClassName.packageName());
 		replacements.put("className", this.messageClassName.shortName());
-		replacements.put("networkClass", this.network.networkClassName.shortName());
 		replacements.put("allFields" , messageParameters.stream().map(p -> this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsDeclaration", dataCoders.stream().map(c -> "\tprivate " + this.tools.naming.computeFullName(c.getInternalType()) + " " + c.uniqueName + ";").collect(Collectors.joining(ls)));
 		replacements.put("internalize", builder.internalizeFunction.instructions(2).collect(Collectors.joining(ls)));
 		replacements.put("externalize", builder.externalizeFunction.instructions(sheduled.equals("true") ? 3 : 2).collect(Collectors.joining(ls)));
 		replacements.put("encode", builder.encodeFunction.instructions(2).collect(Collectors.joining(ls)));
 		replacements.put("decode", builder.decodeFunction.instructions(2).collect(Collectors.joining(ls)));
-		replacements.put("function", this.network.enclosingClassName.shortName() + "." + this.method.getSimpleName().toString());
+		replacements.put("function", this.context.enclosingClassName.shortName() + "." + this.method.getSimpleName().toString());
 		replacements.put("parameters", parameters.stream().map(p -> this.specialValue(p.asType()).orElse(parameterValues.get(p.getSimpleName().toString()))).collect(Collectors.joining(", ")));
 		replacements.put("messageParameters", messageParameters.stream().map(VariableElement::getSimpleName).collect(Collectors.joining(", ")));
 		replacements.put("imports", builder.imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));
@@ -162,7 +161,7 @@ public class PacketProcessingUnit
 		replacements.put("sheduled", sheduled);
 		replacements.put("modulesContent", builder.modules.stream().map(this::readModule).flatMap(List::stream).map(l -> '\t' + l).collect(Collectors.joining()));
 		
-		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation, this.network.enclosingClass);
+		return this.tools.templates.writeFileWithLog(this.messageClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.method, this.annotation, this.context.enclosingClass);
 	}
 	
 	private List<String> readModule(String module)
