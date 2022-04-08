@@ -42,20 +42,20 @@ public class TemplateHelperTest
 		Map<String, String> replacements = new HashMap<>();
 		
 		assertThrows(TemplateException.class, () ->
-			helper.writeFile(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
+			this.helper.writeFile(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer2 = new FakeFiler("Output2");
 		replacements.put("blue", "violets");
 		
 		assertThrows(TemplateException.class, () ->
-			helper.writeFile(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
+			this.helper.writeFile(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer3 = new FakeFiler("Output3");
 		replacements.put("red", "roses");
 		
 		try
 		{
-			helper.writeFile(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
+			this.helper.writeFile(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
 			assertArrayEquals(new Object[] {"This is a test template.",
 											"The value of \"red\" is roses.",
 											"The value of \"blue\" is violets."},
@@ -75,29 +75,29 @@ public class TemplateHelperTest
 		
 		ArrayDeque<ITemplateControl> controls = new ArrayDeque<>();
 		
-		assertEquals("test", helper.mapKeys(controls, "test", 0, replacements));
-		assertEquals("$test", helper.mapKeys(controls, "$test", 0, replacements));
-		assertEquals("$}test{", helper.mapKeys(controls, "$}test{", 0, replacements));
-		assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${test}", 0, replacements));
+		assertEquals("test", this.helper.mapKeys(controls, "test", 0, replacements));
+		assertEquals("$test", this.helper.mapKeys(controls, "$test", 0, replacements));
+		assertEquals("$}test{", this.helper.mapKeys(controls, "$}test{", 0, replacements));
+		assertThrows(TemplateException.class, () -> this.helper.mapKeys(controls, "${test}", 0, replacements));
 		//assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${${test}}", 0, replacements));
-		assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${test1}a${test2}", 0, replacements));
+		assertThrows(TemplateException.class, () -> this.helper.mapKeys(controls, "${test1}a${test2}", 0, replacements));
 		
 		replacements.put("test", "value");
 
-		assertEquals("test", helper.mapKeys(controls, "test", 0, replacements));
-		assertEquals("$test", helper.mapKeys(controls, "$test", 0, replacements));
-		assertEquals("$}test{", helper.mapKeys(controls, "$}test{", 0, replacements));
-		assertEquals("value", helper.mapKeys(controls, "${test}", 0, replacements));
-		assertEquals("value", helper.mapKeys(controls, "${  test	}", 0, replacements));
+		assertEquals("test", this.helper.mapKeys(controls, "test", 0, replacements));
+		assertEquals("$test", this.helper.mapKeys(controls, "$test", 0, replacements));
+		assertEquals("$}test{", this.helper.mapKeys(controls, "$}test{", 0, replacements));
+		assertEquals("value", this.helper.mapKeys(controls, "${test}", 0, replacements));
+		assertEquals("value", this.helper.mapKeys(controls, "${  test	}", 0, replacements));
 		//assertEquals("${test}", mapKeys("${${test}}", 0, replacements));
-		assertEquals("valueavalue", helper.mapKeys(controls, "${test}a${test}", 0, replacements));
+		assertEquals("valueavalue", this.helper.mapKeys(controls, "${test}a${test}", 0, replacements));
 		
 		replacements.put("test1", "VALUE");
 
-		assertEquals("value", helper.mapKeys(controls, "${test}", 0, replacements));
-		assertEquals("VALUE", helper.mapKeys(controls, "${test1}", 0, replacements));
-		assertEquals("VALUEavalue", helper.mapKeys(controls, "${test1}a${test}", 0, replacements));
-		assertEquals("valueaVALUE", helper.mapKeys(controls, "${test}a${test1}", 0, replacements));
+		assertEquals("value", this.helper.mapKeys(controls, "${test}", 0, replacements));
+		assertEquals("VALUE", this.helper.mapKeys(controls, "${test1}", 0, replacements));
+		assertEquals("VALUEavalue", this.helper.mapKeys(controls, "${test1}a${test}", 0, replacements));
+		assertEquals("valueaVALUE", this.helper.mapKeys(controls, "${test}a${test1}", 0, replacements));
 	}
 	
 	private static class FakeFiler implements Filer
@@ -166,7 +166,7 @@ public class TemplateHelperTest
 			
 			if (this.outputStream != null)
 			{
-				byte[] data = outputStream.toByteArray();
+				byte[] data = this.outputStream.toByteArray();
 				try
 				{
 					return new String(data, "UTF-8");

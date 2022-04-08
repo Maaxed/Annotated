@@ -1,9 +1,9 @@
 package fr.max2.annotated.processor.network.model;
 
-import fr.max2.annotated.api.processor.network.ClientPacket;
-import fr.max2.annotated.api.processor.network.ServerPacket;
-
 import java.lang.annotation.Annotation;
+
+import fr.max2.annotated.api.network.ClientPacket;
+import fr.max2.annotated.api.network.ServerPacket;
 
 /**
  * Represents the logical sides a packet can be sent to

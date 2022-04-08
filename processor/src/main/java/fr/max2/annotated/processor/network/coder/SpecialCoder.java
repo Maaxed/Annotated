@@ -7,7 +7,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
-import fr.max2.annotated.api.processor.network.DataProperties;
+import fr.max2.annotated.api.network.DataProperties;
 import fr.max2.annotated.processor.network.coder.handler.IDataCoderProvider;
 import fr.max2.annotated.processor.network.coder.handler.IDataHandler;
 import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;

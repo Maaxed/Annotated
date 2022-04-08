@@ -7,8 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import fr.max2.annotated.api.processor.network.ClientPacket;
-import fr.max2.annotated.api.processor.network.ServerPacket;
+import fr.max2.annotated.api.network.ClientPacket;
+import fr.max2.annotated.api.network.ServerPacket;
 
 public class EnumSideTest
 {

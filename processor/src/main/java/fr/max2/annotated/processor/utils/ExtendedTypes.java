@@ -155,7 +155,7 @@ public class ExtendedTypes implements Types
 	
 	public DeclaredType refineTo(TypeMirror type, TypeMirror base)
 	{
-		return type.accept(declaredTypeRefiner, this.tools.types.erasure(base));
+		return type.accept(this.declaredTypeRefiner, this.tools.types.erasure(base));
 	}
 	
 	private final TypeVisitor<DeclaredType, TypeMirror> declaredTypeRefiner = new DefaultTypeVisitor<>()
@@ -163,12 +163,12 @@ public class ExtendedTypes implements Types
 		@Override
 		public DeclaredType visitDeclared(DeclaredType t, TypeMirror p)
 		{
-			if (tools.types.isSameType(tools.types.erasure(t), p))
+			if (ExtendedTypes.this.tools.types.isSameType(ExtendedTypes.this.tools.types.erasure(t), p))
 			{
 				return t;
 			}
 			
-			List<? extends TypeMirror> superTypes = tools.types.directSupertypes(t);
+			List<? extends TypeMirror> superTypes = ExtendedTypes.this.tools.types.directSupertypes(t);
 			
 			for (TypeMirror parent : superTypes)
 			{
@@ -408,7 +408,7 @@ public class ExtendedTypes implements Types
 	
 	public TypeMirror shallowErasure(TypeMirror type)
 	{
-		return type == null ? null : shallowEraser.visit(type);
+		return type == null ? null : this.shallowEraser.visit(type);
 	}
 	
 	private final TypeVisitor<TypeMirror, Void> shallowEraser = new DefaultTypeVisitor<>()
@@ -423,7 +423,7 @@ public class ExtendedTypes implements Types
 		public TypeMirror visitWildcard(WildcardType t, Void p)
 		{
 			TypeMirror extendsBound = t.getExtendsBound();
-			return extendsBound == null ? tools.elements.getTypeElement(Object.class.getCanonicalName()).asType() : this.visit(extendsBound);
+			return extendsBound == null ? ExtendedTypes.this.tools.elements.getTypeElement(Object.class.getCanonicalName()).asType() : this.visit(extendsBound);
 		}
 
 		@Override

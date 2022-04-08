@@ -1,4 +1,4 @@
-package fr.max2.annotated.api.processor.network;
+package fr.max2.annotated.api.network;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.RetentionPolicy;

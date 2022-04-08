@@ -6,7 +6,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.api.processor.network.DataProperties;
+import fr.max2.annotated.api.network.DataProperties;
 import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
@@ -102,7 +102,7 @@ public class MapCoder extends DataCoder
 			"{");
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + this.readBuffer("Int", null) + ";",
-			this.tools.naming.computeFullName(this.erasureIntType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(implType) + "();",
+			this.tools.naming.computeFullName(this.erasureIntType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 		

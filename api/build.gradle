@@ -1,0 +1,11 @@
+plugins {
+	id 'java'
+}
+
+
+version = rootProject.apiVersion
+group = "${rootProject.group}.api"
+archivesBaseName = "$rootProject.archivesBaseName-API"
+eclipse.project.name = 'Annotated-API'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaVersion)

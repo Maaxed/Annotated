@@ -14,10 +14,10 @@ allprojects {
 
 
 ext {
-	baseVersion = '3.0'
+	apiVersion = '3.0'
 	mcVersion = '1.18.2'
-	libVersion = "$baseVersion-1.0"
-	processorVersion = "$baseVersion-1.0"
+	libVersion = "$apiVersion-1.0"
+	processorVersion = "$apiVersion-1.0"
 	group = 'fr.max2.annotated'
 	archivesBaseName = 'Annotated'
 	javaVersion = 17

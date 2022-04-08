@@ -87,7 +87,7 @@ public class NamingUtils
 			this.tools.log(Kind.NOTE, "Errors opening mapping file from filer: " + e.getClass().getTypeName() + ": " + e.getMessage());
 		}
 
-		if (fileReader == null)
+		if (fileReader == null || path == null)
 		{
 			// Try to find the mapping file using the ClassLoader
 			URL mappingPath = NamingUtils.class.getClassLoader().getResource(mappingFileName);

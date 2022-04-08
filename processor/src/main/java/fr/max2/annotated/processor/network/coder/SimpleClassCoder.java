@@ -39,7 +39,7 @@ public class SimpleClassCoder
 			{
 				builder.encoder().add(this.writeBuffer("Int", saveAccessExpr + ".ordinal()", null));
 				
-				return new OutputExpressions(tools.naming.computeFullName(paramType) + ".values()[" + this.readBuffer("Int", null) + "]", internalAccessExpr, externalAccessExpr);
+				return new OutputExpressions(this.tools.naming.computeFullName(this.paramType) + ".values()[" + this.readBuffer("Int", null) + "]", internalAccessExpr, externalAccessExpr);
 			}
 		});
 }

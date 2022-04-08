@@ -68,7 +68,7 @@ public class ArrayCoder extends DataCoder
 			"{");
 		
 		builder.indentAll(1);
-		OutputExpressions contentOutput = builder.runCoder(contentCoder, elementVarName);
+		OutputExpressions contentOutput = builder.runCoder(this.contentCoder, elementVarName);
 		builder.decoder().add(this.uniqueName + "[" + indexVarName + "] = " + contentOutput.decoded + ";");
 		builder.internalizer().add(convertedName + "[" + indexVarName + "] = " + contentOutput.internalized + ";");
 		builder.externalizer().add(convertedName + "[" + indexVarName + "] = " + contentOutput.externalized + ";");

@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.validation;
+package fr.max2.annotated.validation;
 
 public class Validation
 {

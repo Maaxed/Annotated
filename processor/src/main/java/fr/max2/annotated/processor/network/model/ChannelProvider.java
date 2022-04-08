@@ -12,8 +12,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
-import fr.max2.annotated.api.processor.network.DelegateChannel;
-import fr.max2.annotated.api.processor.network.GenerateChannel;
+import fr.max2.annotated.api.network.DelegateChannel;
+import fr.max2.annotated.api.network.GenerateChannel;
 import fr.max2.annotated.processor.utils.ClassName;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 import fr.max2.annotated.processor.utils.exceptions.IOConsumer;
@@ -104,7 +104,7 @@ public enum ChannelProvider
 	
 	public Class<? extends Annotation> getAnnotationClass()
 	{
-		return annotation;
+		return this.annotation;
 	}
 	
 	public abstract boolean getNetworkClassContent(ProcessingTools tools, IImportClassBuilder<?> imports, IOConsumer<String> content, TypeElement enclosingClass, ClassName enclosingClassName, ClassName networkClassName, @Nullable String modId, Optional<? extends AnnotationMirror> annotation);

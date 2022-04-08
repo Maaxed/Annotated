@@ -6,7 +6,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.api.processor.network.DataProperties;
+import fr.max2.annotated.api.network.DataProperties;
 import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
@@ -83,7 +83,7 @@ public class CollectionCoder extends DataCoder
 		String elementVarName = this.uniqueName + "Element";
 		String lenghtVarName = this.uniqueName + "Length";
 		String indexVarName = this.uniqueName + "Index";
-		String convertedName = uniqueName + "Converted";
+		String convertedName = this.uniqueName + "Converted";
 		
 		builder.encoder().add(
 			this.writeBuffer("Int", saveAccessExpr + ".size()", null),
@@ -91,16 +91,16 @@ public class CollectionCoder extends DataCoder
 			"{");
 		builder.decoder().add(
 			"int " + lenghtVarName + " = " + this.readBuffer("Int", null) + ";",
-			tools.naming.computeFullName(this.codedType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
+			this.tools.naming.computeFullName(this.codedType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
 			"for (int " + indexVarName + " = 0; " + indexVarName + " < " + lenghtVarName + "; " + indexVarName + "++)",
 			"{");
 
 		builder.internalizer().add(
-			tools.naming.computeFullName(this.codedType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
+			this.tools.naming.computeFullName(this.codedType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
 			"for (" + extContentTypeName + " " + elementVarName + " : " + internalAccessExpr + ")",
 			"{");
 		builder.externalizer().add(
-			tools.naming.computeFullName(this.extType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
+			this.tools.naming.computeFullName(this.extType) + " " + convertedName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();",
 			"for (" + contentTypeName + " " + elementVarName + " : " + externalAccessExpr + ")",
 			"{");
 		

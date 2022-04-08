@@ -1,4 +1,4 @@
-package fr.max2.annotated.api.processor.network;
+package fr.max2.annotated.api.network;
 
 /**
  * This class defines the constants corresponding to the valid values for the {@code "type"} property.
@@ -22,7 +22,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a single byte
 	 */
-	public static final String  BYTE = "BYTE";
+	public static final String BYTE = "BYTE";
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code Short}.
 	 * <p>
@@ -35,7 +35,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a short (2 bytes)
 	 */
-	public static final String  SHORT = "SHORT";
+	public static final String SHORT = "SHORT";
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code int}.
 	 * <p>
@@ -48,7 +48,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to an integer (4 bytes)
 	 */
-	public static final String  INT = "INT";
+	public static final String INT = "INT";
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code long}.
 	 * <p>
@@ -61,7 +61,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a long (8 bytes)
 	 */
-	public static final String  LONG = "LONG";
+	public static final String LONG = "LONG";
 	
 	// Floats
 
@@ -77,7 +77,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a float (4 bytes)
 	 */
-	public static final String  FLOAT = "FLOAT";
+	public static final String FLOAT = "FLOAT";
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code double}.
 	 * <p>
@@ -90,7 +90,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a double (8 bytes)
 	 */
-	public static final String  DOUBLE = "DOUBLE";
+	public static final String DOUBLE = "DOUBLE";
 	
 	// Other primitives
 	
@@ -106,7 +106,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a boolean (1 byte)
 	 */
-	public static final String  BOOLEAN = "BOOLEAN";
+	public static final String BOOLEAN = "BOOLEAN";
 	/**
 	 * This type is applicable for: any type that can be implicitly casted to {@code char}.
 	 * <p>
@@ -119,7 +119,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a char (2 bytes)
 	 */
-	public static final String  CHAR = "CHAR";
+	public static final String CHAR = "CHAR";
 	/**
 	 * This type is applicable for: any array of a serializable type.
 	 * <p>
@@ -131,7 +131,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved as an array of elements
 	 */
-	public static final String  ARRAY = "ARRAY";
+	public static final String ARRAY = "ARRAY";
 	
 	// Java classes
 	/**
@@ -151,7 +151,7 @@ public class DataType
 	 * <li>{@code "maxLength"}: the maximum size of the encoded string. Default : 32767.
 	 * </ul>
 	 */
-	public static final String  STRING = "STRING";
+	public static final String STRING = "STRING";
 	/**
 	 * This type is applicable for: every enums.
 	 * <p>
@@ -163,7 +163,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to an integer representing the cardinal of the enum
 	 */
-	public static final String  ENUM = "ENUM";
+	public static final String ENUM = "ENUM";
 	/**
 	 * This type is applicable for: any class implementing or any interface extending {@link java.util.Collection}.
 	 * <p>
@@ -186,7 +186,7 @@ public class DataType
 	 * 						  The property {@code "content.type"} defines the serializer type that will be used for the content of the collection.
 	 * </ul>
 	 */
-	public static final String  COLLECTION = "COLLECTION";
+	public static final String COLLECTION = "COLLECTION";
 	/**
 	 * This type is applicable for: any class implementing or any interface extending {@link java.util.Map}.
 	 * <p>
@@ -208,7 +208,7 @@ public class DataType
 	 * <li>{@code "values"}: a property group to configure the way the values of the map should be serialized.
 	 * </ul>
 	 */
-	public static final String  MAP = "MAP";
+	public static final String MAP = "MAP";
 	/**
 	 * This type is applicable for: {@link java.util.UUID}.
 	 * <p>
@@ -220,7 +220,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a pair of longs (16 bytes)
 	 */
-	public static final String  UUID = "UUID";
+	public static final String UUID = "UUID";
 	/**
 	 * This type is applicable for: {@link java.util.Date}.
 	 * <p>
@@ -232,7 +232,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a long (8 bytes)
 	 */
-	public static final String  TIME = "TIME";
+	public static final String TIME = "TIME";
 	
 	// Minecraft classes
 	
@@ -247,7 +247,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a long (8 bytes)
 	 */
-	public static final String  BLOCK_POS = "BLOCK_POS";
+	public static final String BLOCK_POS = "BLOCK_POS";
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.ResourceLocation}.
 	 * <p>
@@ -259,7 +259,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a single string
 	 */
-	public static final String  RESOURCE_LOCATION = "RESOURCE_LOCATION";
+	public static final String RESOURCE_LOCATION = "RESOURCE_LOCATION";
 	/**
 	 * This type is applicable for: {@link net.minecraft.item.ItemStack}.
 	 * <p>
@@ -271,7 +271,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to an ItemStack
 	 */
-	public static final String  ITEM_STACK = "ITEM_STACK";
+	public static final String ITEM_STACK = "ITEM_STACK";
 	/**
 	 * This type is applicable for: {@link net.minecraftforge.fluids.FluidStack}.
 	 * <p>
@@ -283,7 +283,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a FluidStack
 	 */
-	public static final String  FLUID_STACK = "FLUID_STACK";
+	public static final String FLUID_STACK = "FLUID_STACK";
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.text.ITextComponent}.
 	 * <p>
@@ -295,7 +295,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a String
 	 */
-	public static final String  TEXT_COMPONENT = "TEXT_COMPONENT";
+	public static final String TEXT_COMPONENT = "TEXT_COMPONENT";
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.math.BlockRayTraceResult}.
 	 * <p>
@@ -307,7 +307,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved to a BlockRayTraceResult
 	 */
-	public static final String  BLOCK_RAY_TRACE = "BLOCK_RAY_TRACE";
+	public static final String BLOCK_RAY_TRACE = "BLOCK_RAY_TRACE";
 	/**
 	 * This type is applicable for: any class implementing or any interface extending {@link net.minecraftforge.registries.IForgeRegistryEntry}.
 	 * <p>
@@ -321,7 +321,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved as a single int (4 bytes)
 	 */
-	public static final String  REGISTRY_ENTRY = "REGISTRY_ENTRY";
+	public static final String REGISTRY_ENTRY = "REGISTRY_ENTRY";
 	/**
 	 * This type is applicable for: any class implementing or any interface extending {@link net.minecraftforge.common.util.INBTSerializable}.
 	 * <p>
@@ -341,7 +341,7 @@ public class DataType
 	 * 						  The property {@code "content.type"} defines the serializer type that will be used for serialized nbt.
 	 * </ul>
 	 */
-	public static final String  NBT_SERIALIZABLE = "NBT_SERIALIZABLE";
+	public static final String NBT_SERIALIZABLE = "NBT_SERIALIZABLE";
 	/**
 	 * This type is applicable for: {@link net.minecraft.nbt.StringNBT} and any class extending {@link net.minecraft.nbt.NumberNBT}.
 	 * <p>
@@ -355,7 +355,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved as the corresponding primitive
 	 */
-	public static final String  NBT_PRIMITIVE = "NBT_PRIMITIVE";
+	public static final String NBT_PRIMITIVE = "NBT_PRIMITIVE";
 	/**
 	 * This type is applicable for: any concrete class implementing {@link net.minecraft.nbt.INBT}.
 	 * <p>
@@ -369,7 +369,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved as a nbt object
 	 */
-	public static final String  NBT_CONCRETE = "NBT_CONCRETE";
+	public static final String NBT_CONCRETE = "NBT_CONCRETE";
 	/**
 	 * This type is applicable for: any class implementing or any interface extending {@link net.minecraft.nbt.INBT}.
 	 * <p>
@@ -383,7 +383,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved as a byte and a nbt object
 	 */
-	public static final String  NBT_ABSTRACT = "NBT_ABSTRACT";
+	public static final String NBT_ABSTRACT = "NBT_ABSTRACT";
 	/**
 	 * This type is applicable for: any class extending {@link net.minecraft.entity.Entity}.
 	 * <p>
@@ -397,7 +397,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved as an integer (4 bytes)
 	 */
-	public static final String  ENTITY_ID = "ENTITY_ID";
+	public static final String ENTITY_ID = "ENTITY_ID";
 	/**
 	 * This type is applicable for: any class extending {@link net.minecraft.entity.player.PlayerEntity}.
 	 * <p>
@@ -410,7 +410,7 @@ public class DataType
 	 * <p>
 	 * The data will be saved as a UUID (16 bytes)
 	 */
-	public static final String  PLAYER_ID = "PLAYER_ID";
+	public static final String PLAYER_ID = "PLAYER_ID";
 	/**
 	 * This type is applicable for: {@link net.minecraft.util.math.AxisAlignedBB}.
 	 * <p>
@@ -507,5 +507,5 @@ public class DataType
 	 * <p>
 	 * This type is the one used when no time is specified using the {@code "type"} property.
 	 */
-	public static final String  DEFAULT = "DEFAULT";
+	public static final String DEFAULT = "DEFAULT";
 }

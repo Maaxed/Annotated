@@ -14,7 +14,7 @@ public class ClassName
 
 	public String qualifiedName()
 	{
-		return packageName + "." + shortName;
+		return this.packageName + "." + this.shortName;
 	}
 	
 	public String shortName()
@@ -30,7 +30,7 @@ public class ClassName
 	@Override
 	public int hashCode()
 	{
-		return 31 * (31 + packageName.hashCode()) + shortName.hashCode();
+		return 31 * (31 + this.packageName.hashCode()) + this.shortName.hashCode();
 	}
 
 	@Override

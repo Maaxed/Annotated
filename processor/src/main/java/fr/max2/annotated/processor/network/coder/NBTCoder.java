@@ -21,7 +21,7 @@ public class NBTCoder
 			@Override
 			public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 			{
-				Element elem = this.tools.types.asElement(paramType);
+				Element elem = this.tools.types.asElement(this.paramType);
 				String className = elem.getSimpleName().toString();
 				String primitive = className.substring(0, className.length() - 3);
 				String decodedOutput = this.addBufferInstructions(primitive, saveAccessExpr + ".get" + primitive + "()", null, null, builder);
@@ -66,7 +66,7 @@ public class NBTCoder
 		@Override
 		public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 		{
-			ClassName typeName = this.tools.naming.buildClassName(this.tools.types.asElement(paramType));
+			ClassName typeName = this.tools.naming.buildClassName(this.tools.types.asElement(this.paramType));
 			
 			builder.addImport("net.minecraft.nbt.INBTType");
 			builder.addImport("net.minecraft.nbt.INBT");

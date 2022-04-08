@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.validation;
+package fr.max2.annotated.validation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

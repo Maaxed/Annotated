@@ -4,7 +4,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.api.processor.network.DataProperties;
+import fr.max2.annotated.api.network.DataProperties;
 import fr.max2.annotated.processor.network.coder.handler.IHandlerProvider;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.IPacketBuilder;
@@ -60,7 +60,7 @@ public class SerializableCoder extends DataCoder
 	@Override
 	public OutputExpressions addInstructions(IPacketBuilder builder, String saveAccessExpr, String internalAccessExpr, String externalAccessExpr)
 	{
-		tools.types.provideTypeImports(this.nbtType, builder);
+		this.tools.types.provideTypeImports(this.nbtType, builder);
 		
 		builder.decoder().add(this.tools.naming.computeFullName(this.paramType) + " " + this.uniqueName + " = new " + this.tools.naming.computeSimplifiedName(this.implType) + "();");
 		

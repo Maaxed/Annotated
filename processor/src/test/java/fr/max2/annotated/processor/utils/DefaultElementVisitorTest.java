@@ -8,7 +8,6 @@ import javax.lang.model.element.ElementVisitor;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.max2.annotated.processor.utils.DefaultElementVisitor;
 import fr.max2.annotated.processor.utils.model.element.TestingAllElement;
 
 
@@ -19,14 +18,14 @@ public class DefaultElementVisitorTest
 	@Before
 	public void setUp()
 	{
-		passedElement = new TestingAllElement();
+		this.passedElement = new TestingAllElement();
 	}
 	
 	@Test
 	public void testVisit()
 	{
 		TestingVisitor visitor = new TestingVisitor();
-		passedElement = new TestingAllElement()
+		this.passedElement = new TestingAllElement()
 		{
 			@Override
 			public <R, P> R accept(ElementVisitor<R, P> v, P p)
@@ -36,44 +35,44 @@ public class DefaultElementVisitorTest
 			}
 		};
 		
-		assertEquals("Output", visitor.visit(passedElement, "Input"));
-		assertEquals("Error", visitor.visit(passedElement));
+		assertEquals("Output", visitor.visit(this.passedElement, "Input"));
+		assertEquals("Error", visitor.visit(this.passedElement));
 	}
 	
 	@Test
 	public void testVisitPackage()
 	{
-		assertEquals("Output", new TestingVisitor().visitPackage(passedElement, "Input"));
+		assertEquals("Output", new TestingVisitor().visitPackage(this.passedElement, "Input"));
 	}
 	
 	@Test
 	public void testVisitType()
 	{
-		assertEquals("Output", new TestingVisitor().visitType(passedElement, "Input"));
+		assertEquals("Output", new TestingVisitor().visitType(this.passedElement, "Input"));
 	}
 	
 	@Test
 	public void testVisitVariable()
 	{
-		assertEquals("Output", new TestingVisitor().visitVariable(passedElement, "Input"));
+		assertEquals("Output", new TestingVisitor().visitVariable(this.passedElement, "Input"));
 	}
 	
 	@Test
 	public void testVisitExecutable()
 	{
-		assertEquals("Output", new TestingVisitor().visitExecutable(passedElement, "Input"));
+		assertEquals("Output", new TestingVisitor().visitExecutable(this.passedElement, "Input"));
 	}
 	
 	@Test
 	public void testVisitTypeParameter()
 	{
-		assertEquals("Output", new TestingVisitor().visitTypeParameter(passedElement, "Input"));
+		assertEquals("Output", new TestingVisitor().visitTypeParameter(this.passedElement, "Input"));
 	}
 	
 	@Test
 	public void testVisitUnknown()
 	{
-		assertEquals("Output", new TestingVisitor().visitUnknown(passedElement, "Input"));
+		assertEquals("Output", new TestingVisitor().visitUnknown(this.passedElement, "Input"));
 	}
 	
 	private class TestingVisitor implements DefaultElementVisitor<String, String>
@@ -82,7 +81,7 @@ public class DefaultElementVisitorTest
 		@Override
 		public String visitDefault(Element e, String p)
 		{
-			assertSame(passedElement, e);
+			assertSame(DefaultElementVisitorTest.this.passedElement, e);
 			return p == "Input" ? "Output" : "Error";
 		}
 		

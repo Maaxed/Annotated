@@ -96,7 +96,7 @@ public class PacketProcessingUnit
 		List<? extends VariableElement> parameters = this.method.getParameters();
 		List<? extends VariableElement> messageParameters = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
 		
-		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools, messageClassName.packageName());
+		SimplePacketBuilder builder = new SimplePacketBuilder(this.tools, this.messageClassName.packageName());
 		
 		List<DataCoder> dataCoders = new ArrayList<>();
 		
@@ -143,16 +143,16 @@ public class PacketProcessingUnit
 		String sheduled = this.tools.elements.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true");
 		
 		Map<String, String> replacements = new HashMap<>();
-		replacements.put("package", messageClassName.packageName());
+		replacements.put("package", this.messageClassName.packageName());
 		replacements.put("className", this.messageClassName.shortName());
-		replacements.put("networkClass", network.networkClassName.shortName());
+		replacements.put("networkClass", this.network.networkClassName.shortName());
 		replacements.put("allFields" , messageParameters.stream().map(p -> this.tools.naming.computeFullName(p.asType()) + " " + p.getSimpleName()).collect(Collectors.joining(", ")));
 		replacements.put("fieldsDeclaration", dataCoders.stream().map(c -> "\tprivate " + this.tools.naming.computeFullName(c.getInternalType()) + " " + c.uniqueName + ";").collect(Collectors.joining(ls)));
 		replacements.put("internalize", builder.internalizeFunction.instructions(2).collect(Collectors.joining(ls)));
 		replacements.put("externalize", builder.externalizeFunction.instructions(sheduled.equals("true") ? 3 : 2).collect(Collectors.joining(ls)));
 		replacements.put("encode", builder.encodeFunction.instructions(2).collect(Collectors.joining(ls)));
 		replacements.put("decode", builder.decodeFunction.instructions(2).collect(Collectors.joining(ls)));
-		replacements.put("function", network.enclosingClassName.shortName() + "." + this.method.getSimpleName().toString());
+		replacements.put("function", this.network.enclosingClassName.shortName() + "." + this.method.getSimpleName().toString());
 		replacements.put("parameters", parameters.stream().map(p -> this.specialValue(p.asType()).orElse(parameterValues.get(p.getSimpleName().toString()))).collect(Collectors.joining(", ")));
 		replacements.put("messageParameters", messageParameters.stream().map(VariableElement::getSimpleName).collect(Collectors.joining(", ")));
 		replacements.put("imports", builder.imports.stream().map(i -> "import " + i + ";" + ls).collect(Collectors.joining()));

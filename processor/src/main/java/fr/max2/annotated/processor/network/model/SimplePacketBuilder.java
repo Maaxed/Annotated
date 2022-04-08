@@ -111,7 +111,7 @@ public class SimplePacketBuilder extends SimpleImportClassBuilder<IPacketBuilder
 		@Override
 		public IFunctionBuilder add(String... instructions)
 		{
-			if (active)
+			if (this.active)
 			{
 				for (String instruction : instructions)
 				{

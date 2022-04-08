@@ -15,17 +15,17 @@ public class NamingUtilsTest extends TestModelProvider
 	{
 		this.setUpModel();
 		
-		assertEquals("Integer", SIMPLIFIED.computeName(integer));
-		assertEquals("List<>", SIMPLIFIED.computeName(list));
-		assertEquals("Map<>", SIMPLIFIED.computeName(map));
-		assertEquals("double", SIMPLIFIED.computeName(primitive));
-		assertEquals("Integer[]", SIMPLIFIED.computeName(array));
-		assertEquals("E", SIMPLIFIED.computeName(simpleTypeVariable));
-		assertEquals("?", SIMPLIFIED.computeName(simpleWildcard));
-		assertEquals("? extends Integer", SIMPLIFIED.computeName(extendsWildcard));
-		assertEquals("? super NamingUtils.TypeToString", SIMPLIFIED.computeName(superWildcard));
-		assertEquals("Integer | NamingUtils.TypeToString", SIMPLIFIED.computeName(union));
-		assertEquals("Integer & NamingUtils.TypeToString", SIMPLIFIED.computeName(intersaction));
+		assertEquals("Integer", SIMPLIFIED.computeName(this.integer));
+		assertEquals("List<>", SIMPLIFIED.computeName(this.list));
+		assertEquals("Map<>", SIMPLIFIED.computeName(this.map));
+		assertEquals("double", SIMPLIFIED.computeName(this.primitive));
+		assertEquals("Integer[]", SIMPLIFIED.computeName(this.array));
+		assertEquals("E", SIMPLIFIED.computeName(this.simpleTypeVariable));
+		assertEquals("?", SIMPLIFIED.computeName(this.simpleWildcard));
+		assertEquals("? extends Integer", SIMPLIFIED.computeName(this.extendsWildcard));
+		assertEquals("? super NamingUtils.TypeToString", SIMPLIFIED.computeName(this.superWildcard));
+		assertEquals("Integer | NamingUtils.TypeToString", SIMPLIFIED.computeName(this.union));
+		assertEquals("Integer & NamingUtils.TypeToString", SIMPLIFIED.computeName(this.intersaction));
 		assertEquals("Null", SIMPLIFIED.computeName(TestingNullType.INSTANCE));
 	}
 	
@@ -34,17 +34,17 @@ public class NamingUtilsTest extends TestModelProvider
 	{
 		this.setUpModel();
 		
-		assertEquals("Integer", FULL.computeName(integer));
-		assertEquals("List<Integer>", FULL.computeName(list));
-		assertEquals("Map<Integer, List<Integer>>", FULL.computeName(map));
-		assertEquals("double", FULL.computeName(primitive));
-		assertEquals("Integer[]", FULL.computeName(array));
-		assertEquals("E", FULL.computeName(simpleTypeVariable));
-		assertEquals("?", FULL.computeName(simpleWildcard));
-		assertEquals("? extends Integer", FULL.computeName(extendsWildcard));
-		assertEquals("? super NamingUtils.TypeToString", FULL.computeName(superWildcard));
-		assertEquals("Integer | NamingUtils.TypeToString", FULL.computeName(union));
-		assertEquals("Integer & NamingUtils.TypeToString", FULL.computeName(intersaction));
+		assertEquals("Integer", FULL.computeName(this.integer));
+		assertEquals("List<Integer>", FULL.computeName(this.list));
+		assertEquals("Map<Integer, List<Integer>>", FULL.computeName(this.map));
+		assertEquals("double", FULL.computeName(this.primitive));
+		assertEquals("Integer[]", FULL.computeName(this.array));
+		assertEquals("E", FULL.computeName(this.simpleTypeVariable));
+		assertEquals("?", FULL.computeName(this.simpleWildcard));
+		assertEquals("? extends Integer", FULL.computeName(this.extendsWildcard));
+		assertEquals("? super NamingUtils.TypeToString", FULL.computeName(this.superWildcard));
+		assertEquals("Integer | NamingUtils.TypeToString", FULL.computeName(this.union));
+		assertEquals("Integer & NamingUtils.TypeToString", FULL.computeName(this.intersaction));
 		assertEquals("Null", FULL.computeName(TestingNullType.INSTANCE));
 	}
 	

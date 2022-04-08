@@ -15,8 +15,8 @@ public class ExtendedElementsTest extends TestModelProvider
 	{
 		this.setUpModel();
 
-		assertEquals(this.intElement, helper.asTypeElement(this.intElement));
-		assertNull(helper.asTypeElement(this.packageType));
+		assertEquals(this.intElement, this.helper.asTypeElement(this.intElement));
+		assertNull(this.helper.asTypeElement(this.packageType));
 	}
 	
 	@Test
@@ -24,7 +24,7 @@ public class ExtendedElementsTest extends TestModelProvider
 	{
 		this.setUpModel();
 
-		assertEquals(this.packageType, helper.asPackage(this.packageType));
-		assertNull(helper.asPackage(this.intElement));
+		assertEquals(this.packageType, this.helper.asPackage(this.packageType));
+		assertNull(this.helper.asPackage(this.intElement));
 	}
 }

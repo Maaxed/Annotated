@@ -160,12 +160,12 @@ public class PropertyMap
 		
 		private boolean isString()
 		{
-			return value instanceof String;
+			return this.value instanceof String;
 		}
 		
 		private boolean isPropertyMap()
 		{
-			return value instanceof PropertyMap;
+			return this.value instanceof PropertyMap;
 		}
 
 		private String asString() throws InvalidPropertyException
@@ -173,7 +173,7 @@ public class PropertyMap
 			if (!this.isString())
 				throw new InvalidPropertyException("The value of the property '" + this.identifier + "' should be a string but is a permerty map");
 			
-			return (String)value;
+			return (String)this.value;
 		}
 		
 		private PropertyMap asPropertyMap() throws InvalidPropertyException
@@ -181,7 +181,7 @@ public class PropertyMap
 			if (!isPropertyMap())
 				throw new InvalidPropertyException("The value of the property '" + this.identifier + "' should be a property map but is a string");
 			
-			return (PropertyMap)value;
+			return (PropertyMap)this.value;
 		}
 		
 		private PropertyValue setUsed()
@@ -192,9 +192,9 @@ public class PropertyMap
 
 		private void checkUnusedProperties() throws InvalidPropertyException
 		{
-			if (value instanceof PropertyMap)
+			if (this.value instanceof PropertyMap)
 			{
-				((PropertyMap)value).checkUnusedProperties();
+				((PropertyMap)this.value).checkUnusedProperties();
 			}
 		}
 	}

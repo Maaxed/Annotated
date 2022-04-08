@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.api.processor.network.DataProperties;
-import fr.max2.annotated.api.processor.network.DataType;
 import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.api.network.DataProperties;
+import fr.max2.annotated.api.network.DataType;
 import fr.max2.annotated.processor.network.coder.ArrayCoder;
 import fr.max2.annotated.processor.network.coder.CollectionCoder;
 import fr.max2.annotated.processor.network.coder.DataCoder;
@@ -43,80 +43,80 @@ public class DataCoderFinder
 	{
 		this.tools = tools;
 		
-		handlers.put(DataType.BYTE, PrimitiveCoder.BYTE.createHandler(tools));
-		handlers.put(DataType.SHORT, PrimitiveCoder.SHORT.createHandler(tools));
-		handlers.put(DataType.INT, PrimitiveCoder.INT.createHandler(tools));
-		handlers.put(DataType.LONG, PrimitiveCoder.LONG.createHandler(tools));
-		handlers.put(DataType.FLOAT, PrimitiveCoder.FLOAT.createHandler(tools));
-		handlers.put(DataType.DOUBLE, PrimitiveCoder.DOUBLE.createHandler(tools));
-		handlers.put(DataType.BOOLEAN, PrimitiveCoder.BOOLEAN.createHandler(tools));
-		handlers.put(DataType.CHAR, PrimitiveCoder.CHAR.createHandler(tools));
+		this.handlers.put(DataType.BYTE, PrimitiveCoder.BYTE.createHandler(tools));
+		this.handlers.put(DataType.SHORT, PrimitiveCoder.SHORT.createHandler(tools));
+		this.handlers.put(DataType.INT, PrimitiveCoder.INT.createHandler(tools));
+		this.handlers.put(DataType.LONG, PrimitiveCoder.LONG.createHandler(tools));
+		this.handlers.put(DataType.FLOAT, PrimitiveCoder.FLOAT.createHandler(tools));
+		this.handlers.put(DataType.DOUBLE, PrimitiveCoder.DOUBLE.createHandler(tools));
+		this.handlers.put(DataType.BOOLEAN, PrimitiveCoder.BOOLEAN.createHandler(tools));
+		this.handlers.put(DataType.CHAR, PrimitiveCoder.CHAR.createHandler(tools));
 		
-		handlers.put(DataType.ARRAY, ArrayCoder.HANDLER);
+		this.handlers.put(DataType.ARRAY, ArrayCoder.HANDLER);
 		
 		IDataHandler collection = CollectionCoder.HANDLER.createHandler(tools);
-		handlers.put(DataType.STRING, SimpleClassCoder.STRING.createHandler(tools));
-		handlers.put(DataType.ENUM, SimpleClassCoder.ENUM.createHandler(tools));
-		handlers.put(DataType.COLLECTION, collection);
-		handlers.put(DataType.MAP, MapCoder.HANDLER.createHandler(tools));
-		handlers.put(DataType.UUID, SimpleClassCoder.UUID.createHandler(tools));
-		handlers.put(DataType.TIME, SimpleClassCoder.DATE.createHandler(tools));
+		this.handlers.put(DataType.STRING, SimpleClassCoder.STRING.createHandler(tools));
+		this.handlers.put(DataType.ENUM, SimpleClassCoder.ENUM.createHandler(tools));
+		this.handlers.put(DataType.COLLECTION, collection);
+		this.handlers.put(DataType.MAP, MapCoder.HANDLER.createHandler(tools));
+		this.handlers.put(DataType.UUID, SimpleClassCoder.UUID.createHandler(tools));
+		this.handlers.put(DataType.TIME, SimpleClassCoder.DATE.createHandler(tools));
 
 		IDataHandler blockPos = SimpleClassCoder.BLOCK_POS.createHandler(tools);
 		IDataHandler itemStack = SimpleClassCoder.ITEM_STACK.createHandler(tools);
 		IDataHandler nbtSerializable = SerializableCoder.NBT_SERIALIZABLE.createHandler(tools);
 		IDataHandler entityId = EntityCoder.ENTITY_ID.createHandler(tools);
 		IDataHandler playerId = EntityCoder.PLAYER_ID.createHandler(tools);
-		handlers.put(DataType.BLOCK_POS, blockPos);
-		handlers.put(DataType.RESOURCE_LOCATION, SimpleClassCoder.RESOURCE_LOCATION.createHandler(tools));
-		handlers.put(DataType.ITEM_STACK, itemStack);
-		handlers.put(DataType.FLUID_STACK, SimpleClassCoder.FLUID_STACK.createHandler(tools));
-		handlers.put(DataType.TEXT_COMPONENT, SimpleClassCoder.TEXT_COMPONENT.createHandler(tools));
-		handlers.put(DataType.BLOCK_RAY_TRACE, SimpleClassCoder.BLOCK_RAY_TRACE.createHandler(tools));
-		handlers.put(DataType.REGISTRY_ENTRY, RegistryEntryCoder.HANDLER.createHandler(tools));
-		handlers.put(DataType.NBT_SERIALIZABLE, nbtSerializable);
-		handlers.put(DataType.ENTITY_ID, entityId);
-		handlers.put(DataType.PLAYER_ID, playerId);
+		this.handlers.put(DataType.BLOCK_POS, blockPos);
+		this.handlers.put(DataType.RESOURCE_LOCATION, SimpleClassCoder.RESOURCE_LOCATION.createHandler(tools));
+		this.handlers.put(DataType.ITEM_STACK, itemStack);
+		this.handlers.put(DataType.FLUID_STACK, SimpleClassCoder.FLUID_STACK.createHandler(tools));
+		this.handlers.put(DataType.TEXT_COMPONENT, SimpleClassCoder.TEXT_COMPONENT.createHandler(tools));
+		this.handlers.put(DataType.BLOCK_RAY_TRACE, SimpleClassCoder.BLOCK_RAY_TRACE.createHandler(tools));
+		this.handlers.put(DataType.REGISTRY_ENTRY, RegistryEntryCoder.HANDLER.createHandler(tools));
+		this.handlers.put(DataType.NBT_SERIALIZABLE, nbtSerializable);
+		this.handlers.put(DataType.ENTITY_ID, entityId);
+		this.handlers.put(DataType.PLAYER_ID, playerId);
 
 		IDataHandler sectionPos = VectorClassCoder.SECTION_POS.createHandler(tools);
 		IDataHandler vec3i = VectorClassCoder.VECTOR_3I.createHandler(tools);
-		handlers.put(DataType.AXIS_ALIGNED_BB, VectorClassCoder.AXIS_ALIGNED_BB.createHandler(tools));
-		handlers.put(DataType.MUTABLE_BB, VectorClassCoder.MUTABLE_BB.createHandler(tools));
-		handlers.put(DataType.CHUNK_POS, VectorClassCoder.CHUNK_POS.createHandler(tools));
-		handlers.put(DataType.SECTION_POS, sectionPos);
-		handlers.put(DataType.VECTOR_3D, VectorClassCoder.VECTOR_3D.createHandler(tools));
-		handlers.put(DataType.VECTOR_3I, vec3i);
+		this.handlers.put(DataType.AXIS_ALIGNED_BB, VectorClassCoder.AXIS_ALIGNED_BB.createHandler(tools));
+		this.handlers.put(DataType.MUTABLE_BB, VectorClassCoder.MUTABLE_BB.createHandler(tools));
+		this.handlers.put(DataType.CHUNK_POS, VectorClassCoder.CHUNK_POS.createHandler(tools));
+		this.handlers.put(DataType.SECTION_POS, sectionPos);
+		this.handlers.put(DataType.VECTOR_3D, VectorClassCoder.VECTOR_3D.createHandler(tools));
+		this.handlers.put(DataType.VECTOR_3I, vec3i);
 		
 		IDataHandler nbtPrimitive = NBTCoder.PRIMITIVE.createHandler(tools);
 		IDataHandler nbtConcrete = NBTCoder.CONCRETE.createHandler(tools);
 		IDataHandler nbtAbstract = NBTCoder.ABSTRACT.createHandler(tools);
-		handlers.put(DataType.NBT_PRIMITIVE, nbtPrimitive);
-		handlers.put(DataType.NBT_CONCRETE, nbtConcrete);
-		handlers.put(DataType.NBT_ABSTRACT, nbtAbstract);
+		this.handlers.put(DataType.NBT_PRIMITIVE, nbtPrimitive);
+		this.handlers.put(DataType.NBT_CONCRETE, nbtConcrete);
+		this.handlers.put(DataType.NBT_ABSTRACT, nbtAbstract);
 		
-		handlers.put(DataType.DEFAULT, SpecialCoder.DEFAULT);
-		
-		
-		spacialHandlers.add(SpecialCoder.WILDCRD);
-		spacialHandlers.add(SpecialCoder.VARIABLE_TYPE);
-		spacialHandlers.add(SpecialCoder.INTERSECTION);
+		this.handlers.put(DataType.DEFAULT, SpecialCoder.DEFAULT);
 		
 		
-		handlerPriorities.prioritize(blockPos).over(vec3i);
-		handlerPriorities.prioritize(sectionPos).over(vec3i);
-		handlerPriorities.prioritize(itemStack).over(nbtSerializable);
+		this.spacialHandlers.add(SpecialCoder.WILDCRD);
+		this.spacialHandlers.add(SpecialCoder.VARIABLE_TYPE);
+		this.spacialHandlers.add(SpecialCoder.INTERSECTION);
 		
-		handlerPriorities.prioritize(playerId).over(entityId);
-		handlerPriorities.prioritize(playerId).over(nbtSerializable);
-		handlerPriorities.prioritize(entityId).over(nbtSerializable);
 		
-		handlerPriorities.prioritize(nbtPrimitive).over(nbtConcrete);
-		handlerPriorities.prioritize(nbtConcrete).over(nbtAbstract);
-		handlerPriorities.prioritize(nbtConcrete).over(collection);
-		handlerPriorities.prioritize(nbtAbstract).over(collection);
+		this.handlerPriorities.prioritize(blockPos).over(vec3i);
+		this.handlerPriorities.prioritize(sectionPos).over(vec3i);
+		this.handlerPriorities.prioritize(itemStack).over(nbtSerializable);
 		
-		this.typeMap = new HashSet<>(handlers.values());
-		this.typeMap.addAll(spacialHandlers);
+		this.handlerPriorities.prioritize(playerId).over(entityId);
+		this.handlerPriorities.prioritize(playerId).over(nbtSerializable);
+		this.handlerPriorities.prioritize(entityId).over(nbtSerializable);
+		
+		this.handlerPriorities.prioritize(nbtPrimitive).over(nbtConcrete);
+		this.handlerPriorities.prioritize(nbtConcrete).over(nbtAbstract);
+		this.handlerPriorities.prioritize(nbtConcrete).over(collection);
+		this.handlerPriorities.prioritize(nbtAbstract).over(collection);
+		
+		this.typeMap = new HashSet<>(this.handlers.values());
+		this.typeMap.addAll(this.spacialHandlers);
 	}
 	
 	public DataCoder getCoder(Element field) throws CoderExcepetion
@@ -158,7 +158,7 @@ public class DataCoderFinder
 	public IDataHandler getDefaultHandler(TypeMirror type)
 	{
 		List<IDataHandler> validHandlers = this.typeMap.stream().filter(entry -> entry.canProcess(type)).collect(Collectors.toList());
-		List<IDataHandler> prioritizedHandlers = handlerPriorities.getHighests(validHandlers);
+		List<IDataHandler> prioritizedHandlers = this.handlerPriorities.getHighests(validHandlers);
 		
 		switch (prioritizedHandlers.size())
 		{
@@ -173,12 +173,12 @@ public class DataCoderFinder
 	
 	public IDataHandler getSpecialHandler(TypeMirror type)
 	{
-		return spacialHandlers.stream().filter(entry -> entry.canProcess(type)).findAny().orElse(null);
+		return this.spacialHandlers.stream().filter(entry -> entry.canProcess(type)).findAny().orElse(null);
 	}
 	
 	private IDataHandler handlerFromName(String handlerName)
 	{
-		IDataHandler handler = handlers.get(handlerName);
+		IDataHandler handler = this.handlers.get(handlerName);
 		if (handler == null)
 			throw new IllegalArgumentException("The type '" + handlerName + "' is invalid");
 		

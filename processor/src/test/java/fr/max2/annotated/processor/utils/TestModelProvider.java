@@ -31,13 +31,13 @@ public class TestModelProvider
 		this.integer = new TestingDeclaredType(this.intElement);
 		
 		TestingTypeElement genericTypeElement = new TestingTypeElement(ElementKind.INTERFACE, "java.util", "List").withNewTypeParameter("E");
-		this.list = new TestingDeclaredType(genericTypeElement, integer);
+		this.list = new TestingDeclaredType(genericTypeElement, this.integer);
 		
 		TestingTypeElement complexTypeElement = new TestingTypeElement(ElementKind.INTERFACE, "java.util", "Map").withNewTypeParameter("K").withNewTypeParameter("V");
-		this.map = new TestingDeclaredType(complexTypeElement, integer, list);
+		this.map = new TestingDeclaredType(complexTypeElement, this.integer, this.list);
 
 		this.primitive = new TestingPrimitiveType(TypeKind.DOUBLE);
-		this.array = new TestingArrayType(integer);
+		this.array = new TestingArrayType(this.integer);
 		
 		this.simpleTypeVariable = genericTypeElement.getTypeParameters().get(0).asType();
 		

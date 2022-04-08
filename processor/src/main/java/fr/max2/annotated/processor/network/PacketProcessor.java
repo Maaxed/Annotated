@@ -21,10 +21,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
 
-import fr.max2.annotated.api.processor.network.ClientPacket;
-import fr.max2.annotated.api.processor.network.DelegateChannel;
-import fr.max2.annotated.api.processor.network.GenerateChannel;
-import fr.max2.annotated.api.processor.network.ServerPacket;
+import fr.max2.annotated.api.network.ClientPacket;
+import fr.max2.annotated.api.network.DelegateChannel;
+import fr.max2.annotated.api.network.GenerateChannel;
+import fr.max2.annotated.api.network.ServerPacket;
 import fr.max2.annotated.processor.network.model.ChannelProvider;
 import fr.max2.annotated.processor.network.model.EnumSide;
 import fr.max2.annotated.processor.utils.ClassName;
