@@ -1,0 +1,22 @@
+plugins {
+	id 'java'
+}
+
+
+version = rootProject.processorVersion
+group = "${rootProject.group}.processor"
+archivesBaseName = "$rootProject.archivesBaseName-Processor"
+eclipse.project.name = 'Annotated-Processor'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaVersion)
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	testImplementation 'junit:junit:4.13'
+	implementation 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+tasks.named('test') { dependsOn(project(':validation').tasks.named('run')) }

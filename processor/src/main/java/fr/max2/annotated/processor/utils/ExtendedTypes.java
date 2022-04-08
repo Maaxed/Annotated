@@ -158,7 +158,7 @@ public class ExtendedTypes implements Types
 		return type.accept(declaredTypeRefiner, this.tools.types.erasure(base));
 	}
 	
-	private final TypeVisitor<DeclaredType, TypeMirror> declaredTypeRefiner = new DefaultTypeVisitor<DeclaredType, TypeMirror>()
+	private final TypeVisitor<DeclaredType, TypeMirror> declaredTypeRefiner = new DefaultTypeVisitor<>()
 	{
 		@Override
 		public DeclaredType visitDeclared(DeclaredType t, TypeMirror p)
@@ -411,7 +411,7 @@ public class ExtendedTypes implements Types
 		return type == null ? null : shallowEraser.visit(type);
 	}
 	
-	private final TypeVisitor<TypeMirror, Void> shallowEraser = new DefaultTypeVisitor<TypeMirror, Void>()
+	private final TypeVisitor<TypeMirror, Void> shallowEraser = new DefaultTypeVisitor<>()
 	{
 		@Override
 		public TypeMirror visitTypeVariable(TypeVariable t, Void p)

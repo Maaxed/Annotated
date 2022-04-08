@@ -1,6 +1,4 @@
-plugins {
-	id 'net.ltgt.apt-eclipse' version '0.21'
-}
+apply plugin: 'net.minecraftforge.gradle'
 
 version = "$rootProject.mcVersion-1.0"
 group = 'fr.max2.annotated.example'
@@ -41,13 +39,13 @@ dependencies {
 	compileOnly rootProject
 	annotationProcessor rootProject
 }
-
+/*
 eclipse {
 	jdt.apt.genSrcDir = file('src/generated/java')
 	classpath.file.whenMerged {
 		entries.findAll { it.kind == 'output' } *.path = 'bin/main'
 	}	
-}
+}*/
 
 processResources {
 	inputs.property 'version', project.version

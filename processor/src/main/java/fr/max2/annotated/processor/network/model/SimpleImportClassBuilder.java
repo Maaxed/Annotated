@@ -6,7 +6,6 @@ import java.util.TreeSet;
 import javax.lang.model.element.TypeElement;
 
 import fr.max2.annotated.processor.utils.ClassName;
-import fr.max2.annotated.processor.utils.ClassRef;
 import fr.max2.annotated.processor.utils.ProcessingTools;
 
 public class SimpleImportClassBuilder<B extends IImportClassBuilder<B>> implements IImportClassBuilder<B>
@@ -57,7 +56,7 @@ public class SimpleImportClassBuilder<B extends IImportClassBuilder<B>> implemen
 	{
 		String packageName = className.packageName();
 		
-		if (packageName.startsWith(ClassRef.MAIN_PACKAGE + ".lib"))
+		if (packageName.startsWith("fr.max2.annotated.lib"))
 			return true;
 		
 		if (packageName.startsWith("java.lang"))

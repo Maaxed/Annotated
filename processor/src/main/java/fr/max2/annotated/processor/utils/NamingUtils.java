@@ -50,8 +50,9 @@ public class NamingUtils
 			return this.getFieldMapping(srgName, defaultName);
 		case "method":
 			return this.getMethodMapping(srgName, defaultName);
+		default:
+			return srgName;
 		}
-		return srgName;
 	}
 	
 	public String getMethodMapping(String srgName, String defaultName)

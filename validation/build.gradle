@@ -1,0 +1,18 @@
+plugins {
+	id 'application'
+}
+apply from: rootProject.file('/forge_dependency.gradle')
+
+
+version = rootProject.processorVersion
+group = "${rootProject.group}.validation"
+archivesBaseName = "$rootProject.archivesBaseName-Validation"
+eclipse.project.name = 'Annotated-Validation'
+
+dependencies {
+	implementation project(':processor')
+}
+
+application {
+    mainClassName = 'fr.max2.annotated.processor.validation.Validation'
+}

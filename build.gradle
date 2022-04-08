@@ -1,101 +1,26 @@
 buildscript {
 	repositories {
-		maven { url = 'https://files.minecraftforge.net/maven' }
-		jcenter()
+		maven { url = 'https://maven.minecraftforge.net' }
 		mavenCentral()
 	}
 	dependencies {
-		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
 	}
 }
-
-plugins {
-	id 'jacoco'
-	id 'org.sonarqube' version '2.6'
-}
-
-allprojects {
-	apply plugin: 'net.minecraftforge.gradle'
-}
-
-apply plugin: 'maven-publish'
-
-jacoco {
-	toolVersion = '0.8.3'
-}
-
-sonarqube {
-	properties {
-		property 'sonar.projectKey', 'annotated'
-		property 'sonar.projectName', 'Annotated'
-	}
-}
-
-ext {
-	mcVersion = '1.16.4'
-	processorVersion = "MC$mcVersion-2.0"
-}
-
-version = processorVersion
-group = 'fr.max2.annotated'
-archivesBaseName = 'Annotated'
 
 allprojects {
 	apply plugin: 'eclipse'
-	
-	sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-	
-	minecraft {
-		mappings channel: 'snapshot', version: '20201028-1.16.3'
-	}
-	
-	repositories {
-		mavenCentral()
-	}
-
-	dependencies {
-		minecraft 'net.minecraftforge:forge:1.16.4-35.1.12'
-		testCompile 'junit:junit:4.13'
-	}
 }
 
-jar {
-	manifest {
-		attributes([
-			'Specification-Title': 'Annotated',
-			'Specification-Vendor': 'LeBossMax2',
-			'Specification-Version': '2',
-			'Implementation-Title': project.name,
-			'Implementation-Version': "${version}",
-			'Implementation-Vendor' :'LeBossMax2',
-			'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-		])
-	}
+
+ext {
+	baseVersion = '3.0'
+	mcVersion = '1.18.2'
+	libVersion = "$baseVersion-1.0"
+	processorVersion = "$baseVersion-1.0"
+	group = 'fr.max2.annotated'
+	archivesBaseName = 'Annotated'
+	javaVersion = 17
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-	from sourceSets.main.allSource
-	classifier = 'sources'
-}
-
-tasks.assemble.dependsOn 'sourcesJar'
-
-publishing {
-	repositories {
-	}
-	publications {
-		mavenJava(MavenPublication) {
-			from(components.java)
-			artifact sourcesJar
-			pom {
-				description = 'An annotation processor for creating Minecraft Forge mods'
-				
-				withXml {
-					// Remove the dependencies from the pom
-					def mainNode = asNode()
-					mainNode.remove(mainNode.dependencies)
-				}
-			}
-		}
-	}
-}
+eclipse.project.name = 'Annotated'

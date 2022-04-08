@@ -177,7 +177,7 @@ public class PacketProcessingUnit
 		TypeElement elem = this.tools.elements.asTypeElement(this.tools.types.asElement(type));
 		if (elem != null)
 		{
-			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT))
+			if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT.replace('$', '.')))
 				return Optional.of("ctx");
 			
 			if (elem.getQualifiedName().contentEquals(ClassRef.SERVER_PLAYER))
