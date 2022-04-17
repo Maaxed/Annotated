@@ -16,7 +16,7 @@ public class CollectionSerializer<C, T extends Collection<C>> implements Network
 		this.contentSerializer = contentSerializer;
 	}
 	
-	public static <C, T extends Collection<C>> CollectionSerializer<C, T> of(IntFunction<T> implementationConstructor, NetworkSerializer<C> contentSerializer)
+	public static <C, T extends Collection<C>> NetworkSerializer<T> of(IntFunction<T> implementationConstructor, NetworkSerializer<C> contentSerializer)
 	{
 		return new CollectionSerializer<>(implementationConstructor, contentSerializer);
 	}

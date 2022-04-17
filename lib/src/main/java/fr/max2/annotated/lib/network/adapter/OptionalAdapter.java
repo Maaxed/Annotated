@@ -13,7 +13,7 @@ public class OptionalAdapter<F, T> implements NetworkAdapter<Optional<F>, Option
 		this.contentAdapter = contentAdapter;
 	}
 
-	public static <F, T> OptionalAdapter<F, T> of(NetworkAdapter<F, T> contentAdapter)
+	public static <F, T> NetworkAdapter<Optional<F>, Optional<T>> of(NetworkAdapter<F, T> contentAdapter)
 	{
 		return new OptionalAdapter<>(contentAdapter);
 	}

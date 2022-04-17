@@ -2,17 +2,15 @@ package fr.max2.annotated.processor.network.coder.handler;
 
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.DataCoder;
-import fr.max2.annotated.processor.utils.ProcessingTools;
-import fr.max2.annotated.processor.utils.PropertyMap;
-import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
+import fr.max2.annotated.processor.util.ProcessingTools;
+import fr.max2.annotated.processor.util.exceptions.CoderException;
 
-public class NamedDataHandler extends TypedDataHandler
+public class NamedDataHandler<C> extends TypedDataHandler<C>
 {
 	public final String typeName;
-	protected final IDataCoderProvider coderProvider;
+	protected final ICoderProvider<C> coderProvider;
 	
-	public NamedDataHandler(ProcessingTools tools, String typeName, IDataCoderProvider coderProvider)
+	public NamedDataHandler(ProcessingTools tools, String typeName, ICoderProvider<C> coderProvider)
 	{
 		super(tools, tools.types.erasure(tools.elements.getTypeElement(typeName).asType()));
 		this.typeName = typeName;
@@ -36,19 +34,14 @@ public class NamedDataHandler extends TypedDataHandler
 	}
 
 	@Override
-	public DataCoder createCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties) throws CoderExcepetion
+	public C createCoder(ProcessingTools tools, TypeMirror paramType) throws CoderException
 	{
-		return this.coderProvider.createCoder(tools, uniqueName, paramType, properties);
+		return this.coderProvider.createCoder(tools, paramType);
 	};
 	
 	@Override
 	public String toString()
 	{
 		return "NamedHandler:" + this.typeName;
-	}
-	
-	public static IHandlerProvider provider(String typeName, IDataCoderProvider coderProvider)
-	{
-		return tools -> new NamedDataHandler(tools, typeName, coderProvider);
 	}
 }

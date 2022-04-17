@@ -15,7 +15,7 @@ public class ObjectArraySerializer<T> implements NetworkSerializer<T[]>
 		this.contentSerializer = contentSerializer;
 	}
 	
-	public static <T> ObjectArraySerializer<T> of(IntFunction<T[]> arrayConstructor, NetworkSerializer<T> contentSerializer)
+	public static <T> NetworkSerializer<T[]> of(IntFunction<T[]> arrayConstructor, NetworkSerializer<T> contentSerializer)
 	{
 		return new ObjectArraySerializer<>(arrayConstructor, contentSerializer);
 	}

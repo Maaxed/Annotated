@@ -4,17 +4,15 @@ import javax.annotation.Nullable;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.DataCoder;
-import fr.max2.annotated.processor.utils.ProcessingTools;
-import fr.max2.annotated.processor.utils.PropertyMap;
-import fr.max2.annotated.processor.utils.exceptions.CoderExcepetion;
+import fr.max2.annotated.processor.util.ProcessingTools;
+import fr.max2.annotated.processor.util.exceptions.CoderException;
 
-public class SpecialDataHandler implements IDataHandler
+public class SpecialDataHandler<C> implements ICoderHandler<C>
 {
 	private final @Nullable TypeKind kind;
-	private final IDataCoderProvider coderProvider;
+	private final ICoderProvider<C> coderProvider;
 	
-	public SpecialDataHandler(@Nullable TypeKind kind, IDataCoderProvider coderProvider)
+	public SpecialDataHandler(@Nullable TypeKind kind, ICoderProvider<C> coderProvider)
 	{
 		this.kind = kind;
 		this.coderProvider = coderProvider;
@@ -27,9 +25,9 @@ public class SpecialDataHandler implements IDataHandler
 	}
 	
 	@Override
-	public DataCoder createCoder(ProcessingTools tools, String uniqueName, TypeMirror paramType, PropertyMap properties) throws CoderExcepetion
+	public C createCoder(ProcessingTools tools, TypeMirror paramType) throws CoderException
 	{
-		return this.coderProvider.createCoder(tools, uniqueName, paramType, properties);
+		return this.coderProvider.createCoder(tools, paramType);
 	}
 	
 	@Override

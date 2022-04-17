@@ -5,8 +5,8 @@ import java.util.TreeSet;
 
 import javax.lang.model.element.TypeElement;
 
-import fr.max2.annotated.processor.utils.ClassName;
-import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.util.ClassName;
+import fr.max2.annotated.processor.util.ProcessingTools;
 
 public class SimpleImportClassBuilder<B extends IImportClassBuilder<B>> implements IImportClassBuilder<B>
 {

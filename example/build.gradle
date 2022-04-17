@@ -1,14 +1,22 @@
-apply plugin: 'net.minecraftforge.gradle'
+apply from: rootProject.file('/forge_dependency.gradle')
 
-version = "$rootProject.mcVersion-1.0"
-group = 'fr.max2.annotated.example'
-archivesBaseName = 'AnnotatedExample'
+
+version = rootProject.apiVersion
+group = "${rootProject.group}.example"
+archivesBaseName = "$rootProject.archivesBaseName-Example"
+eclipse.project.name = 'Annotated-Example'
+
+dependencies {
+	implementation project(':lib')
+	annotationProcessor project(':processor')
+}
 
 
 minecraft {
 	runs {
 		client {
 			workingDirectory project.file('run/client')
+            taskName "$project.name-runClient"
 
 			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 			property 'forge.logging.console.level', 'debug'
@@ -22,6 +30,7 @@ minecraft {
 
 		server {
 			workingDirectory project.file('run/server')
+            taskName "$project.name-runServer"
 
 			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 			property 'forge.logging.console.level', 'debug'
@@ -33,11 +42,6 @@ minecraft {
 			}
 		}
 	}
-}
-
-dependencies {
-	compileOnly rootProject
-	annotationProcessor rootProject
 }
 /*
 eclipse {
@@ -65,7 +69,7 @@ processResources {
 jar {
 	manifest {
 		attributes([
-			'Specification-Title': 'AnnotatedExample',
+			'Specification-Title': 'Annotated-Example',
 			'Specification-Vendor': 'LeBossMax2',
 			'Specification-Version': '1',
 			'Implementation-Title': project.name,

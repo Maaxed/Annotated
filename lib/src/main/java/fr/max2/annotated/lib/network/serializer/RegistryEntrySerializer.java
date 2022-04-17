@@ -17,12 +17,12 @@ public class RegistryEntrySerializer<T extends ForgeRegistryEntry<T>> implements
 		this.registry = registry;
 	}
 	
-	public static <T extends ForgeRegistryEntry<T>> RegistryEntrySerializer<T> of(IForgeRegistry<T> registry)
+	public static <T extends ForgeRegistryEntry<T>> NetworkSerializer<T> of(IForgeRegistry<T> registry)
 	{
 		return new RegistryEntrySerializer<>(registry);
 	}
 	
-	public static <T extends ForgeRegistryEntry<T>> RegistryEntrySerializer<T> of(ResourceKey<Registry<T>> registryKey)
+	public static <T extends ForgeRegistryEntry<T>> NetworkSerializer<T> of(ResourceKey<Registry<T>> registryKey)
 	{
 		return new RegistryEntrySerializer<>(RegistryManager.ACTIVE.getRegistry(registryKey));
 	}
@@ -31,12 +31,12 @@ public class RegistryEntrySerializer<T extends ForgeRegistryEntry<T>> implements
      * @deprecated The uniqueness of registry super types will not be guaranteed starting in 1.19.
      */
     @Deprecated(forRemoval = true, since = "1.18.2")
-	public static <T extends ForgeRegistryEntry<T>> RegistryEntrySerializer<T> of(Class<T> registryClass)
+	public static <T extends ForgeRegistryEntry<T>> NetworkSerializer<T> of(Class<T> registryClass)
 	{
 		return new RegistryEntrySerializer<>(RegistryManager.ACTIVE.getRegistry(registryClass));
 	}
 	
-	public static <T extends ForgeRegistryEntry<T>> RegistryEntrySerializer<T> of(ResourceLocation registryName)
+	public static <T extends ForgeRegistryEntry<T>> NetworkSerializer<T> of(ResourceLocation registryName)
 	{
 		return new RegistryEntrySerializer<T>(RegistryManager.ACTIVE.getRegistry(registryName));
 	}

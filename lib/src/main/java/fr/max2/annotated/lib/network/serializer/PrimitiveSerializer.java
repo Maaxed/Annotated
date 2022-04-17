@@ -11,7 +11,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(byte value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, byte value)
 		{
 			buf.writeByte(value);
 		}
@@ -24,7 +24,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Byte value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override
@@ -38,7 +38,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(short value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, short value)
 		{
 			buf.writeShort(value);
 		}
@@ -51,7 +51,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Short value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override
@@ -65,7 +65,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(int value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, int value)
 		{
 			buf.writeInt(value);
 		}
@@ -78,7 +78,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Integer value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override
@@ -92,7 +92,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(long value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, long value)
 		{
 			buf.writeLong(value);
 		}
@@ -105,7 +105,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Long value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override
@@ -119,7 +119,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(float value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, float value)
 		{
 			buf.writeFloat(value);
 		}
@@ -132,7 +132,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Float value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override
@@ -146,7 +146,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(double value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, double value)
 		{
 			buf.writeDouble(value);
 		}
@@ -159,7 +159,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Double value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override
@@ -173,7 +173,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(boolean value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, boolean value)
 		{
 			buf.writeBoolean(value);
 		}
@@ -186,7 +186,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Boolean value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override
@@ -200,7 +200,7 @@ public final class PrimitiveSerializer
 	{
 		INSTANCE;
 
-		public void encodePrimitive(char value, FriendlyByteBuf buf)
+		public void encodePrimitive(FriendlyByteBuf buf, char value)
 		{
 			buf.writeChar(value);
 		}
@@ -213,7 +213,7 @@ public final class PrimitiveSerializer
 		@Override
 		public void encode(FriendlyByteBuf buf, Character value)
 		{
-			encodePrimitive(value, buf);
+			encodePrimitive(buf, value);
 		}
 
 		@Override

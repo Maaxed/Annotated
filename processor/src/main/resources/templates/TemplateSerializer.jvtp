@@ -1,0 +1,24 @@
+package ${package};
+
+@javax.annotation.processing.Generated("fr.max2.annotated.processor.network.PacketProcessor")
+public class ${serializerName} implements fr.max2.annotated.lib.network.serializer.NetworkSerializer<${targetName}>
+{
+${fieldDeclaration}
+	
+	private ${serializerName}(${constructorParams})
+	{
+${fieldInitialization}
+	}
+	
+    @java.lang.Override
+	public void encode(net.minecraft.network.FriendlyByteBuf buf, ${targetName} msg)
+	{
+${encode}
+	}
+	
+    @java.lang.Override
+	public ${targetName} decode(net.minecraft.network.FriendlyByteBuf buf)
+	{
+		return new ${targetName}(${decode});
+	}
+}

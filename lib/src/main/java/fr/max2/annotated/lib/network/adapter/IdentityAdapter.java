@@ -10,7 +10,7 @@ public class IdentityAdapter<T> implements NetworkAdapter<T, T>
 	{ }
 	
 	@SuppressWarnings("unchecked")
-	public static <T> IdentityAdapter<T> of()
+	public static <T> NetworkAdapter<T, T> of()
 	{
 		return (IdentityAdapter<T>)INSTANCE;
 	}

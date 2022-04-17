@@ -2,9 +2,9 @@ package fr.max2.annotated.processor.network.coder.handler;
 
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.utils.ProcessingTools;
+import fr.max2.annotated.processor.util.ProcessingTools;
 
-public abstract class TypedDataHandler implements IDataHandler
+public abstract class TypedDataHandler<C> implements ICoderHandler<C>
 {
 	protected final TypeMirror type;
 	protected final ProcessingTools tools;

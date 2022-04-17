@@ -18,7 +18,7 @@ public class MapSerializer<K, V, T extends Map<K, V>> implements NetworkSerializ
 		this.valueSerializer = valueSerializer;
 	}
 	
-	public static <K, V, T extends Map<K, V>> MapSerializer<K, V, T> of(IntFunction<T> implementationConstructor, NetworkSerializer<K> keySerializer, NetworkSerializer<V> valueSerializer)
+	public static <K, V, T extends Map<K, V>> NetworkSerializer<T> of(IntFunction<T> implementationConstructor, NetworkSerializer<K> keySerializer, NetworkSerializer<V> valueSerializer)
 	{
 		return new MapSerializer<>(implementationConstructor, keySerializer, valueSerializer);
 	}

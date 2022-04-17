@@ -343,27 +343,15 @@ public class DataType
 	 */
 	public static final String NBT_SERIALIZABLE = "NBT_SERIALIZABLE";
 	/**
-	 * This type is applicable for: {@link net.minecraft.nbt.StringNBT} and any class extending {@link net.minecraft.nbt.NumberNBT}.
-	 * <p>
-	 * This is the default type for:
-	 * <ul>
-	 * <li>{@link net.minecraft.nbt.StringNBT}
-	 * <li>{@link net.minecraft.nbt.IntNBT}
-	 * <li>any class extending {@link net.minecraft.nbt.NumberNBT}
-	 * </ul>
-	 * 
-	 * <p>
-	 * The data will be saved as the corresponding primitive
-	 */
-	public static final String NBT_PRIMITIVE = "NBT_PRIMITIVE";
-	/**
 	 * This type is applicable for: any concrete class implementing {@link net.minecraft.nbt.INBT}.
 	 * <p>
 	 * This is the default type for:
 	 * <ul>
 	 * <li>{@link net.minecraft.nbt.CompoundNBT}
 	 * <li>{@link net.minecraft.nbt.ListNBT}
-	 * <li>any concrete class implementing {@link net.minecraft.nbt.INBT} but not extending {@link net.minecraft.nbt.NumberNBT}
+	 * <li>{@link net.minecraft.nbt.StringNBT}
+	 * <li>{@link net.minecraft.nbt.IntNBT}
+	 * <li>any concrete class implementing {@link net.minecraft.nbt.INBT}
 	 * </ul>
 	 * 
 	 * <p>
@@ -487,11 +475,12 @@ public class DataType
 	//TODO [v2.1] DamageSource, VoxelShape
 	//TODO [v2.1] Rotations, Size2i, Vec2f, GlobalPos
 	//TODO [v2.1] Entity by copy type
+	//TODO [v3.0] Entity by id + DimensionType
+	//TODO [v3.0] DimensionType
 	//TODO [v2.1] IDynamicSerializable
 	//TODO [v2.1] TileEntity
 	//TODO [v2.1] Container
 	//TODO [v2.1] JsonDeserializer + JsonSerializer
-	//TODO [v2.1] Optional
 	//TODO [v2.2] custom data class
 	
 	// Special types

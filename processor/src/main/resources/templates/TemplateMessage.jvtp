@@ -1,17 +1,6 @@
 package ${package};
 
-import java.util.function.Supplier;
-import javax.annotation.Generated;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
-${if clientPacket}
-import net.minecraft.entity.player.ServerPlayerEntity;
-${end}
-${imports}
-@Generated("fr.max2.annotated.processor.network.PacketProcessor")
+@javax.annotation.processing.Generated("fr.max2.annotated.processor.network.PacketProcessor")
 public class ${className}
 {
 ${fieldsDeclaration}
@@ -26,12 +15,12 @@ ${internalize}
 	}
 	${end}
 	
-	private static void encode(${className} msg, PacketBuffer buf)
+	private static void encode(${className} msg, net.minecraft.network.FriendlyByteBuf buf)
 	{
 ${encode}
 	}
 	
-	private static ${className} decode(PacketBuffer buf)
+	private static ${className} decode(net.minecraft.network.FriendlyByteBuf buf)
 	{
 		${className} msg = new ${className}();
 		
@@ -39,11 +28,11 @@ ${decode}
 		
 		return msg;
 	}
-	
-	private static void handle(${className} msg, Supplier<NetworkEvent.Context> ctxSup)
+	/*
+	private static void handle(${className} msg, java.util.function.Supplier<net.minecraftforge.fml.network.NetworkEvent.Context> ctxSup)
 	{
-		NetworkEvent.Context ctx = ctxSup.get();
-		if (ctx.getDirection().getReceptionSide() != LogicalSide.${receiveSide})
+		net.minecraftforge.fml.network.NetworkEvent.Context ctx = ctxSup.get();
+		if (ctx.getDirection().getReceptionSide() != net.minecraftforge.fml.LogicalSide.${receiveSide})
 			return;
 		
 		${if sheduled}
@@ -63,12 +52,12 @@ ${externalize}
 		ctx.setPacketHandled(true);
 	}
 	
-	static void registerTo(SimpleChannel channel, int index)
+	static void registerTo(net.minecraftforge.fml.network.simple.SimpleChannel channel, int index)
 	{
 		channel.registerMessage(index, ${className}.class, ${className}::encode, ${className}::decode, ${className}::handle);
 	}
 	
-	${if clientPacket}public${else}private${end} static void send(SimpleChannel channel, PacketDistributor.PacketTarget _target${if allFields}, ${end}${allFields})
+	${if clientPacket}public${else}private${end} static void send(net.minecraftforge.fml.network.simple.SimpleChannel channel, net.minecraftforge.fml.network.PacketDistributor.PacketTarget _target${if allFields}, ${end}${allFields})
 	{
 		channel.send(_target, new ${className}(${messageParameters}));
 	}
@@ -76,15 +65,15 @@ ${externalize}
 	
 	public static void sendToServer(${allFields})
 	{
-		send(PacketDistributor.SERVER.noArg()${if allFields}, ${end}${messageParameters});
+		send(net.minecraftforge.fml.network.PacketDistributor.SERVER.noArg()${if allFields}, ${end}${messageParameters});
 	}
 	${end}
 	${if clientPacket}
 	
-	public static void sendTo(ServerPlayerEntity _targetPlayer${if allFields}, ${end}${allFields})
+	public static void sendTo(net.minecraft.entity.player.ServerPlayerEntity _targetPlayer${if allFields}, ${end}${allFields})
 	{
-		send(PacketDistributor.PLAYER.with(() -> _targetPlayer)${if allFields}, ${end}${messageParameters});
+		send(net.minecraftforge.fml.network.PacketDistributor.PLAYER.with(() -> _targetPlayer)${if allFields}, ${end}${messageParameters});
 	}
 	${end}
-${modulesContent}
+	*/
 }

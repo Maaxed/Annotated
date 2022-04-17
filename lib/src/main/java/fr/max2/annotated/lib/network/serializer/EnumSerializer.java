@@ -11,7 +11,7 @@ public class EnumSerializer<T extends Enum<T>> implements NetworkSerializer<T>
 		this.enumClass = enumClass;
 	}
 	
-	public static <T extends Enum<T>> EnumSerializer<T> of(Class<T> enumClass)
+	public static <T extends Enum<T>> NetworkSerializer<T> of(Class<T> enumClass)
 	{
 		return new EnumSerializer<>(enumClass);
 	}

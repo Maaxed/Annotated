@@ -13,7 +13,7 @@ public class OptionalSerializer<T> implements NetworkSerializer<Optional<T>>
 		this.contentSerializer = contentSerializer;
 	}
 	
-	public static <T> OptionalSerializer<T> of(NetworkSerializer<T> contentSerializer)
+	public static <T> NetworkSerializer<Optional<T>> of(NetworkSerializer<T> contentSerializer)
 	{
 		return new OptionalSerializer<>(contentSerializer);
 	}

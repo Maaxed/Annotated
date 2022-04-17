@@ -27,7 +27,7 @@ public final class TagSerializer
 			this.tagType = tagType;
 		}
 		
-		public static <T extends Tag> Concrete<T> of(TagType<T> tagType)
+		public static <T extends Tag> NetworkSerializer<T> of(TagType<T> tagType)
 		{
 			// TODO [v3.0] Cache instances
 			return new Concrete<>(tagType);

@@ -17,7 +17,7 @@ public class ObjectArrayAdapter<F, T> implements NetworkAdapter<F[], T[]>
 		this.contentAdapter = contentAdapter;
 	}
 	
-	public static <F, T> ObjectArrayAdapter<F, T> of(IntFunction<F[]> fromArrayConstructor, IntFunction<T[]> toArrayConstructor, NetworkAdapter<F, T> contentAdapter)
+	public static <F, T> NetworkAdapter<F[], T[]> of(IntFunction<F[]> fromArrayConstructor, IntFunction<T[]> toArrayConstructor, NetworkAdapter<F, T> contentAdapter)
 	{
 		return new ObjectArrayAdapter<>(fromArrayConstructor, toArrayConstructor, contentAdapter);
 	}

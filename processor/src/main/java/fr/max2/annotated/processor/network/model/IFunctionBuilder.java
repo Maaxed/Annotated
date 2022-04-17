@@ -1,11 +1,11 @@
 package fr.max2.annotated.processor.network.model;
 
 
-public interface IFunctionBuilder
+public interface IFunctionBuilder<P>
 {
-	IPacketBuilder end();
+	P end();
 	
-	IFunctionBuilder add(String... instructions);
+	IFunctionBuilder<P> addLines(String... instructions);
 	
-	IFunctionBuilder indent(int indent);
+	IFunctionBuilder<P> indent(int indent);
 }

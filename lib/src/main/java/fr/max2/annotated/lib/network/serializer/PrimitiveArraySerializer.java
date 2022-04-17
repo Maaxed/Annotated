@@ -18,7 +18,7 @@ public final class PrimitiveArraySerializer
 			
 			for(short v : value)
 			{
-				PrimitiveSerializer.ShortSerializer.INSTANCE.encodePrimitive(v, buf);
+				PrimitiveSerializer.ShortSerializer.INSTANCE.encodePrimitive(buf, v);
 			}
 		}
 
@@ -50,7 +50,7 @@ public final class PrimitiveArraySerializer
 			
 			for(float v : value)
 			{
-				PrimitiveSerializer.FloatSerializer.INSTANCE.encodePrimitive(v, buf);
+				PrimitiveSerializer.FloatSerializer.INSTANCE.encodePrimitive(buf, v);
 			}
 		}
 
@@ -78,7 +78,7 @@ public final class PrimitiveArraySerializer
 			
 			for(double v : value)
 			{
-				PrimitiveSerializer.DoubleSerializer.INSTANCE.encodePrimitive(v, buf);
+				PrimitiveSerializer.DoubleSerializer.INSTANCE.encodePrimitive(buf, v);
 			}
 		}
 
@@ -107,7 +107,7 @@ public final class PrimitiveArraySerializer
 			// TODO [v3.0] Group the booleans in bytes
 			for(boolean v : value)
 			{
-				PrimitiveSerializer.BooleanSerializer.INSTANCE.encodePrimitive(v, buf);
+				PrimitiveSerializer.BooleanSerializer.INSTANCE.encodePrimitive(buf, v);
 			}
 		}
 
@@ -135,7 +135,7 @@ public final class PrimitiveArraySerializer
 			
 			for(char v : value)
 			{
-				PrimitiveSerializer.CharSerializer.INSTANCE.encodePrimitive(v, buf);
+				PrimitiveSerializer.CharSerializer.INSTANCE.encodePrimitive(buf, v);
 			}
 		}
 

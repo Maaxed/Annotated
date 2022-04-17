@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.stream.Stream;
 
-import fr.max2.annotated.processor.utils.ClassRef;
+import fr.max2.annotated.processor.util.ClassRef;
 
 public class ClassRefValidation
 {

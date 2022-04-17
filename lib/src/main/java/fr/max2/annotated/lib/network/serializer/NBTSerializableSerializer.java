@@ -17,6 +17,11 @@ public class NBTSerializableSerializer<D extends Tag, T extends INBTSerializable
 		this.tagSerializer = tagSerializer;
 	}
 
+	public static <D extends Tag, T extends INBTSerializable<D>> NBTSerializableSerializer<D, T> of(Supplier<T> constructor, NetworkSerializer<D> tagSerializer)
+	{
+		return new NBTSerializableSerializer<>(constructor, tagSerializer);
+	}
+
 	@Override
 	public void encode(FriendlyByteBuf buf, T value)
 	{
