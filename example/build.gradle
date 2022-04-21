@@ -7,6 +7,7 @@ archivesBaseName = "$rootProject.archivesBaseName-Example"
 eclipse.project.name = 'Annotated-Example'
 
 dependencies {
+	implementation project(':api')
 	implementation project(':lib')
 	annotationProcessor project(':processor')
 }
@@ -50,21 +51,6 @@ eclipse {
 		entries.findAll { it.kind == 'output' } *.path = 'bin/main'
 	}	
 }*/
-
-processResources {
-	inputs.property 'version', project.version
-	inputs.property 'mcversion', rootProject.mcVersion
-	
-	from(sourceSets.main.resources.srcDirs) {
-		include 'META-INF/mods.toml'
-		
-		expand 'version': project.version, 'mcversion': rootProject.mcVersion
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude 'META-INF/mods.toml'
-	}
-}
 
 jar {
 	manifest {

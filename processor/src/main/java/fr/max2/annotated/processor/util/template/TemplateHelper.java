@@ -41,7 +41,9 @@ public class TemplateHelper
 		}
 		catch (Exception e)
 		{
-			throw ProcessorException.builder().context(originatingElement, annotation).build("Unable to write while the class file '" + className + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
+			throw ProcessorException.builder()
+				.context(originatingElement, annotation)
+				.build("Unable to write the class file '" + className + "' from template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 		}
 	}
 	
@@ -67,6 +69,7 @@ public class TemplateHelper
 		try (Writer writer = file.openWriter())
 		{
 			this.readTemplate(templateFile, replacements, writer::write);
+			// [v3.0] TODO remove file if an error occurred
 		}
 		
 	}

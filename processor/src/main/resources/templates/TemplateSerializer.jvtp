@@ -10,13 +10,13 @@ ${fieldDeclaration}
 ${fieldInitialization}
 	}
 	
-    @java.lang.Override
-	public void encode(net.minecraft.network.FriendlyByteBuf buf, ${targetName} msg)
+	@java.lang.Override
+	public void encode(net.minecraft.network.FriendlyByteBuf buf, ${targetName} value)
 	{
 ${encode}
 	}
 	
-    @java.lang.Override
+	@java.lang.Override
 	public ${targetName} decode(net.minecraft.network.FriendlyByteBuf buf)
 	{
 		return new ${targetName}(${decode});

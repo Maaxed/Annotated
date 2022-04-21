@@ -21,20 +21,20 @@ import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 public class SerializationProcessingUnit
 {
 	private final ProcessingTools tools;
-	private final TypeElement serialisableClass;
+	private final TypeElement serializableClass;
 	private final Optional<? extends AnnotationMirror> annotation;
 	private final List<? extends VariableElement> fields;
 	public final ClassName serializableClassName;
 	public final ClassName serializerClassName;
 	private boolean hasErrors = false;
 
-	public SerializationProcessingUnit(ProcessingTools tools, TypeElement serialisableClass, Optional<? extends AnnotationMirror> annotation)
+	public SerializationProcessingUnit(ProcessingTools tools, TypeElement serializableClass, Optional<? extends AnnotationMirror> annotation)
 	{
 		this.tools = tools;
-		this.serialisableClass = serialisableClass;
+		this.serializableClass = serializableClass;
 		this.annotation = annotation;
-		this.fields = ElementFilter.fieldsIn(serialisableClass.getEnclosedElements());
-		this.serializableClassName = tools.naming.buildClassName(serialisableClass);
+		this.fields = ElementFilter.fieldsIn(serializableClass.getEnclosedElements());
+		this.serializableClassName = tools.naming.buildClassName(serializableClass);
 		
 		String className = tools.elements.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
 		
@@ -73,7 +73,7 @@ public class SerializationProcessingUnit
 		catch (Exception e)
 		{
 			ProcessorException.builder()
-				.context(this.serialisableClass, this.annotation)
+				.context(this.serializableClass, this.annotation)
 				.build("Unexpected exception generating the '" + this.serializerClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e)
 				.log(this.tools);
 		}
@@ -123,13 +123,13 @@ public class SerializationProcessingUnit
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", this.serializerClassName.packageName());
 		replacements.put("serializerName", this.serializerClassName.shortName());
-		replacements.put("targetName", this.serializerClassName.qualifiedName());
+		replacements.put("targetName", this.serializableClassName.qualifiedName());
 		replacements.put("fieldDeclaration", serializerFields.stream().map(f -> "\tprivate " + f.type + " " + f.uniqueName + ";").collect(Collectors.joining(ls)));
 		replacements.put("constructorParams", "");
 		replacements.put("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";").collect(Collectors.joining(ls)));
 		replacements.put("encode", encodeCode.stream().collect(Collectors.joining(ls)));
 		replacements.put("decode", decodeCode.build());
 		
-		this.tools.templates.writeFileWithLog(this.serializerClassName.qualifiedName(), "templates/TemplateMessage.jvtp", replacements, this.serialisableClass, this.annotation, this.serialisableClass);
+		this.tools.templates.writeFileWithLog(this.serializerClassName.qualifiedName(), "templates/TemplateSerializer.jvtp", replacements, this.serializableClass, this.annotation, this.serializableClass);
 	}
 }

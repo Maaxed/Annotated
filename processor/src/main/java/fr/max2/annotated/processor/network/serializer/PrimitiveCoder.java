@@ -23,6 +23,15 @@ public class PrimitiveCoder extends SerializationCoder
 		return "fr.max2.annotated.lib.network.serializer.PrimitiveSerializer." + this.name + "Serializer.INSTANCE";
 	}
 	
+	@Override
+	public OutputExpressions code(String fieldName)
+	{
+		String serializer = this.codeSerializerInstance();
+		return new OutputExpressions(
+			serializer + ".encodePrimitive(buf, value." + fieldName + ")",
+			serializer + ".decodePrimitive(buf)");
+	}
+	
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools, String name)
 	{
 		return new TypedDataHandler<>(tools, tools.types.getPrimitiveType(TypeKind.valueOf(name.toUpperCase())))
