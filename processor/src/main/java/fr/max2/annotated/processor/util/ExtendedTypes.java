@@ -149,6 +149,28 @@ public class ExtendedTypes implements Types
 		}
 	};
 	
+	public DeclaredType asDeclared(TypeMirror type)
+	{
+		if (type == null)
+			return null;
+		
+		return this.declaredTypeCaster.visit(type);
+	}
+	
+	private final DefaultTypeVisitor<DeclaredType, Void> declaredTypeCaster = new DefaultTypeVisitor<>()
+	{
+		public DeclaredType visitDeclared(DeclaredType t, Void p)
+		{
+			return t;
+		}
+
+		@Override
+		public DeclaredType visitDefault(TypeMirror t, Void p)
+		{
+			return null;
+		}
+	};
+	
 	public DeclaredType refineTo(TypeMirror type, TypeMirror base)
 	{
 		if (type == null)
@@ -285,6 +307,9 @@ public class ExtendedTypes implements Types
 		}
 	}
 
+	/**
+	 * <code>T&lt;From&gt;</code> => <code>T&lt;To&gt;</code>
+	 */
 	public DeclaredType replaceTypeArgument(DeclaredType type, TypeMirror fromArg, TypeMirror toArg)
 	{
 		if (type == null)
@@ -305,6 +330,11 @@ public class ExtendedTypes implements Types
 		return this.getDeclaredType(this.tools.elements.asTypeElement(this.asElement(type)), newArgs);
 	}
 	
+	/**
+	 * <code>? extends T</code> => <code>T</code>
+	 * <br>
+	 * <code>T</code> => <code>T</code>
+	 */
 	public TypeMirror shallowErasure(TypeMirror type)
 	{
 		if (type == null)

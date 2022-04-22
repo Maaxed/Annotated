@@ -1,13 +1,15 @@
 package fr.max2.annotated.processor.network.serializer;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Types;
 
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
@@ -66,15 +68,38 @@ public abstract class SerializationCoder
 		}
 	}
 	
-	public static void requireDefaultConstructor(Types typeHelper, TypeMirror type, @Nullable String errorHelpInfo) throws IncompatibleTypeException
+	public static void requireDefaultConstructor(ProcessingTools tools, TypeMirror type) throws IncompatibleTypeException
 	{
-		Element elem = typeHelper.asElement(type);
+		requireConstructor(tools, type, cons -> cons.getParameters().isEmpty());
+	}
+	
+	public static void requireConstructor(ProcessingTools tools, TypeMirror type, List<TypeMirror> paramTypes) throws IncompatibleTypeException
+	{
+		requireConstructor(tools, type, cons ->
+		{
+			List<? extends VariableElement> actualParams = cons.getParameters();
+			if (actualParams.size() != paramTypes.size())
+				return false;
+			
+			for (int i = 0; i < paramTypes.size(); i++)
+			{
+				if (!tools.types.isAssignable(actualParams.get(i).asType(), paramTypes.get(i)))
+					return false;
+			}
+			
+			return true;
+		});
+	}
+	
+	public static void requireConstructor(ProcessingTools tools, TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
+	{
+		Element elem = tools.types.asElement(type);
 		if (elem == null) return; // Unknown type, assume it has a default constructor
 		
-		errorHelpInfo = errorHelpInfo == null ? "" : ". " + errorHelpInfo;
+		if (elem.getModifiers().contains(Modifier.ABSTRACT))
+			throw new IncompatibleTypeException("The type '" + type + "' is abstract and can't be instantiated");
 		
-		if (elem.getModifiers().contains(Modifier.ABSTRACT)) throw new IncompatibleTypeException("The type '" + type + "' is abstract and can't be instantiated" + errorHelpInfo);
-		
-		if (!ElementFilter.constructorsIn(elem.getEnclosedElements()).stream().anyMatch(cons -> cons.getParameters().isEmpty())) throw new IncompatibleTypeException("The type '" + type + "' doesn't have a default constructor" + errorHelpInfo);
+		if (!ElementFilter.constructorsIn(elem.getEnclosedElements()).stream().anyMatch(constructorFilter))
+			throw new IncompatibleTypeException("The type '" + type + "' doesn't have the required constructor");
 	}
 }

@@ -1,7 +1,7 @@
 package fr.max2.annotated.processor.util.exceptions;
 
 
-public abstract class CoderException extends Exception 
+public abstract class CoderException extends RuntimeException
 {
 	public CoderException()
 	{

@@ -16,13 +16,16 @@ import javax.lang.model.type.WildcardType;
 public class NamingUtils
 {
 	private final ProcessingTools tools;
-	public final Naming typeUse = builder().allowPrimitives().allowSpecialTypes().withGenericMode(Generics.WITH_PARAMETERS).withRawMode(RawNameMode.FULLY_QUALIFIED).build();
-	public final Naming typeDeclaration = builder().withGenericMode(Generics.NONE).withRawMode(RawNameMode.SHORT).build();
-	public final Naming erasedType = builder().allowPrimitives().withGenericMode(Generics.NONE).withRawMode(RawNameMode.FULLY_QUALIFIED).build();
+	public final Naming typeUse;
+	public final Naming typeDeclaration;
+	public final Naming erasedType;
 	
 	NamingUtils(ProcessingTools tools)
 	{
 		this.tools = tools;
+		this.typeUse = builder().allowPrimitives().allowSpecialTypes().withGenericMode(Generics.WITH_PARAMETERS).withRawMode(RawNameMode.FULLY_QUALIFIED).build();
+		this.typeDeclaration = builder().withGenericMode(Generics.NONE).withRawMode(RawNameMode.SHORT).build();
+		this.erasedType = builder().allowPrimitives().withGenericMode(Generics.NONE).withRawMode(RawNameMode.FULLY_QUALIFIED).build();
 	}
 	
 	// Class naming from mirrors
