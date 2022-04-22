@@ -57,6 +57,8 @@ public class ProcessorException extends Exception
 			}
 			cause = cause.getCause();
 		}
+		
+		this.printStackTrace();
 	}
 	
 	public static Builder builder()

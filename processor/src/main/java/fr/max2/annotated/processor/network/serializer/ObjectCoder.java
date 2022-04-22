@@ -4,6 +4,7 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
+import fr.max2.annotated.processor.network.model.ICodeConsumer;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
 public class ObjectCoder extends SerializationCoder
@@ -16,9 +17,18 @@ public class ObjectCoder extends SerializationCoder
 	}
 
 	@Override
-	public String codeSerializerInstance()
+	public void codeSerializerInstance(ICodeConsumer output)
 	{
-		return this.serilizer;
+		output.write(this.serilizer);
+	}
+	
+	@Override
+	public OutputExpressions code(String fieldName)
+	{
+		String serializer = this.serilizer;
+		return new OutputExpressions(
+			serializer + ".encodePrimitive(buf, value." + fieldName + ")",
+			serializer + ".decodePrimitive(buf)");
 	}
 	
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools, String typeName, String serilizer)

@@ -19,7 +19,23 @@ public class SimpleParameterListBuilder implements IParameterConsumer, IParamete
 		output.addAll(this.params);
 	}
 	
-	public String build()
+	public void build(ICodeConsumer output)
+	{
+		for (int i = 0; i < this.params.size(); i++)
+		{
+			output.write(this.params.get(i));
+			if (i < this.params.size() - 1)
+			{
+				output.writeLine(",");
+			}
+			else
+			{
+				output.writeLine();
+			}
+		}
+	}
+	
+	public String buildSingleLine()
 	{
 		return String.join(", ", this.params);
 	}

@@ -23,7 +23,7 @@ public class ParametrizedCoder extends GenericCoder
 		super(tools, type, serializer, params ->
 		{
 			parameterCoder.pipe(params);
-			parameterCoders.stream().map(SerializationCoder::codeSerializerInstance).forEach(params::add);
+			parameterCoders.stream().map(SerializationCoder::codeSerializerInstanceToString).forEach(params::add);
 		});
 	}
 	

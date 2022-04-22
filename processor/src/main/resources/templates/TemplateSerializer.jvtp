@@ -19,6 +19,9 @@ ${encode}
 	@java.lang.Override
 	public ${targetName} decode(net.minecraft.network.FriendlyByteBuf buf)
 	{
-		return new ${targetName}(${decode});
+		return new ${targetName}
+		(
+${decode}
+		);
 	}
 }

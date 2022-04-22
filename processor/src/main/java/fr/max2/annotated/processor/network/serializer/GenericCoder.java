@@ -7,6 +7,7 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
+import fr.max2.annotated.processor.network.model.ICodeConsumer;
 import fr.max2.annotated.processor.network.model.IParameterConsumer;
 import fr.max2.annotated.processor.network.model.IParameterSupplier;
 import fr.max2.annotated.processor.network.model.SimpleParameterListBuilder;
@@ -25,11 +26,14 @@ public class GenericCoder extends SerializationCoder
 	}
 
 	@Override
-	public String codeSerializerInstance()
+	public void codeSerializerInstance(ICodeConsumer output)
 	{
 		SimpleParameterListBuilder builder = new SimpleParameterListBuilder();
 		this.parameterCoder.pipe(builder);
-		return this.serializer + ".of(" + builder.build() + ")";
+		output.write(this.serializer);
+		output.writeLine(".of(");
+		builder.build(output);
+		output.write(")");
 	}
 	
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools, String typeName, String serializer, BiConsumer<TypeMirror, IParameterConsumer> parameterCoder)

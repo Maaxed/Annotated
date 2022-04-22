@@ -11,6 +11,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
+import fr.max2.annotated.processor.network.model.ICodeConsumer;
+import fr.max2.annotated.processor.network.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
 
@@ -25,14 +27,23 @@ public abstract class SerializationCoder
 		this.type = type;
 	}
 
-	public abstract String codeSerializerInstance();
+	public abstract void codeSerializerInstance(ICodeConsumer output);
+	
+	public final String codeSerializerInstanceToString()
+	{
+		SimpleCodeBuilder code = new SimpleCodeBuilder();
+		this.codeSerializerInstance(code);
+		return code.toString();
+	}
 	
 	public OutputExpressions code(String fieldName)
 	{
+		SimpleCodeBuilder fieldCode = new SimpleCodeBuilder();
+		this.codeSerializerInstance(fieldCode);
 		return new OutputExpressions(
 			"this." + fieldName + ".encode(buf, value." + fieldName + ")",
 			"this." + fieldName + ".decode(buf)",
-			Optional.of(new Field("fr.max2.annotated.lib.network.serializer.NetworkSerializer<" + this.type.toString() + ">", fieldName, this.codeSerializerInstance())));
+			Optional.of(new Field("fr.max2.annotated.lib.network.serializer.NetworkSerializer<" + this.type.toString() + ">", fieldName, this.codeSerializerInstanceToString())));
 	}
 	
 	public static final class OutputExpressions

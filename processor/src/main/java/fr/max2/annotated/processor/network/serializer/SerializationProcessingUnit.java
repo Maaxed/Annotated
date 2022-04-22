@@ -12,6 +12,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 
+import fr.max2.annotated.processor.network.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.network.model.SimpleParameterListBuilder;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingTools;
@@ -117,6 +118,9 @@ public class SerializationProcessingUnit
 				throw ProcessorException.builder().context(field).build("Unable to produce code : " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 			}
 		}
+		
+		SimpleCodeBuilder decodeCodeBuilder = new SimpleCodeBuilder();
+		decodeCode.build(decodeCodeBuilder);
 
 		String ls = System.lineSeparator();
 		
@@ -128,7 +132,7 @@ public class SerializationProcessingUnit
 		replacements.put("constructorParams", "");
 		replacements.put("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";").collect(Collectors.joining(ls)));
 		replacements.put("encode", encodeCode.stream().collect(Collectors.joining(ls)));
-		replacements.put("decode", decodeCode.build());
+		replacements.put("decode", decodeCodeBuilder.build());
 		
 		this.tools.templates.writeFileWithLog(this.serializerClassName.qualifiedName(), "templates/TemplateSerializer.jvtp", replacements, this.serializableClass, this.annotation, this.serializableClass);
 	}
