@@ -22,17 +22,17 @@ public class CollectionSerializer<C, T extends Collection<C>> implements Network
 	{
 		return new CollectionSerializer<>(implementationConstructor, contentSerializer);
 	}
-	
+
 	@SuppressWarnings({ "unchecked" })
 	public static <C> NetworkSerializer<List<? extends C>> listOf(IntFunction<? extends List<C>> implementationConstructor, NetworkSerializer<C> contentSerializer)
 	{
-		return (NetworkSerializer<List<? extends C>>)(NetworkSerializer<?>)new CollectionSerializer<>(implementationConstructor, contentSerializer);
+		return (NetworkSerializer<List<? extends C>>)(NetworkSerializer<?>)of(implementationConstructor, contentSerializer);
 	}
 	
 	@SuppressWarnings({ "unchecked" })
 	public static <C> NetworkSerializer<Set<? extends C>> setOf(IntFunction<? extends Set<C>> implementationConstructor, NetworkSerializer<C> contentSerializer)
 	{
-		return (NetworkSerializer<Set<? extends C>>)(NetworkSerializer<?>)new CollectionSerializer<>(implementationConstructor, contentSerializer);
+		return (NetworkSerializer<Set<? extends C>>)(NetworkSerializer<?>)of(implementationConstructor, contentSerializer);
 	}
 
 	@Override

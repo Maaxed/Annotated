@@ -7,10 +7,10 @@ import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
 import fr.max2.annotated.processor.network.model.ICodeConsumer;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
-public class ObjectCoder extends SerializationCoder
+public class SimpleCoder extends SerializationCoder
 {
-	private final String serilizer;
-	public ObjectCoder(ProcessingTools tools, TypeMirror type, String serilizer)
+	protected final String serilizer;
+	public SimpleCoder(ProcessingTools tools, TypeMirror type, String serilizer)
 	{
 		super(tools, type);
 		this.serilizer = serilizer;
@@ -23,16 +23,16 @@ public class ObjectCoder extends SerializationCoder
 	}
 	
 	@Override
-	public OutputExpressions code(String fieldName)
+	public OutputExpressions code(String fieldName, String valueAccess)
 	{
 		String serializer = this.serilizer;
 		return new OutputExpressions(
-			serializer + ".encodePrimitive(buf, value." + fieldName + ")",
-			serializer + ".decodePrimitive(buf)");
+			serializer + ".encode(buf, " + valueAccess + ")",
+			serializer + ".decode(buf)");
 	}
 	
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools, String typeName, String serilizer)
 	{
-		return new NamedDataHandler<>(tools, typeName, (t, paramType) -> new ObjectCoder(tools, paramType, serilizer));
+		return new NamedDataHandler<>(tools, typeName, false, paramType -> new SimpleCoder(tools, paramType, serilizer));
 	}
 }

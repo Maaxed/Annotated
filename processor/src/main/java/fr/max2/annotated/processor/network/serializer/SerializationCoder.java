@@ -33,15 +33,15 @@ public abstract class SerializationCoder
 	{
 		SimpleCodeBuilder code = new SimpleCodeBuilder();
 		this.codeSerializerInstance(code);
-		return code.toString();
+		return code.build();
 	}
 	
-	public OutputExpressions code(String fieldName)
+	public OutputExpressions code(String fieldName, String valueAccess)
 	{
 		SimpleCodeBuilder fieldCode = new SimpleCodeBuilder();
 		this.codeSerializerInstance(fieldCode);
 		return new OutputExpressions(
-			"this." + fieldName + ".encode(buf, value." + fieldName + ")",
+			"this." + fieldName + ".encode(buf, " + valueAccess + ")",
 			"this." + fieldName + ".decode(buf)",
 			Optional.of(new Field("fr.max2.annotated.lib.network.serializer.NetworkSerializer<" + this.type.toString() + ">", fieldName, this.codeSerializerInstanceToString())));
 	}
@@ -79,6 +79,16 @@ public abstract class SerializationCoder
 		}
 	}
 	
+	public static void requireConcreteType(ProcessingTools tools, TypeMirror type) throws IncompatibleTypeException
+	{
+		Element elem = tools.types.asElement(type);
+		if (elem == null)
+			return; // Unknown type, assume it is concrete
+		
+		if (elem.getModifiers().contains(Modifier.ABSTRACT))
+			throw new IncompatibleTypeException("The type '" + type + "' is abstract and cannot be instantiated");
+	}
+	
 	public static void requireDefaultConstructor(ProcessingTools tools, TypeMirror type) throws IncompatibleTypeException
 	{
 		requireConstructor(tools, type, cons -> cons.getParameters().isEmpty());
@@ -86,7 +96,40 @@ public abstract class SerializationCoder
 	
 	public static void requireConstructor(ProcessingTools tools, TypeMirror type, List<TypeMirror> paramTypes) throws IncompatibleTypeException
 	{
-		requireConstructor(tools, type, cons ->
+		requireConstructor(tools, type, isConstructorCompatible(tools, paramTypes));
+	}
+	
+	public static void requireConstructor(ProcessingTools tools, TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
+	{
+		if (findConstructor(tools, type, constructorFilter) == null)
+			throw new IncompatibleTypeException("The type '" + type + "' doesn't have the required constructor");
+	}
+	
+	public static ExecutableElement findConstructor(ProcessingTools tools, TypeMirror type) throws IncompatibleTypeException
+	{
+		return findConstructor(tools, type, cons -> cons.getParameters().isEmpty());
+	}
+	
+	public static ExecutableElement findConstructor(ProcessingTools tools, TypeMirror type, List<TypeMirror> paramTypes) throws IncompatibleTypeException
+	{
+		return findConstructor(tools, type, isConstructorCompatible(tools, paramTypes));
+	}
+	
+	public static ExecutableElement findConstructor(ProcessingTools tools, TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
+	{
+		Element elem = tools.types.asElement(type);
+		if (elem == null)
+			throw new IncompatibleTypeException("The type '" + type + "' is not a DeclaredType");
+		
+		return ElementFilter.constructorsIn(elem.getEnclosedElements()).stream()
+			.filter(constructorFilter)
+			.reduce((a, b) -> { throw new IncompatibleTypeException("The type '" + elem + "' have multiple matching constructors"); })
+			.orElse(null);
+	}
+
+	private static Predicate<? super ExecutableElement> isConstructorCompatible(ProcessingTools tools, List<TypeMirror> paramTypes)
+	{
+		return cons ->
 		{
 			List<? extends VariableElement> actualParams = cons.getParameters();
 			if (actualParams.size() != paramTypes.size())
@@ -99,18 +142,6 @@ public abstract class SerializationCoder
 			}
 			
 			return true;
-		});
-	}
-	
-	public static void requireConstructor(ProcessingTools tools, TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
-	{
-		Element elem = tools.types.asElement(type);
-		if (elem == null) return; // Unknown type, assume it has a default constructor
-		
-		if (elem.getModifiers().contains(Modifier.ABSTRACT))
-			throw new IncompatibleTypeException("The type '" + type + "' is abstract and can't be instantiated");
-		
-		if (!ElementFilter.constructorsIn(elem.getEnclosedElements()).stream().anyMatch(constructorFilter))
-			throw new IncompatibleTypeException("The type '" + type + "' doesn't have the required constructor");
+		};
 	}
 }

@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
@@ -24,7 +27,6 @@ public class SerializationProcessingUnit
 	private final ProcessingTools tools;
 	private final TypeElement serializableClass;
 	private final Optional<? extends AnnotationMirror> annotation;
-	private final List<? extends VariableElement> fields;
 	public final ClassName serializableClassName;
 	public final ClassName serializerClassName;
 	private boolean hasErrors = false;
@@ -34,7 +36,6 @@ public class SerializationProcessingUnit
 		this.tools = tools;
 		this.serializableClass = serializableClass;
 		this.annotation = annotation;
-		this.fields = ElementFilter.fieldsIn(serializableClass.getEnclosedElements());
 		this.serializableClassName = tools.naming.buildClassName(serializableClass);
 		
 		String className = tools.elements.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
@@ -88,26 +89,26 @@ public class SerializationProcessingUnit
 		List<SerializationCoder.Field> serializerFields = new ArrayList<>();
 		List<String> encodeCode = new ArrayList<>();
 		SimpleParameterListBuilder decodeCode = new SimpleParameterListBuilder();
-		for (VariableElement field : this.fields)
+		for (Data data : this.getDataToSerialize())
 		{
 			SerializationCoder coder;
 			try
 			{
-				coder = this.tools.coders.getCoder(field);
+				coder = this.tools.coders.getCoder(data.originElement);
 				dataCoders.add(coder);
 			}
 			catch (CoderException e)
 			{
-				throw ProcessorException.builder().context(field).build(e.getMessage(), e);
+				throw ProcessorException.builder().context(data.originElement).build(e.getMessage(), e);
 			}
 			catch (Exception e)
 			{
-				throw ProcessorException.builder().context(field).build("Unable to create a coder: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
+				throw ProcessorException.builder().context(data.originElement).build("Unable to create a coder: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 			}
 			
 			try
 			{
-				SerializationCoder.OutputExpressions output = coder.code(field.getSimpleName().toString());
+				SerializationCoder.OutputExpressions output = coder.code(data.baseName, "value." + data.accessElement.getSimpleName() + (data.accessElement.getKind().isField() ? "" : "()"));
 				output.field.ifPresent(serializerFields::add);
 				
 				encodeCode.add(output.encodeCode + ";");
@@ -115,7 +116,7 @@ public class SerializationProcessingUnit
 			}
 			catch (Exception e)
 			{
-				throw ProcessorException.builder().context(field).build("Unable to produce code : " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
+				throw ProcessorException.builder().context(data.originElement).build("Unable to produce code : " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 			}
 		}
 		
@@ -135,5 +136,41 @@ public class SerializationProcessingUnit
 		replacements.put("decode", decodeCodeBuilder.build());
 		
 		this.tools.templates.writeFileWithLog(this.serializerClassName.qualifiedName(), "templates/TemplateSerializer.jvtp", replacements, this.serializableClass, this.annotation, this.serializableClass);
+	}
+	
+	private List<Data> getDataToSerialize()
+	{
+		if (this.serializableClass.getKind() == ElementKind.RECORD)
+		{
+			return this.serializableClass.getRecordComponents().stream().map(Data::fromRecordComp).toList();
+		}
+		else
+		{
+			return ElementFilter.fieldsIn(this.serializableClass.getEnclosedElements()).stream().map(Data::fromField).toList();
+		}
+	}
+	
+	private static class Data
+	{
+		private final Element originElement;
+		private final String baseName;
+		private final Element accessElement;
+		
+		public Data(Element originElement, String baseName, Element accessElement)
+		{
+			this.originElement = originElement;
+			this.baseName = baseName;
+			this.accessElement = accessElement;
+		}
+		
+		public static Data fromField(VariableElement field)
+		{
+			return new Data(field, field.getSimpleName().toString(), field);
+		}
+		
+		public static Data fromRecordComp(RecordComponentElement comp)
+		{
+			return new Data(comp, comp.getSimpleName().toString(), comp.getAccessor());
+		}
 	}
 }

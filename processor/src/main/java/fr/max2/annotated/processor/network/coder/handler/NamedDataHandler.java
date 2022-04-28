@@ -8,12 +8,14 @@ import fr.max2.annotated.processor.util.exceptions.CoderException;
 public class NamedDataHandler<C> extends TypedDataHandler<C>
 {
 	public final String typeName;
+	protected final boolean inherited;
 	protected final ICoderProvider<C> coderProvider;
 	
-	public NamedDataHandler(ProcessingTools tools, String typeName, ICoderProvider<C> coderProvider)
+	public NamedDataHandler(ProcessingTools tools, String typeName, boolean inherited, ICoderProvider<C> coderProvider)
 	{
 		super(tools, tools.types.erasure(tools.elements.getTypeElement(typeName).asType()));
 		this.typeName = typeName;
+		this.inherited = inherited;
 		this.coderProvider = coderProvider;
 	}
 	
@@ -29,14 +31,17 @@ public class NamedDataHandler<C> extends TypedDataHandler<C>
 			return false;
 		
 		default:
-			return this.tools.types.isAssignable(type, this.type);
+			if (this.inherited)
+				return this.tools.types.isAssignable(type, this.type);
+			
+			return this.tools.types.isAssignable(type, this.type) && this.tools.types.isAssignable(this.type, type);
 		}
 	}
 
 	@Override
-	public C createCoder(ProcessingTools tools, TypeMirror paramType) throws CoderException
+	public C createCoder(TypeMirror paramType) throws CoderException
 	{
-		return this.coderProvider.createCoder(tools, paramType);
+		return this.coderProvider.createCoder(paramType);
 	};
 	
 	@Override

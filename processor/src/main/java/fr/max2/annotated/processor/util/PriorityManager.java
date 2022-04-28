@@ -57,7 +57,7 @@ public class PriorityManager<T>
 			}
 			
 			// Check for cycles
-			if (this.isHigherThan(otherRule))
+			if (otherRule.isHigherThan(this))
 			{
 				throw new IllegalArgumentException("The rule causes a priority cycle");
 			}

@@ -15,7 +15,7 @@ public class ArrayCoder
 {
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools)
 	{
-		return new SpecialDataHandler<>(TypeKind.ARRAY, (t, fieldType) ->
+		return new SpecialDataHandler<>(TypeKind.ARRAY, fieldType ->
 		{
 			ArrayType arrayType = tools.types.asArrayType(fieldType);
 			if (arrayType == null) throw new IncompatibleTypeException("The type '" + fieldType + "' is not an array");
@@ -24,11 +24,11 @@ public class ArrayCoder
 			
 			if (contentType.getKind().isPrimitive())
 			{
-				return new ObjectCoder(t, fieldType, "fr.max2.annotated.lib.network.serializer.PrimitiveArraySerializer." + capitalize(tools.naming.erasedType.get(contentType)) + "ArraySerializer");
+				return new SimpleCoder(tools, fieldType, "fr.max2.annotated.lib.network.serializer.PrimitiveArraySerializer." + capitalize(tools.naming.erasedType.get(contentType)) + "ArraySerializer");
 			}
 			SerializationCoder contentCoder = tools.coders.getCoder(contentType);
-			
-			return new ParametrizedCoder(t, fieldType, "fr.max2.annotated.lib.network.serializer.ObjectArraySerializer",
+
+			return new GenericCoder(tools, fieldType, "fr.max2.annotated.lib.network.serializer.ObjectArraySerializer",
 				params -> params.add(tools.naming.erasedType.get(fieldType) + "::new"), List.of(contentCoder));
 		});
 	}

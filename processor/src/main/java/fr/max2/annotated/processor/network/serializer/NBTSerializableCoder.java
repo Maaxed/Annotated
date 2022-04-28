@@ -9,13 +9,14 @@ public class NBTSerializableCoder
 	
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools)
 	{
-		return ParametrizedCoder.handler(tools, ClassRef.NBT_SERIALIZABLE_INTERFACE, "fr.max2.annotated.lib.network.serializer.NBTSerializableSerializer",
-			(fieldType, params) -> params.add(tools.naming.erasedType.get(fieldType) + "::new"),
-			1,
-			fieldType ->
+		return GenericCoder.handler(tools, ClassRef.NBT_SERIALIZABLE_INTERFACE, "fr.max2.annotated.lib.network.serializer.NBTSerializableSerializer",
+			(fieldType, builder) ->
 			{
+				SerializationCoder.requireConcreteType(tools, fieldType);
 				SerializationCoder.requireDefaultConstructor(tools, fieldType);
-				return fieldType;
+				
+				builder.add(tools.naming.erasedType.get(fieldType) + "::new");
+				builder.addCoders(1, fieldType);
 			});
 	}
 }

@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 
 public class SpecialDataHandler<C> implements ICoderHandler<C>
@@ -25,9 +24,9 @@ public class SpecialDataHandler<C> implements ICoderHandler<C>
 	}
 	
 	@Override
-	public C createCoder(ProcessingTools tools, TypeMirror paramType) throws CoderException
+	public C createCoder(TypeMirror paramType) throws CoderException
 	{
-		return this.coderProvider.createCoder(tools, paramType);
+		return this.coderProvider.createCoder(paramType);
 	}
 	
 	@Override

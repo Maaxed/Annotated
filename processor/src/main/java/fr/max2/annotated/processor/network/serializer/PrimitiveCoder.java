@@ -5,31 +5,22 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
-import fr.max2.annotated.processor.network.model.ICodeConsumer;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 
-public class PrimitiveCoder extends SerializationCoder
+public class PrimitiveCoder extends SimpleCoder
 {
-	private final String serializerName;
 	public PrimitiveCoder(ProcessingTools tools, TypeMirror type, String name)
 	{
-		super(tools, type);
-		this.serializerName = "fr.max2.annotated.lib.network.serializer.PrimitiveSerializer." + name + "Serializer.INSTANCE";
-	}
-
-	@Override
-	public void codeSerializerInstance(ICodeConsumer output)
-	{
-		output.write(this.serializerName);
+		super(tools, type, "fr.max2.annotated.lib.network.serializer.PrimitiveSerializer." + name + "Serializer.INSTANCE");
 	}
 	
 	@Override
-	public OutputExpressions code(String fieldName)
+	public OutputExpressions code(String fieldName, String valueAccess)
 	{
-		String serializer = this.serializerName;
+		String serializer = this.serilizer;
 		return new OutputExpressions(
-			serializer + ".encodePrimitive(buf, value." + fieldName + ")",
+			serializer + ".encodePrimitive(buf, " + valueAccess + ")",
 			serializer + ".decodePrimitive(buf)");
 	}
 	
@@ -44,9 +35,9 @@ public class PrimitiveCoder extends SerializationCoder
 			}
 
 			@Override
-			public SerializationCoder createCoder(ProcessingTools tools, TypeMirror paramType) throws CoderException
+			public SerializationCoder createCoder(TypeMirror paramType) throws CoderException
 			{
-				return new PrimitiveCoder(tools, paramType, name);
+				return new PrimitiveCoder(this.tools, paramType, name);
 			}
 		};
 	}

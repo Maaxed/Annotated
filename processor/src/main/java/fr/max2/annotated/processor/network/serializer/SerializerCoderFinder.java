@@ -22,12 +22,9 @@ public class SerializerCoderFinder
 	private final Collection<ICoderHandler<SerializationCoder>> spacialHandlers = new HashSet<>();
 	private final PriorityManager<ICoderHandler<SerializationCoder>> handlerPriorities = new PriorityManager<>();
 	private final Collection<ICoderHandler<SerializationCoder>> handlers = new HashSet<>();
-	private final ProcessingTools tools;
 	
 	public SerializerCoderFinder(ProcessingTools tools)
 	{
-		this.tools = tools;
-		
 		this.handlers.add(PrimitiveCoder.handler(tools, "Byte"));
 		this.handlers.add(PrimitiveCoder.handler(tools, "Short"));
 		this.handlers.add(PrimitiveCoder.handler(tools, "Int"));
@@ -37,61 +34,58 @@ public class SerializerCoderFinder
 		this.handlers.add(PrimitiveCoder.handler(tools, "Boolean"));
 		this.handlers.add(PrimitiveCoder.handler(tools, "Char"));
 		
-		this.handlers.add(ArrayCoder.handler(tools));
-		
-		ICoderHandler<SerializationCoder> collection = CollectionCoder.handler(tools);
-		this.handlers.add(ObjectCoder.handler(tools, "java.lang.String", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.StringSerializer"));
-		this.handlers.add(GenericCoder.handler(tools, "java.lang.Enum", "fr.max2.annotated.lib.network.serializer.EnumSerializer", type -> tools.naming.erasedType.get(type) + ".class"));
-		this.handlers.add(collection);
-		this.handlers.add(MapCoder.handler(tools));
-		this.handlers.add(ObjectCoder.handler(tools, "java.util.UUID", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.UUIDSerializer"));
-		this.handlers.add(ObjectCoder.handler(tools, "java.util.Date", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.DateSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, "java.lang.String", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.StringSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, "java.util.UUID", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.UUIDSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, "java.util.Date", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.DateSerializer"));
 
-		ICoderHandler<SerializationCoder> blockPos = ObjectCoder.handler(tools, ClassRef.BLOCK_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockPosSerializer");
-		ICoderHandler<SerializationCoder> itemStack = ObjectCoder.handler(tools, ClassRef.ITEM_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ItemStackSerializer");
-		ICoderHandler<SerializationCoder> nbtSerializable = NBTSerializableCoder.handler(tools);
+		ICoderHandler<SerializationCoder> itemStack = SimpleCoder.handler(tools, ClassRef.ITEM_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ItemStackSerializer");
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.BLOCK_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockPosSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.RESOURCE_LOCATION, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ResourceLocationSerializer"));
+		this.handlers.add(itemStack);
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.FLUID_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.FluidStackSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.TEXT_COMPONENT, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.TextComponentSerializer")); // TODO allow serializing specific implementations
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.BLOCK_RAY_TRACE, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockHitResultSerializer"));
+		
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.AXIS_ALIGNED_BB, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.AABBSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.MUTABLE_BB, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.StructureBBSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.CHUNK_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ChunkPosSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.SECTION_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.SectionPosSerializer"));
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.VECTOR_3D, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3Serializer"));
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.VECTOR_3I, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3ISerializer"));
+		
+		ICoderHandler<SerializationCoder> nbtAbstract = SimpleCoder.handler(tools, ClassRef.NBT_BASE, "fr.max2.annotated.lib.network.serializer.TagSerializer.Abstract");
+		ICoderHandler<SerializationCoder> nbtConcrete = GenericCoder.handler(tools, ClassRef.NBT_BASE, "fr.max2.annotated.lib.network.serializer.TagSerializer.Concrete", type -> tools.naming.erasedType.get(type) + ".TYPE");
+		this.handlers.add(nbtAbstract);
+		this.handlers.add(nbtConcrete);
+		
 		//ICoderHandler<SerializationCoder> entityId = EntityCoder.ENTITY_ID.createHandler(tools);
 		//ICoderHandler<SerializationCoder> playerId = EntityCoder.PLAYER_ID.createHandler(tools);
-		this.handlers.add(blockPos);
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.RESOURCE_LOCATION, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ResourceLocationSerializer"));
-		this.handlers.add(itemStack);
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.FLUID_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.FluidStackSerializer"));
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.TEXT_COMPONENT, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.TextComponentSerializer"));
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.BLOCK_RAY_TRACE, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockHitResultSerializer"));
-		this.handlers.add(GenericCoder.handler(tools, ClassRef.REGISTRY_ENTRY, "fr.max2.annotated.lib.network.serializer.RegistryEntrySerializer", type -> tools.naming.erasedType.get(type) + ".class"));
-		this.handlers.add(nbtSerializable);
 		//this.handlers.add(entityId);
 		//this.handlers.add(playerId);
 
-		ICoderHandler<SerializationCoder> sectionPos = ObjectCoder.handler(tools, ClassRef.SECTION_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.SectionPosSerializer");
-		ICoderHandler<SerializationCoder> vec3i = ObjectCoder.handler(tools, ClassRef.VECTOR_3I, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3ISerializer");
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.AXIS_ALIGNED_BB, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.AABBSerializer"));
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.MUTABLE_BB, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.StructureBBSerializer"));
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.CHUNK_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ChunkPosSerializer"));
-		this.handlers.add(sectionPos);
-		this.handlers.add(ObjectCoder.handler(tools, ClassRef.VECTOR_3D, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3Serializer"));
-		this.handlers.add(vec3i);
-		
-		ICoderHandler<SerializationCoder> nbtConcrete = GenericCoder.handler(tools, ClassRef.NBT_BASE, "fr.max2.annotated.lib.network.serializer.TagSerializer.Concrete", type -> tools.naming.erasedType.get(type) + ".TYPE");
-		ICoderHandler<SerializationCoder> nbtAbstract = ObjectCoder.handler(tools, ClassRef.NBT_BASE, "fr.max2.annotated.lib.network.serializer.TagSerializer.Abstract");
-		this.handlers.add(nbtConcrete);
-		this.handlers.add(nbtAbstract);
+		this.handlers.add(GenericCoder.handler(tools, ClassRef.REGISTRY_ENTRY, "fr.max2.annotated.lib.network.serializer.RegistryEntrySerializer", type -> tools.naming.erasedType.get(type) + ".class")); // TODO [v3.1] Find a good way to get the registry from the type
+		ICoderHandler<SerializationCoder> nbtSerializable = NBTSerializableCoder.handler(tools);
+		this.handlers.add(nbtSerializable);
+
+		this.handlers.add(GenericCoder.handler(tools, "java.lang.Enum", "fr.max2.annotated.lib.network.serializer.EnumSerializer", type -> tools.naming.erasedType.get(type) + ".class"));
+		this.handlers.add(ArrayCoder.handler(tools));
+		ICoderHandler<SerializationCoder> collection = CollectionCoder.handler(tools);
+		this.handlers.add(collection);
+		this.handlers.add(MapCoder.handler(tools));
 		
 		
-		this.spacialHandlers.add(SpecialCoder.WILDCRD);
-		this.spacialHandlers.add(SpecialCoder.VARIABLE_TYPE);
-		this.spacialHandlers.add(SpecialCoder.INTERSECTION);
+		this.spacialHandlers.add(SpecialCoder.wildcard(tools));
+		this.spacialHandlers.add(SpecialCoder.variableType(tools));
+		this.spacialHandlers.add(SpecialCoder.intersection(tools));
 		
 		
-		this.handlerPriorities.prioritize(blockPos).over(vec3i);
-		this.handlerPriorities.prioritize(sectionPos).over(vec3i);
 		this.handlerPriorities.prioritize(itemStack).over(nbtSerializable);
 		
 		/*this.handlerPriorities.prioritize(playerId).over(entityId);
 		this.handlerPriorities.prioritize(playerId).over(nbtSerializable);
 		this.handlerPriorities.prioritize(entityId).over(nbtSerializable);*/
 		
-		this.handlerPriorities.prioritize(nbtConcrete).over(nbtAbstract);
+		this.handlerPriorities.prioritize(nbtAbstract).over(nbtConcrete);
 		this.handlerPriorities.prioritize(nbtConcrete).over(collection);
 		this.handlerPriorities.prioritize(nbtAbstract).over(collection);
 		
@@ -127,7 +121,7 @@ public class SerializerCoderFinder
 		if (handler == null)
 			return null;
 		
-		return handler.createCoder(this.tools, type);
+		return handler.createCoder(type);
 	}
 	
 	public Optional<ICoderHandler<SerializationCoder>> getHandler(TypeMirror type)

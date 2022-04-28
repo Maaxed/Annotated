@@ -18,10 +18,24 @@ public class CollectionCoder
 
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools)
 	{
-		return ParametrizedCoder.handler(tools, COLLECTION_TYPE, "fr.max2.annotated.lib.network.serializer.CollectionSerializer",
-			(fieldType, params) -> params.add(tools.naming.erasedType.get(defaultImplementation(tools, fieldType)) + "::new"),
-			1,
-			fieldType -> defaultImplementation(tools, fieldType));
+		return GenericCoder.handler(tools, COLLECTION_TYPE, "fr.max2.annotated.lib.network.serializer.CollectionSerializer",
+			(fieldType, builder) ->
+			{
+				TypeMirror impl = defaultImplementation(tools, fieldType);
+
+				SerializationCoder.requireConcreteType(tools, impl);
+				if (SerializationCoder.findConstructor(tools, impl, List.of(tools.types.getPrimitiveType(TypeKind.INT))) != null)
+				{
+					builder.add(tools.naming.erasedType.get(impl) + "::new");
+				}
+				else
+				{
+					SerializationCoder.requireDefaultConstructor(tools, impl);
+					builder.add("size -> new " + tools.naming.erasedType.get(impl) + "()");
+				}
+				
+				builder.addCoders(1, impl);
+			});
 	}
 	
 	private static TypeMirror defaultImplementation(ProcessingTools tools, TypeMirror fieldType) throws CoderException
@@ -38,8 +52,6 @@ public class CollectionCoder
 			
 			implType = elem.asType();
 		}
-		
-		SerializationCoder.requireConstructor(tools, implType, List.of(tools.types.getPrimitiveType(TypeKind.INT)));
 		
 		return implType;
 	}

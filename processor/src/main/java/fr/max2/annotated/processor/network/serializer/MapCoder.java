@@ -18,10 +18,24 @@ public class MapCoder
 
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools)
 	{
-		return ParametrizedCoder.handler(tools, MAP_TYPE, "fr.max2.annotated.lib.network.serializer.MapSerializer",
-			(fieldType, params) -> params.add(tools.naming.erasedType.get(defaultImplementation(tools, fieldType)) + "::new"),
-			2,
-			fieldType -> defaultImplementation(tools, fieldType));
+		return GenericCoder.handler(tools, MAP_TYPE, "fr.max2.annotated.lib.network.serializer.MapSerializer",
+			(fieldType, builder) ->
+			{
+				TypeMirror impl = defaultImplementation(tools, fieldType);
+
+				SerializationCoder.requireConcreteType(tools, impl);
+				if (SerializationCoder.findConstructor(tools, impl, List.of(tools.types.getPrimitiveType(TypeKind.INT))) != null)
+				{
+					builder.add(tools.naming.erasedType.get(impl) + "::new");
+				}
+				else
+				{
+					SerializationCoder.requireDefaultConstructor(tools, impl);
+					builder.add("size -> new " + tools.naming.erasedType.get(impl) + "()");
+				}
+				
+				builder.addCoders(2, impl);
+			});
 	}
 	
 	private static TypeMirror defaultImplementation(ProcessingTools tools, TypeMirror fieldType) throws CoderException
@@ -38,8 +52,6 @@ public class MapCoder
 			
 			implType = elem.asType();
 		}
-		
-		SerializationCoder.requireConstructor(tools, implType, List.of(tools.types.getPrimitiveType(TypeKind.INT)));
 		
 		return implType;
 	}

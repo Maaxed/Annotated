@@ -135,13 +135,13 @@ public class NamingUtils
 
 		public NamingBuilder allowPrimitives()
 		{
-			this.allowArrays = false;
+			this.allowPrimitives = true;
 			return this;
 		}
 
 		public NamingBuilder allowSpecialTypes()
 		{
-			this.allowArrays = false;
+			this.allowSpecialTypes = true;
 			return this;
 		}
 		
