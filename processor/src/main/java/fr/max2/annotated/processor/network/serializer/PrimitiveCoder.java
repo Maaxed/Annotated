@@ -3,6 +3,7 @@ package fr.max2.annotated.processor.network.serializer;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.annotated.processor.network.coder.CoderCompatibility;
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.util.ProcessingTools;
@@ -29,9 +30,9 @@ public class PrimitiveCoder extends SimpleCoder
 		return new TypedDataHandler<>(tools, tools.types.getPrimitiveType(TypeKind.valueOf(name.toUpperCase())))
 		{
 			@Override
-			public boolean canProcess(TypeMirror type)
+			public CoderCompatibility getCompatibilityFor(TypeMirror type)
 			{
-				return this.tools.types.isAssignable(type, this.type) && this.tools.types.isAssignable(this.type, type);
+				return CoderCompatibility.matching(this.tools.types.isAssignable(type, this.type) && this.tools.types.isAssignable(this.type, type));
 			}
 
 			@Override

@@ -1,17 +1,18 @@
 package fr.max2.annotated.processor.network.serializer;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.annotated.processor.network.coder.CoderCompatibility;
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.util.ClassRef;
-import fr.max2.annotated.processor.util.PriorityManager;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
@@ -19,9 +20,8 @@ import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
 public class SerializerCoderFinder
 {
 	// TODO find available serializers using Filer.getResource / classloader / JavaFileManager.getFileForInput / ServiceLoader (see ToolProvider)
-	private final Collection<ICoderHandler<SerializationCoder>> spacialHandlers = new HashSet<>();
-	private final PriorityManager<ICoderHandler<SerializationCoder>> handlerPriorities = new PriorityManager<>();
-	private final Collection<ICoderHandler<SerializationCoder>> handlers = new HashSet<>();
+	private final Collection<ICoderHandler<SerializationCoder>> spacialHandlers = new ArrayList<>();
+	private final Collection<ICoderHandler<SerializationCoder>> handlers = new ArrayList<>();
 	
 	public SerializerCoderFinder(ProcessingTools tools)
 	{
@@ -38,10 +38,9 @@ public class SerializerCoderFinder
 		this.handlers.add(SimpleCoder.handler(tools, "java.util.UUID", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.UUIDSerializer"));
 		this.handlers.add(SimpleCoder.handler(tools, "java.util.Date", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.DateSerializer"));
 
-		ICoderHandler<SerializationCoder> itemStack = SimpleCoder.handler(tools, ClassRef.ITEM_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ItemStackSerializer");
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.BLOCK_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockPosSerializer"));
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.RESOURCE_LOCATION, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ResourceLocationSerializer"));
-		this.handlers.add(itemStack);
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.ITEM_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ItemStackSerializer"));
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.FLUID_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.FluidStackSerializer"));
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.TEXT_COMPONENT, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.TextComponentSerializer")); // TODO [v3.1] allow serializing specific implementations
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.BLOCK_RAY_TRACE, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockHitResultSerializer"));
@@ -53,41 +52,24 @@ public class SerializerCoderFinder
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.VECTOR_3D, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3Serializer"));
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.VECTOR_3I, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3ISerializer"));
 		
-		ICoderHandler<SerializationCoder> nbtAbstract = SimpleCoder.handler(tools, ClassRef.NBT_BASE, "fr.max2.annotated.lib.network.serializer.TagSerializer.Abstract");
-		ICoderHandler<SerializationCoder> nbtConcrete = GenericCoder.handler(tools, ClassRef.NBT_BASE, "fr.max2.annotated.lib.network.serializer.TagSerializer.Concrete", type -> tools.naming.erasedType.get(type) + ".TYPE");
-		this.handlers.add(nbtAbstract);
-		this.handlers.add(nbtConcrete);
+		this.handlers.add(NBTCoder.abstractHandler(tools));
+		this.handlers.add(NBTCoder.concreteHandler(tools));
 		
-		//ICoderHandler<SerializationCoder> entityId = EntityCoder.ENTITY_ID.createHandler(tools);
-		//ICoderHandler<SerializationCoder> playerId = EntityCoder.PLAYER_ID.createHandler(tools);
-		//this.handlers.add(entityId);
-		//this.handlers.add(playerId);
+		//this.handlers.add(EntityCoder.ENTITY_ID.createHandler(tools));
+		//this.handlers.add(EntityCoder.PLAYER_ID.createHandler(tools));
 
 		this.handlers.add(GenericCoder.handler(tools, ClassRef.REGISTRY_ENTRY, "fr.max2.annotated.lib.network.serializer.RegistryEntrySerializer", type -> tools.naming.erasedType.get(type) + ".class")); // TODO [v3.1] Find a good way to get the registry from the type
-		ICoderHandler<SerializationCoder> nbtSerializable = NBTSerializableCoder.handler(tools);
-		this.handlers.add(nbtSerializable);
+		this.handlers.add(NBTSerializableCoder.handler(tools));
 
 		this.handlers.add(GenericCoder.handler(tools, "java.lang.Enum", "fr.max2.annotated.lib.network.serializer.EnumSerializer", type -> tools.naming.erasedType.get(type) + ".class"));
 		this.handlers.add(ArrayCoder.handler(tools));
-		ICoderHandler<SerializationCoder> collection = CollectionCoder.handler(tools);
-		this.handlers.add(collection);
+		this.handlers.add(CollectionCoder.handler(tools));
 		this.handlers.add(MapCoder.handler(tools));
 		
 		
 		this.spacialHandlers.add(SpecialCoder.wildcard(tools));
 		this.spacialHandlers.add(SpecialCoder.variableType(tools));
 		this.spacialHandlers.add(SpecialCoder.intersection(tools));
-		
-		
-		this.handlerPriorities.prioritize(itemStack).over(nbtSerializable);
-		
-		/*this.handlerPriorities.prioritize(playerId).over(entityId);
-		this.handlerPriorities.prioritize(playerId).over(nbtSerializable);
-		this.handlerPriorities.prioritize(entityId).over(nbtSerializable);*/
-		
-		this.handlerPriorities.prioritize(nbtAbstract).over(nbtConcrete);
-		this.handlerPriorities.prioritize(nbtConcrete).over(collection);
-		this.handlerPriorities.prioritize(nbtAbstract).over(collection);
 		
 		//TODO [v2.1] DamageSource, VoxelShape
 		//TODO [v2.1] Rotations, Size2i, Vec2f, GlobalPos
@@ -99,8 +81,6 @@ public class SerializerCoderFinder
 		//TODO [v2.1] Container
 		//TODO [v2.1] JsonDeserializer + JsonSerializer
 		//TODO [v2.2] custom data class
-		
-		this.handlers.addAll(this.spacialHandlers);
 	}
 	
 	public SerializationCoder getCoder(Element field) throws CoderException
@@ -142,23 +122,57 @@ public class SerializerCoderFinder
 	
 	private Optional<ICoderHandler<SerializationCoder>> getDefaultHandler(TypeMirror type)
 	{
-		List<ICoderHandler<SerializationCoder>> validHandlers = this.handlers.stream().filter(entry -> entry.canProcess(type)).collect(Collectors.toList());
-		List<ICoderHandler<SerializationCoder>> prioritizedHandlers = this.handlerPriorities.getHighests(validHandlers);
+		MaxResult res = this.handlers.stream().collect(MaxResult.collector(type));
 		
-		switch (prioritizedHandlers.size())
-		{
-		case 0:
+		if (!res.maxCompat.isCompatible())
 			return Optional.empty();
-		case 1:
-			return Optional.of(prioritizedHandlers.get(0));
-		default:
-			throw new IllegalArgumentException("The data handler of the '" + type.toString() + "' type couldn't be chosen: handler priorities are equal: " + prioritizedHandlers.stream().map(h -> h.getClass().getTypeName() + ":" + h.toString()).collect(Collectors.joining(", ")));
-		}
+		
+		if (res.serializers.size() == 1)
+			return Optional.of(res.serializers.get(0));
+		
+		throw new IllegalArgumentException("The data handler of the '" + type.toString() + "' type couldn't be chosen: handler priorities are equal: " + res.serializers.stream().map(h -> h.getClass().getTypeName() + ":" + h.toString()).collect(Collectors.joining(", ")));
 	}
 	
 	private Optional<ICoderHandler<SerializationCoder>> getSpecialHandler(TypeMirror type)
 	{
-		return this.spacialHandlers.stream().filter(entry -> entry.canProcess(type)).findAny();
+		return this.spacialHandlers.stream().filter(entry -> entry.getCompatibilityFor(type).isCompatible()).findAny();
+	}
+	
+	public static class MaxResult
+	{
+		private final TypeMirror type;
+		private CoderCompatibility maxCompat = CoderCompatibility.INCOMPATIBLE;
+		private final List<ICoderHandler<SerializationCoder>> serializers = new ArrayList<>();
+		
+		public MaxResult(TypeMirror type)
+		{
+			this.type = type;
+		}
+
+		public void accumulate(ICoderHandler<SerializationCoder> val)
+		{
+			CoderCompatibility compat = val.getCompatibilityFor(this.type);
+			int cmp = compat.compareTo(this.maxCompat);
+			if (cmp >= 0)
+			{
+				if (cmp > 0)
+				{
+					this.maxCompat = compat;
+					this.serializers.clear();
+				}
+				this.serializers.add(val);
+			}
+		}
+		
+		public MaxResult combine(MaxResult other)
+		{
+			return this;
+		}
+		
+		public static Collector<ICoderHandler<SerializationCoder>, MaxResult, MaxResult> collector(TypeMirror type)
+		{
+			return Collector.of(() -> new MaxResult(type), MaxResult::accumulate, MaxResult::combine);
+		}
 	}
 	
 }

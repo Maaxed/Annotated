@@ -2,6 +2,7 @@ package fr.max2.annotated.processor.network.coder.handler;
 
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.annotated.processor.network.coder.CoderCompatibility;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 
@@ -20,7 +21,7 @@ public class NamedDataHandler<C> extends TypedDataHandler<C>
 	}
 	
 	@Override
-	public boolean canProcess(TypeMirror type)
+	public CoderCompatibility getCompatibilityFor(TypeMirror type)
 	{
 		switch (type.getKind())
 		{
@@ -28,13 +29,16 @@ public class NamedDataHandler<C> extends TypedDataHandler<C>
 		case WILDCARD:
 		case UNION:
 		case INTERSECTION:
-			return false;
+			return CoderCompatibility.INCOMPATIBLE;
 		
 		default:
-			if (this.inherited)
-				return this.tools.types.isAssignable(type, this.type);
+			if (!this.tools.types.isAssignable(type, this.type))
+				return CoderCompatibility.INCOMPATIBLE;
 			
-			return this.tools.types.isAssignable(type, this.type) && this.tools.types.isAssignable(this.type, type);
+			if (this.tools.types.isAssignable(this.type, type))
+				return CoderCompatibility.EXACT_MATCH;
+			
+			return this.inherited ? CoderCompatibility.SUPER_TYPE_MATCH : CoderCompatibility.INCOMPATIBLE;
 		}
 	}
 

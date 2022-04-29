@@ -1,26 +1,26 @@
 package fr.max2.annotated.processor.network.coder.handler;
 
-import javax.annotation.Nullable;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
+import fr.max2.annotated.processor.network.coder.CoderCompatibility;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 
 public class SpecialDataHandler<C> implements ICoderHandler<C>
 {
-	private final @Nullable TypeKind kind;
+	private final TypeKind kind;
 	private final ICoderProvider<C> coderProvider;
 	
-	public SpecialDataHandler(@Nullable TypeKind kind, ICoderProvider<C> coderProvider)
+	public SpecialDataHandler(TypeKind kind, ICoderProvider<C> coderProvider)
 	{
 		this.kind = kind;
 		this.coderProvider = coderProvider;
 	}
 	
 	@Override
-	public boolean canProcess(TypeMirror type)
+	public CoderCompatibility getCompatibilityFor(TypeMirror type)
 	{
-		return this.kind != null && type.getKind() == this.kind;
+		return CoderCompatibility.matching(type.getKind() == this.kind);
 	}
 	
 	@Override

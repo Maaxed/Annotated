@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
@@ -85,7 +86,7 @@ public abstract class SerializationCoder
 		if (elem == null)
 			return; // Unknown type, assume it is concrete
 		
-		if (elem.getModifiers().contains(Modifier.ABSTRACT))
+		if (elem.getKind() == ElementKind.INTERFACE || elem.getModifiers().contains(Modifier.ABSTRACT))
 			throw new IncompatibleTypeException("The type '" + type + "' is abstract and cannot be instantiated");
 	}
 	
