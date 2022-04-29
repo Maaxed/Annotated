@@ -38,15 +38,16 @@ public class SerializationProcessingUnit
 		this.annotation = annotation;
 		this.serializableClassName = tools.naming.buildClassName(serializableClass);
 		
-		String className = tools.elements.getAnnotationValue(this.annotation, "className").map(anno -> anno.getValue().toString()).orElse("");
+		String className = tools.elements.getAnnotationValue(this.annotation, "serializerClassName").map(anno -> anno.getValue().toString()).orElse("");
 		
 		int sep = className.lastIndexOf('.');
 		
-		String packageName = sep == -1 ? this.serializableClassName.packageName() : className.substring(0, sep);
+		String packageName = this.serializableClassName.packageName();
 		
 		if (sep != -1)
 		{
 			className = className.substring(sep + 1);
+			packageName = className.substring(0, sep);
 		}
 		else if (className.isEmpty())
 		{

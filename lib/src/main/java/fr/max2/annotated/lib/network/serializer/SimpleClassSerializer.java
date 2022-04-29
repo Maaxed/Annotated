@@ -19,7 +19,7 @@ public final class SimpleClassSerializer
 	private SimpleClassSerializer()
 	{ }
 	
-	public static final NetworkSerializer<String> StringSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeUtf, FriendlyByteBuf::readUtf);
+	public static final NetworkSerializer<String> StringSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeUtf, FriendlyByteBuf::readUtf); // TODO [v3.1] Add maxLength parameter
 
 	public static final NetworkSerializer<UUID> UUIDSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeUUID, FriendlyByteBuf::readUUID);
 	

@@ -69,7 +69,7 @@ public class TemplateHelper
 		try (Writer writer = file.openWriter())
 		{
 			this.readTemplate(templateFile, replacements, writer::write);
-			// [v3.0] TODO remove file if an error occurred
+			// TODO [v3.0] remove file if an error occurred
 		}
 		
 	}

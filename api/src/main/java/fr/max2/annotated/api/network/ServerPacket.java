@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * @see DelegateChannel
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.METHOD})
+@Target(ElementType.METHOD)
 public @interface ServerPacket
 {
 	/**

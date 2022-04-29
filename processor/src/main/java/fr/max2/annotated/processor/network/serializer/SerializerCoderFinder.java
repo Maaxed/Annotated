@@ -43,7 +43,7 @@ public class SerializerCoderFinder
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.RESOURCE_LOCATION, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ResourceLocationSerializer"));
 		this.handlers.add(itemStack);
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.FLUID_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.FluidStackSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.TEXT_COMPONENT, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.TextComponentSerializer")); // TODO allow serializing specific implementations
+		this.handlers.add(SimpleCoder.handler(tools, ClassRef.TEXT_COMPONENT, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.TextComponentSerializer")); // TODO [v3.1] allow serializing specific implementations
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.BLOCK_RAY_TRACE, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockHitResultSerializer"));
 		
 		this.handlers.add(SimpleCoder.handler(tools, ClassRef.AXIS_ALIGNED_BB, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.AABBSerializer"));
@@ -88,6 +88,17 @@ public class SerializerCoderFinder
 		this.handlerPriorities.prioritize(nbtAbstract).over(nbtConcrete);
 		this.handlerPriorities.prioritize(nbtConcrete).over(collection);
 		this.handlerPriorities.prioritize(nbtAbstract).over(collection);
+		
+		//TODO [v2.1] DamageSource, VoxelShape
+		//TODO [v2.1] Rotations, Size2i, Vec2f, GlobalPos
+		//TODO [v2.1] Entity by copy type
+		//TODO [v3.0] Entity by id + DimensionType
+		//TODO [v3.0] DimensionType
+		//TODO [v2.1] IDynamicSerializable
+		//TODO [v2.1] TileEntity
+		//TODO [v2.1] Container
+		//TODO [v2.1] JsonDeserializer + JsonSerializer
+		//TODO [v2.2] custom data class
 		
 		this.handlers.addAll(this.spacialHandlers);
 	}
