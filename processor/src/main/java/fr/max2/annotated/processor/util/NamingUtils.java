@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
@@ -30,17 +31,18 @@ public class NamingUtils
 	
 	// Class naming from mirrors
 	
-	public ClassName buildClassName(Element type)
+	public ClassName buildClassName(TypeElement type)
 	{
 		StringBuilder builder = new StringBuilder();
+		Element elem = type;
 		do
 		{
 			if (builder.length() > 0)
-				builder.append('.');
-			builder.append(type.getSimpleName());
-			type = type.getEnclosingElement();
+				builder.insert(0, '.');
+			builder.insert(0,elem.getSimpleName());
+			elem = elem.getEnclosingElement();
 		}
-		while (type != null && type.getKind() != ElementKind.PACKAGE);
+		while (elem != null && elem.getKind() != ElementKind.PACKAGE && elem.getKind() != ElementKind.MODULE);
 
 		String packageName = this.tools.elements.getPackageOf(type).getQualifiedName().toString();
 		return new ClassName(packageName, builder.toString());

@@ -33,7 +33,26 @@ public enum Visibility
 		if (modifiers.contains(Modifier.PUBLIC)) return PUBLIC;
 		if (modifiers.contains(Modifier.PROTECTED)) return Visibility.PROTECTED;
 		if (modifiers.contains(Modifier.PRIVATE)) return PRIVATE;
-		return PACKAGE;
+		Element enclosing = elem.getEnclosingElement();
+		return enclosing == null || enclosing.getKind().isInterface() ? PUBLIC : PACKAGE;
+	}
+
+	public static Visibility getTopLevelVisibility(Element elem)
+	{
+		Visibility v = PUBLIC;
+		while (elem != null && (elem.getKind().isClass() || elem.getKind().isInterface()))
+		{
+			Visibility newV = getElementVisibility(elem);
+			if (newV.isAtMost(v))
+			{
+				v = newV;
+				if (v == Visibility.PRIVATE)
+					return Visibility.PRIVATE;
+			}
+
+			elem = elem.getEnclosingElement();
+		}
+		return v;
 	}
 	
 }

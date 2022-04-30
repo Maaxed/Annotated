@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target({ ElementType.FIELD, ElementType.RECORD_COMPONENT })
-public @interface ProcessField
+public @interface IncludeField
 {
 	public String getter() default "";
 }

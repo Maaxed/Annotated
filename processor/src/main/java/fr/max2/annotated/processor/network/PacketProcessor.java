@@ -15,6 +15,9 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
@@ -25,6 +28,7 @@ import fr.max2.annotated.api.network.ServerPacket;
 import fr.max2.annotated.processor.network.serializer.SerializationProcessingUnit;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingTools;
+import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
@@ -141,11 +145,44 @@ public class PacketProcessor extends AbstractProcessor
 		for (TypeElement type : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(NetworkSerializable.class)))
 		{
 			Optional<? extends AnnotationMirror> annotation = this.tools.elements.getAnnotationMirror(type, NetworkSerializable.class.getCanonicalName());
-			if (type.getNestingKind().isNested())
+			switch (type.getNestingKind())
+			{
+			default:
+			case ANONYMOUS:
+			case LOCAL:
+				ProcessorException.builder()
+					.context(type, annotation)
+					.build("Anonymous and local classes are not supported !")
+					.log(this.tools);
+				continue; // Skip this packet
+			case MEMBER:
+				TypeElement elem = type;
+				while (elem != null && elem.getNestingKind() != NestingKind.TOP_LEVEL)
+				{
+					Element enclosing = elem.getEnclosingElement();
+					if (enclosing != null && !enclosing.getKind().isInterface())
+					{
+						if (!type.getModifiers().contains(Modifier.STATIC))
+						{
+							ProcessorException.builder()
+								.context(type, annotation)
+								.build("Non-static nested classes are not supported !")
+								.log(this.tools);
+							continue; // Skip this packet
+						}
+					}
+					elem = this.tools.elements.asTypeElement(enclosing);
+				}
+				break;
+			case TOP_LEVEL:
+				break;
+			}
+
+			if (Visibility.getTopLevelVisibility(type) != Visibility.PUBLIC)
 			{
 				ProcessorException.builder()
 					.context(type, annotation)
-					.build("Nested and anonymous classes are not supported !")
+					.build("Non-public classes are not supported !")
 					.log(this.tools);
 				continue; // Skip this packet
 			}

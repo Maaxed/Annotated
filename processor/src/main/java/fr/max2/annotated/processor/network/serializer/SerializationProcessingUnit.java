@@ -19,7 +19,7 @@ import javax.lang.model.util.ElementFilter;
 
 import fr.max2.annotated.api.network.IgnoreField;
 import fr.max2.annotated.api.network.NetworkSerializable;
-import fr.max2.annotated.api.network.ProcessField;
+import fr.max2.annotated.api.network.IncludeField;
 import fr.max2.annotated.api.network.SelectionMode;
 import fr.max2.annotated.processor.network.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.network.model.SimpleParameterListBuilder;
@@ -169,16 +169,16 @@ public class SerializationProcessingUnit
 	
 	public boolean shouldSerializeElement(Element element)
 	{
-		ProcessField process = element.getAnnotation(ProcessField.class);
+		IncludeField include = element.getAnnotation(IncludeField.class);
 		IgnoreField ignore = element.getAnnotation(IgnoreField.class);
 		
 		if (element.getModifiers().contains(Modifier.STATIC))
 		{
-			if (process != null)
+			if (include != null)
 			{
 				ProcessorException.builder()
 					.context(element)
-					.build("A static field cannot have the ProcessField annotations")
+					.build("A static field cannot have the " + IncludeField.class.getSimpleName() + " annotations")
 					.log(this.tools);
 			}
 			if (ignore != null)
@@ -186,16 +186,16 @@ public class SerializationProcessingUnit
 				ProcessorException
 					.builder()
 					.context(element)
-					.build("A static field cannot have the IgnoreField annotations")
+					.build("A static field cannot have the " + IgnoreField.class.getSimpleName() + " annotations")
 					.log(this.tools);
 			}
 			return false;
 		}
 		
-		if (process != null && ignore != null)
+		if (include != null && ignore != null)
 			throw ProcessorException.builder().context(element).build("A field cannot have both ProcessField and IgnoreField annotations");
 		
-		if (process != null)
+		if (include != null)
 			return true;
 		
 		if (ignore != null)
@@ -227,10 +227,10 @@ public class SerializationProcessingUnit
 		
 		public Data(ProcessingTools tools, Element originElement, String baseName, Element accessElement)
 		{
-			ProcessField process = originElement.getAnnotation(ProcessField.class);
+			IncludeField include = originElement.getAnnotation(IncludeField.class);
 			this.originElement = originElement;
 			this.baseName = baseName;
-			if (process == null || process.getter().isEmpty())
+			if (include == null || include.getter().isEmpty())
 			{
 				this.accessElement = accessElement;
 			}
@@ -238,16 +238,18 @@ public class SerializationProcessingUnit
 			{
 				ExecutableElement getter = ElementFilter.methodsIn(originElement.getEnclosingElement().getEnclosedElements())
 										.stream()
-										.filter(elem -> elem.getSimpleName().contentEquals(process.getter()))
+										.filter(elem -> elem.getSimpleName().contentEquals(include.getter()))
 										.filter(elem -> elem.getParameters().isEmpty())
-										.reduce((a, b) -> { throw ProcessorException.builder().context(originElement).build("Found multiple matching getter methods with name '" + process.getter() + "' in class '" + originElement.getEnclosingElement() + "'"); })
-										.orElseThrow(() -> ProcessorException.builder().context(originElement).build("Cannot find the getter method '" + process.getter() + "' in class '" + originElement.getEnclosingElement() + "'"));
+										.reduce((a, b) -> { throw ProcessorException.builder().context(originElement).build("Found multiple matching getter methods with name '" + include.getter() + "' in class '" + originElement.getEnclosingElement() + "'"); })
+										.orElseThrow(() -> ProcessorException.builder().context(originElement).build("Cannot find the getter method '" + include.getter() + "' in class '" + originElement.getEnclosingElement() + "'"));
 				
 				this.accessElement = getter;
 				
 				if (!tools.types.isSameType(getter.getReturnType(), originElement.asType()))
-					ProcessorException.builder().context(originElement).build("The getter method '" + process.getter() + "' has a wrong type: expected " + originElement.asType() + ", but got " + getter.getReturnType());
+					ProcessorException.builder().context(originElement).build("The getter method '" + include.getter() + "' has a wrong type: expected " + originElement.asType() + ", but got " + getter.getReturnType());
 			}
+			if (!this.accessElement.getModifiers().contains(Modifier.PUBLIC))
+				ProcessorException.builder().context(originElement).build("The element '" + this.accessElement + "' is not public");
 		}
 		
 		public static Data fromField(ProcessingTools tools, VariableElement field)

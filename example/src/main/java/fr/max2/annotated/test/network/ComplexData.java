@@ -9,6 +9,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import com.mojang.math.Vector3d;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
+
 import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.test.util.EnumTest;
 import net.minecraft.core.BlockPos;
@@ -26,6 +30,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.ItemStackHandler;
@@ -69,10 +74,10 @@ public record ComplexData
 	SectionPos mySectionPos,
 	Vec3 myVec3,
 	Vec3i myVec3i,
-	//Vec2 myVec2,
-	//Vector3d myVector3d,
-	//Vector3f myVector3f,
-	//Vector4f myVector4f,
+	Vec2 myVec2,
+	Vector3d myVector3d,
+	Vector3f myVector3f,
+	Vector4f myVector4f,
 	
 	// Complex types
 	Tag myTag,
