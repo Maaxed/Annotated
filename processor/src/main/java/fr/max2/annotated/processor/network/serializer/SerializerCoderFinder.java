@@ -8,7 +8,12 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 
 import fr.max2.annotated.processor.network.coder.CoderCompatibility;
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
@@ -19,40 +24,26 @@ import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
 
 public class SerializerCoderFinder
 {
+	private final TypeMirror networkSerializerType;
 	// TODO find available serializers using Filer.getResource / classloader / JavaFileManager.getFileForInput / ServiceLoader (see ToolProvider)
 	private final Collection<ICoderHandler<SerializationCoder>> spacialHandlers = new ArrayList<>();
 	private final Collection<ICoderHandler<SerializationCoder>> handlers = new ArrayList<>();
 	
 	public SerializerCoderFinder(ProcessingTools tools)
 	{
-		this.handlers.add(PrimitiveCoder.handler(tools, "Byte"));
-		this.handlers.add(PrimitiveCoder.handler(tools, "Short"));
-		this.handlers.add(PrimitiveCoder.handler(tools, "Int"));
-		this.handlers.add(PrimitiveCoder.handler(tools, "Long"));
-		this.handlers.add(PrimitiveCoder.handler(tools, "Float"));
-		this.handlers.add(PrimitiveCoder.handler(tools, "Double"));
-		this.handlers.add(PrimitiveCoder.handler(tools, "Boolean"));
-		this.handlers.add(PrimitiveCoder.handler(tools, "Char"));
+		this.networkSerializerType = tools.elements.getTypeElement("fr.max2.annotated.lib.network.serializer.NetworkSerializer").asType();
 		
-		this.handlers.add(SimpleCoder.handler(tools, "java.lang.String", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.StringSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, "java.util.UUID", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.UUIDSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, "java.util.Date", "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.DateSerializer"));
+		// Register primitives
+		for (String primitiveName : new String[] {"Byte", "Short", "Int", "Long", "Float", "Double", "Boolean","Char"})
+		{
+			this.handlers.add(PrimitiveCoder.handler(tools, primitiveName));
+		}
+		
+		scanClass(tools, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer");
+		scanClass(tools, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer");
 
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.BLOCK_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockPosSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.RESOURCE_LOCATION, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ResourceLocationSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.ITEM_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ItemStackSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.FLUID_STACK, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.FluidStackSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.TEXT_COMPONENT, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.TextComponentSerializer")); // TODO [v3.1] allow serializing specific implementations
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.BLOCK_RAY_TRACE, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.BlockHitResultSerializer"));
-		
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.AXIS_ALIGNED_BB, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.AABBSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.MUTABLE_BB, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.StructureBBSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.CHUNK_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.ChunkPosSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.SECTION_POS, "fr.max2.annotated.lib.network.serializer.SimpleClassSerializer.SectionPosSerializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.VECTOR_3D, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3Serializer"));
-		this.handlers.add(SimpleCoder.handler(tools, ClassRef.VECTOR_3I, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer.Vec3ISerializer"));
-		
-		this.handlers.add(NBTCoder.abstractHandler(tools));
+		scanClass(tools, "fr.max2.annotated.lib.network.serializer.TagSerializer");
+		//this.handlers.add(NBTCoder.abstractHandler(tools));
 		this.handlers.add(NBTCoder.concreteHandler(tools));
 		
 		//this.handlers.add(EntityCoder.ENTITY_ID.createHandler(tools));
@@ -82,7 +73,58 @@ public class SerializerCoderFinder
 		//TODO [v2.1] JsonDeserializer + JsonSerializer
 		//TODO [v2.2] custom data class
 	}
-	
+
+	protected void scanClass(ProcessingTools tools, CharSequence classFullName)
+	{
+		this.scanClass(tools, tools.elements.getTypeElement(classFullName));
+	}
+
+	private void scanClass(ProcessingTools tools, TypeElement elem)
+	{
+		for (VariableElement field : ElementFilter.fieldsIn(elem.getEnclosedElements()))
+		{
+			if (!field.getModifiers().contains(Modifier.PUBLIC))
+				continue; // Skip if private
+			
+			if (!field.getModifiers().contains(Modifier.STATIC))
+				continue; // Skip if not static
+			
+			registerConstant(tools, field);
+		}
+	}
+
+	protected void registerConstant(ProcessingTools tools, CharSequence classFullName, CharSequence constantName)
+	{
+		this.registerConstant(tools, tools.elements.getTypeElement(classFullName), constantName);
+	}
+
+	private void registerConstant(ProcessingTools tools, TypeElement elem, CharSequence constantName)
+	{
+		VariableElement field = ElementFilter.fieldsIn(elem.getEnclosedElements())
+			.stream()
+			.filter(f -> f.getSimpleName().contentEquals(constantName))
+			.filter(f -> f.getModifiers().contains(Modifier.PUBLIC))
+			.filter(f -> f.getModifiers().contains(Modifier.STATIC))
+			.reduce((a, b) -> { throw new RuntimeException("Multiple fields with the same name: '" + constantName + "'"); })
+			.orElseThrow(() -> new RuntimeException("No field find with the given name: '" + constantName + "'"));
+
+		this.registerConstant(tools, field);
+	}
+
+	private void registerConstant(ProcessingTools tools, VariableElement field)
+	{
+		TypeMirror type = field.asType();
+		DeclaredType serializer = tools.types.refineTo(type, this.networkSerializerType);
+		
+		if (serializer == null)
+			throw new RuntimeException("The type of the serializer field '" + field + "' doesn't implement '" + this.networkSerializerType + "'");
+		
+		if (serializer.getTypeArguments().size() != 1)
+			throw new RuntimeException("The serializer type '" + serializer + "' has the wrong number of arguments: expected 1, but got " + serializer.getTypeArguments().size());
+		
+		this.handlers.add(SimpleCoder.handler(tools, tools.types.erasure(serializer.getTypeArguments().get(0)), field));
+	}
+
 	public SerializationCoder getCoder(Element field) throws CoderException
 	{
 		/*Element elem = this.tools.types.asElement(field.asType());

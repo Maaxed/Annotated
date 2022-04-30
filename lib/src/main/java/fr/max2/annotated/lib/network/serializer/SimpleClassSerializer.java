@@ -19,27 +19,29 @@ public final class SimpleClassSerializer
 	private SimpleClassSerializer()
 	{ }
 	
-	public static final NetworkSerializer<String> StringSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeUtf, FriendlyByteBuf::readUtf); // TODO [v3.1] Add maxLength parameter
+	// TODO [v3.1] Add maxLength parameter
+	public static final NetworkSerializer<String> STRING = new DelegatedSerializer<>(FriendlyByteBuf::writeUtf, FriendlyByteBuf::readUtf);
 
-	public static final NetworkSerializer<UUID> UUIDSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeUUID, FriendlyByteBuf::readUUID);
+	public static final NetworkSerializer<UUID> UUID = new DelegatedSerializer<>(FriendlyByteBuf::writeUUID, FriendlyByteBuf::readUUID);
 	
-	public static final NetworkSerializer<Date> DateSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeDate, FriendlyByteBuf::readDate);
+	public static final NetworkSerializer<Date> DATE = new DelegatedSerializer<>(FriendlyByteBuf::writeDate, FriendlyByteBuf::readDate);
 	
-	public static final NetworkSerializer<BlockPos> BlockPosSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeBlockPos, FriendlyByteBuf::readBlockPos);
+	public static final NetworkSerializer<BlockPos> BLOCK_POS = new DelegatedSerializer<>(FriendlyByteBuf::writeBlockPos, FriendlyByteBuf::readBlockPos);
 	
-	public static final NetworkSerializer<ChunkPos> ChunkPosSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::readChunkPos);
+	public static final NetworkSerializer<ChunkPos> CHUNK_POS = new DelegatedSerializer<>(FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::readChunkPos);
 	
-	public static final NetworkSerializer<SectionPos> SectionPosSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeSectionPos, FriendlyByteBuf::readSectionPos);
+	public static final NetworkSerializer<SectionPos> SECTION_POS = new DelegatedSerializer<>(FriendlyByteBuf::writeSectionPos, FriendlyByteBuf::readSectionPos);
 	
-	public static final NetworkSerializer<ResourceLocation> ResourceLocationSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::readResourceLocation);
+	public static final NetworkSerializer<ResourceLocation> RESOURCE_LOCATION = new DelegatedSerializer<>(FriendlyByteBuf::writeResourceLocation, FriendlyByteBuf::readResourceLocation);
 
-	public static final NetworkSerializer<ItemStack> ItemStackSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeItem, FriendlyByteBuf::readItem);
+	public static final NetworkSerializer<ItemStack> ITEM_STACK = new DelegatedSerializer<>(FriendlyByteBuf::writeItem, FriendlyByteBuf::readItem);
 
-	public static final NetworkSerializer<FluidStack> FluidStackSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeFluidStack, FriendlyByteBuf::readFluidStack);
+	public static final NetworkSerializer<FluidStack> FLUID_STACK = new DelegatedSerializer<>(FriendlyByteBuf::writeFluidStack, FriendlyByteBuf::readFluidStack);
 
-	public static final NetworkSerializer<Component> TextComponentSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent);
+	// TODO [v3.1] allow serializing specific implementations
+	public static final NetworkSerializer<Component> TEXT_COMPONENT = new DelegatedSerializer<>(FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent);
 
-	public static final NetworkSerializer<BlockHitResult> BlockHitResultSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeBlockHitResult, FriendlyByteBuf::readBlockHitResult);
+	public static final NetworkSerializer<BlockHitResult> BLOCK_HIT_RESULT = new DelegatedSerializer<>(FriendlyByteBuf::writeBlockHitResult, FriendlyByteBuf::readBlockHitResult);
 
-	public static final NetworkSerializer<BitSet> BitSetResultSerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeBitSet, FriendlyByteBuf::readBitSet);
+	public static final NetworkSerializer<BitSet> BITSET = new DelegatedSerializer<>(FriendlyByteBuf::writeBitSet, FriendlyByteBuf::readBitSet);
 }

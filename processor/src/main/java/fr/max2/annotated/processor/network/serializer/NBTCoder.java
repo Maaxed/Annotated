@@ -8,24 +8,19 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.CoderCompatibility;
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
-import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.network.serializer.GenericCoder.Builder;
 import fr.max2.annotated.processor.util.ClassRef;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
 public class NBTCoder
 {
-	public static ICoderHandler<SerializationCoder> abstractHandler(ProcessingTools tools)
-	{
-		return SimpleCoder.handler(tools, ClassRef.NBT_BASE, "fr.max2.annotated.lib.network.serializer.TagSerializer.Abstract");
-	}
-	
 	public static ICoderHandler<SerializationCoder> concreteHandler(ProcessingTools tools)
 	{
-		DeclaredType collectionType = tools.types.asDeclared(tools.elements.getTypeElement(ClassRef.NBT_BASE).asType());
-		return new NamedDataHandler<>(tools, ClassRef.NBT_BASE, true, fieldType ->
+		DeclaredType nbtType = tools.types.asDeclared(tools.types.erasure(tools.elements.getTypeElement(ClassRef.NBT_BASE).asType()));
+		return new TypedDataHandler<>(tools, nbtType, true, fieldType ->
 		{
-			Builder builder = GenericCoder.builder(tools, collectionType, fieldType);
+			Builder builder = GenericCoder.builder(tools, nbtType, fieldType);
 			builder.add(tools.naming.erasedType.get(fieldType) + ".TYPE");
 			return builder.build("fr.max2.annotated.lib.network.serializer.TagSerializer.Concrete");
 		})

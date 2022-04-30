@@ -10,7 +10,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
-import fr.max2.annotated.processor.network.coder.handler.NamedDataHandler;
+import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.network.model.ICodeConsumer;
 import fr.max2.annotated.processor.network.model.IParameterConsumer;
 import fr.max2.annotated.processor.network.model.IParameterSupplier;
@@ -47,8 +47,8 @@ public class GenericCoder extends SerializationCoder
 	
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools, String typeName, String serializer, BiConsumer<TypeMirror, Builder> parameterProvider)
 	{
-		DeclaredType collectionType = tools.types.asDeclared(tools.elements.getTypeElement(typeName).asType());
-		return new NamedDataHandler<>(tools, typeName, true, fieldType ->
+		DeclaredType collectionType = tools.types.asDeclared(tools.types.erasure(tools.elements.getTypeElement(typeName).asType()));
+		return new TypedDataHandler<>(tools, collectionType, true, fieldType ->
 		{
 			Builder builder = builder(tools, collectionType, fieldType);
 			parameterProvider.accept(fieldType, builder);
@@ -113,6 +113,9 @@ public class GenericCoder extends SerializationCoder
 				throw new IncompatibleTypeException("The implementation type '" + rawImplType + "' is not a sub type of " + this.baseType);
 			
 			DeclaredType implType = this.tools.types.asDeclared(rawImplType);
+			if (refinedImplType.getTypeArguments().size() != expectedTypeArgCount)
+				throw new IncompatibleTypeException("The implementation type '" + implType + "' has the wrong number of arguments: expected " + refinedImplType + ", but got " + refinedImplType.getTypeArguments().size());
+
 			for (int argIndex = 0; argIndex < expectedTypeArgCount; argIndex++)
 			{
 				TypeMirror arg = refinedImplType.getTypeArguments().get(argIndex);

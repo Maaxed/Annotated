@@ -46,7 +46,7 @@ public final class TagSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<Tag> Abstract = new NetworkSerializer<>()
+	public static final NetworkSerializer<Tag> ABSTRACT = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, Tag value)

@@ -4,14 +4,19 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import javax.lang.model.AnnotatedConstruct;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.ModuleElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.ModuleElement.Directive;
 import javax.lang.model.util.Elements;
 
 public class ExtendedElements implements Elements
@@ -96,11 +101,47 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.getPackageElement(name);
 	}
+	
+	@Override
+	public PackageElement getPackageElement(ModuleElement module, CharSequence name)
+	{
+		return this.base.getPackageElement(module, name);
+	}
+	
+	@Override
+	public Set<? extends PackageElement> getAllPackageElements(CharSequence name)
+	{
+		return this.base.getAllPackageElements(name);
+	}
 
 	@Override
 	public TypeElement getTypeElement(CharSequence name)
 	{
 		return this.base.getTypeElement(name);
+	}
+	
+	@Override
+	public TypeElement getTypeElement(ModuleElement module, CharSequence name)
+	{
+		return this.base.getTypeElement(module, name);
+	}
+	
+	@Override
+	public Set<? extends TypeElement> getAllTypeElements(CharSequence name)
+	{
+		return this.base.getAllTypeElements(name);
+	}
+	
+	@Override
+	public ModuleElement getModuleElement(CharSequence name)
+	{
+		return this.base.getModuleElement(name);
+	}
+	
+	@Override
+	public Set<? extends ModuleElement> getAllModuleElements()
+	{
+		return this.base.getAllModuleElements();
 	}
 
 	@Override
@@ -120,6 +161,30 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.isDeprecated(e);
 	}
+	
+	@Override
+	public Origin getOrigin(Element e)
+	{
+		return this.base.getOrigin(e);
+	}
+	
+	@Override
+	public Origin getOrigin(AnnotatedConstruct c, AnnotationMirror a)
+	{
+		return this.base.getOrigin(c, a);
+	}
+	
+	@Override
+	public Origin getOrigin(ModuleElement m, Directive directive)
+	{
+		return this.base.getOrigin(m, directive);
+	}
+	
+	@Override
+	public boolean isBridge(ExecutableElement e)
+	{
+		return this.base.isBridge(e);
+	}
 
 	@Override
 	public Name getBinaryName(TypeElement type)
@@ -131,6 +196,12 @@ public class ExtendedElements implements Elements
 	public PackageElement getPackageOf(Element type)
 	{
 		return this.base.getPackageOf(type);
+	}
+	
+	@Override
+	public ModuleElement getModuleOf(Element e)
+	{
+		return this.base.getModuleOf(e);
 	}
 
 	@Override
@@ -180,4 +251,17 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.isFunctionalInterface(type);
 	}
+	
+	@Override
+	public boolean isAutomaticModule(ModuleElement module)
+	{
+		return this.base.isAutomaticModule(module);
+	}
+	@Override
+	public RecordComponentElement recordComponentFor(ExecutableElement accessor)
+	{
+		return this.base.recordComponentFor(accessor);
+	}
+	
+	
 }
