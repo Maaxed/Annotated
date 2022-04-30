@@ -8,8 +8,12 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
@@ -22,7 +26,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
+
+import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
 
 public class ExtendedTypes implements Types
 {
@@ -365,7 +372,74 @@ public class ExtendedTypes implements Types
 		}
 	};
 
-	
+
+	public void requireConcreteType(TypeMirror type) throws IncompatibleTypeException
+	{
+		Element elem = this.tools.types.asElement(type);
+		if (elem == null)
+			return; // Unknown type, assume it is concrete
+		
+		if (elem.getKind() == ElementKind.INTERFACE || elem.getModifiers().contains(Modifier.ABSTRACT))
+			throw new IncompatibleTypeException("The type '" + type + "' is abstract and cannot be instantiated");
+	}
+
+	public void requireDefaultConstructor(TypeMirror type) throws IncompatibleTypeException
+	{
+		requireConstructor(type, cons -> cons.getParameters().isEmpty());
+	}
+
+	public void requireConstructor(TypeMirror type, List<TypeMirror> paramTypes) throws IncompatibleTypeException
+	{
+		requireConstructor(type, isConstructorCompatible(paramTypes));
+	}
+
+	public void requireConstructor(TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
+	{
+		if (findConstructor(type, constructorFilter) == null)
+			throw new IncompatibleTypeException("The type '" + type + "' doesn't have the required constructor");
+	}
+
+	public ExecutableElement findConstructor(TypeMirror type) throws IncompatibleTypeException
+	{
+		return findConstructor(type, cons -> cons.getParameters().isEmpty());
+	}
+
+	public ExecutableElement findConstructor(TypeMirror type, List<TypeMirror> paramTypes) throws IncompatibleTypeException
+	{
+		return findConstructor(type, isConstructorCompatible(paramTypes));
+	}
+
+	public ExecutableElement findConstructor(TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
+	{
+		Element elem = this.tools.types.asElement(type);
+		if (elem == null)
+			throw new IncompatibleTypeException("The type '" + type + "' is not a DeclaredType");
+		
+		return ElementFilter.constructorsIn(elem.getEnclosedElements()).stream()
+			.filter(constructorFilter)
+			.reduce((a, b) -> { throw new IncompatibleTypeException("The type '" + elem + "' have multiple matching constructors"); })
+			.orElse(null);
+	}
+
+	private Predicate<? super ExecutableElement> isConstructorCompatible(List<TypeMirror> paramTypes)
+	{
+		return cons ->
+		{
+			List<? extends VariableElement> actualParams = cons.getParameters();
+			if (actualParams.size() != paramTypes.size())
+				return false;
+
+			for (int i = 0; i < paramTypes.size(); i++)
+			{
+				if (!this.tools.types.isAssignable(actualParams.get(i).asType(), paramTypes.get(i)))
+					return false;
+			}
+
+			return true;
+		};
+	}
+
+
 	// Delegate Types methods
 	
 	@Override

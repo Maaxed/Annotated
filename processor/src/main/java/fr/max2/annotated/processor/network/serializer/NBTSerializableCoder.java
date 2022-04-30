@@ -12,8 +12,8 @@ public class NBTSerializableCoder
 		return GenericCoder.handler(tools, ClassRef.NBT_SERIALIZABLE_INTERFACE, "fr.max2.annotated.lib.network.serializer.NBTSerializableSerializer",
 			(fieldType, builder) ->
 			{
-				SerializationCoder.requireConcreteType(tools, fieldType);
-				SerializationCoder.requireDefaultConstructor(tools, fieldType);
+				tools.types.requireConcreteType(fieldType);
+				tools.types.requireDefaultConstructor(fieldType);
 				
 				builder.add(tools.naming.erasedType.get(fieldType) + "::new");
 				builder.addCoders(1, fieldType);

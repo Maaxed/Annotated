@@ -23,14 +23,14 @@ public class MapCoder
 			{
 				TypeMirror impl = defaultImplementation(tools, fieldType);
 
-				SerializationCoder.requireConcreteType(tools, impl);
-				if (SerializationCoder.findConstructor(tools, impl, List.of(tools.types.getPrimitiveType(TypeKind.INT))) != null)
+				tools.types.requireConcreteType(impl);
+				if (tools.types.findConstructor(impl, List.of(tools.types.getPrimitiveType(TypeKind.INT))) != null)
 				{
 					builder.add(tools.naming.erasedType.get(impl) + "::new");
 				}
 				else
 				{
-					SerializationCoder.requireDefaultConstructor(tools, impl);
+					tools.types.requireDefaultConstructor(impl);
 					builder.add("size -> new " + tools.naming.erasedType.get(impl) + "()");
 				}
 				
