@@ -22,10 +22,12 @@ import javax.lang.model.util.Elements;
 public class ExtendedElements implements Elements
 {
 	private final Elements base;
+	public final TypeElement objectElement;
 	
 	ExtendedElements(ProcessingTools tools, Elements base)
 	{
 		this.base = base;
+		this.objectElement = this.getTypeElement(Object.class.getCanonicalName());
 	}
 	
 	public TypeElement asTypeElement(Element elem)

@@ -355,7 +355,7 @@ public class ExtendedTypes implements Types
 		public TypeMirror visitWildcard(WildcardType t, Void p)
 		{
 			TypeMirror extendsBound = t.getExtendsBound();
-			return extendsBound == null ? ExtendedTypes.this.tools.elements.getTypeElement(Object.class.getCanonicalName()).asType() : this.visit(extendsBound);
+			return extendsBound == null ? ExtendedTypes.this.tools.elements.objectElement.asType() : this.visit(extendsBound);
 		}
 
 		@Override

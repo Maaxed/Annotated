@@ -51,6 +51,7 @@ public class SerializerCoderFinder
 		this.handlers.add(GenericCoder.handler(tools, ClassRef.REGISTRY_ENTRY, "fr.max2.annotated.lib.network.serializer.RegistryEntrySerializer", type -> tools.naming.erasedType.get(type) + ".class")); // TODO [v3.1] Find a good way to get the registry from the type
 		this.handlers.add(NBTSerializableCoder.handler(tools));
 
+		scanClass(tools, "fr.max2.annotated.lib.network.serializer.PrimitiveArraySerializer");
 		this.handlers.add(GenericCoder.handler(tools, "java.lang.Enum", "fr.max2.annotated.lib.network.serializer.EnumSerializer", type -> tools.naming.erasedType.get(type) + ".class"));
 		this.handlers.add(ArrayCoder.handler(tools));
 		this.handlers.add(CollectionCoder.handler(tools));

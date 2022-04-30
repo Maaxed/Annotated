@@ -34,10 +34,10 @@ public class SerializationProcessor
 	
 	public void process(RoundEnvironment roundEnv)
 	{
-		Collection<SerializationProcessingUnit> contexts;
+		Collection<SerializationProcessingUnit> units;
 		try
 		{
-			contexts = buildSerializationProcessingUnits(roundEnv);
+			units = buildProcessingUnits(roundEnv);
 		}
 		catch (Exception e)
 		{
@@ -45,21 +45,21 @@ public class SerializationProcessor
 			return;
 		}
 		
-		for (SerializationProcessingUnit context : contexts)
+		for (SerializationProcessingUnit unit : units)
 		{
-			if (this.processedClasses.contains(context.serializableClassName))
+			if (this.processedClasses.contains(unit.serializableClassName))
 				continue; // Skip the class if it has already been processed in a previous round
 			
-			context.process();
+			unit.process();
 			
-			if (!context.hasErrors())
-				this.processedClasses.add(context.serializableClassName);
+			if (!unit.hasErrors())
+				this.processedClasses.add(unit.serializableClassName);
 		}
 	}
 	
-	private Collection<SerializationProcessingUnit> buildSerializationProcessingUnits(RoundEnvironment roundEnv)
+	private Collection<SerializationProcessingUnit> buildProcessingUnits(RoundEnvironment roundEnv)
 	{
-		List<SerializationProcessingUnit> contexts = new ArrayList<>();
+		List<SerializationProcessingUnit> units = new ArrayList<>();
 		
 		for (TypeElement type : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(NetworkSerializable.class)))
 		{
@@ -106,9 +106,9 @@ public class SerializationProcessor
 				continue; // Skip this packet
 			}
 			
-			contexts.add(new SerializationProcessingUnit(this.tools, type, annotation, type.getAnnotation(NetworkSerializable.class)));
+			units.add(new SerializationProcessingUnit(this.tools, type, annotation, type.getAnnotation(NetworkSerializable.class)));
 		}
 		
-		return contexts;
+		return units;
 	}
 }

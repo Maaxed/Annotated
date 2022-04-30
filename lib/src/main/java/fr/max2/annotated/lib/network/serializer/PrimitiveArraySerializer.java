@@ -7,9 +7,9 @@ public final class PrimitiveArraySerializer
 	private PrimitiveArraySerializer()
 	{ }
 	
-	public static final NetworkSerializer<byte[]> ByteArraySerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeByteArray, FriendlyByteBuf::readByteArray);
+	public static final NetworkSerializer<byte[]> BYTE_ARRAY = new DelegatedSerializer<>(FriendlyByteBuf::writeByteArray, FriendlyByteBuf::readByteArray);
 	
-	public static final NetworkSerializer<short[]> ShortArraySerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<short[]> SHORT_ARRAY = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, short[] value)
@@ -37,11 +37,11 @@ public final class PrimitiveArraySerializer
 		}
 	};
 	
-	public static final NetworkSerializer<int[]> IntArraySerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeVarIntArray, FriendlyByteBuf::readVarIntArray);
+	public static final NetworkSerializer<int[]> INT_ARRAY = new DelegatedSerializer<>(FriendlyByteBuf::writeVarIntArray, FriendlyByteBuf::readVarIntArray);
 	
-	public static final NetworkSerializer<long[]> LongArraySerializer = new DelegatedSerializer<>(FriendlyByteBuf::writeLongArray, FriendlyByteBuf::readLongArray);
+	public static final NetworkSerializer<long[]> LONG_ARRAY = new DelegatedSerializer<>(FriendlyByteBuf::writeLongArray, FriendlyByteBuf::readLongArray);
 	
-	public static final NetworkSerializer<float[]> FloatArraySerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<float[]> FLOAT_ARRAY = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, float[] value)
@@ -69,7 +69,7 @@ public final class PrimitiveArraySerializer
 		}
 	};
 	
-	public static final NetworkSerializer<double[]> DoubleArraySerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<double[]> DOUBLE_ARRAY = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, double[] value)
@@ -97,7 +97,7 @@ public final class PrimitiveArraySerializer
 		}
 	};
 	
-	public static final NetworkSerializer<boolean[]> BooleanArraySerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<boolean[]> BOOLEAN_ARRAY = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, boolean[] value)
@@ -126,7 +126,7 @@ public final class PrimitiveArraySerializer
 		}
 	};
 	
-	public static final NetworkSerializer<char[]> CharArraySerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<char[]> CHAR_ARRAY = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, char[] value)
