@@ -145,12 +145,12 @@ public class PacketProcessor extends AbstractProcessor
 			{
 				ProcessorException.builder()
 					.context(type, annotation)
-					.build("Nested / anonymous classes are not supported !")
+					.build("Nested and anonymous classes are not supported !")
 					.log(this.tools);
 				continue; // Skip this packet
 			}
 			
-			contexts.add(new SerializationProcessingUnit(this.tools, type, annotation));
+			contexts.add(new SerializationProcessingUnit(this.tools, type, annotation, type.getAnnotation(NetworkSerializable.class)));
 		}
 		
 		return contexts;

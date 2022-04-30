@@ -10,11 +10,17 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 
+import fr.max2.annotated.api.network.IgnoreField;
+import fr.max2.annotated.api.network.NetworkSerializable;
+import fr.max2.annotated.api.network.ProcessField;
+import fr.max2.annotated.api.network.SelectionMode;
 import fr.max2.annotated.processor.network.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.network.model.SimpleParameterListBuilder;
 import fr.max2.annotated.processor.util.ClassName;
@@ -27,18 +33,20 @@ public class SerializationProcessingUnit
 	private final ProcessingTools tools;
 	private final TypeElement serializableClass;
 	private final Optional<? extends AnnotationMirror> annotation;
+	private final SelectionMode fieldSelectionMode;
 	public final ClassName serializableClassName;
 	public final ClassName serializerClassName;
 	private boolean hasErrors = false;
 
-	public SerializationProcessingUnit(ProcessingTools tools, TypeElement serializableClass, Optional<? extends AnnotationMirror> annotation)
+	public SerializationProcessingUnit(ProcessingTools tools, TypeElement serializableClass, Optional<? extends AnnotationMirror> annotation, NetworkSerializable annotationData)
 	{
 		this.tools = tools;
 		this.serializableClass = serializableClass;
 		this.annotation = annotation;
+		this.fieldSelectionMode = annotationData.fieldSelectionMode();
 		this.serializableClassName = tools.naming.buildClassName(serializableClass);
 		
-		String className = tools.elements.getAnnotationValue(this.annotation, "serializerClassName").map(anno -> anno.getValue().toString()).orElse("");
+		String className = annotationData.serializerClassName();
 		
 		int sep = className.lastIndexOf('.');
 		
@@ -143,12 +151,72 @@ public class SerializationProcessingUnit
 	{
 		if (this.serializableClass.getKind() == ElementKind.RECORD)
 		{
-			return this.serializableClass.getRecordComponents().stream().map(Data::fromRecordComp).toList();
+			return this.serializableClass.getRecordComponents()
+				.stream()
+				.filter(this::shouldSerializeElement)
+				.map(c -> Data.fromRecordComp(this.tools, c))
+				.toList();
 		}
 		else
 		{
-			return ElementFilter.fieldsIn(this.serializableClass.getEnclosedElements()).stream().map(Data::fromField).toList();
+			return ElementFilter.fieldsIn(this.serializableClass.getEnclosedElements())
+				.stream()
+				.filter(this::shouldSerializeElement)
+				.map(f -> Data.fromField(this.tools, f))
+				.toList();
 		}
+	}
+	
+	public boolean shouldSerializeElement(Element element)
+	{
+		ProcessField process = element.getAnnotation(ProcessField.class);
+		IgnoreField ignore = element.getAnnotation(IgnoreField.class);
+		
+		if (element.getModifiers().contains(Modifier.STATIC))
+		{
+			if (process != null)
+			{
+				ProcessorException.builder()
+					.context(element)
+					.build("A static field cannot have the ProcessField annotations")
+					.log(this.tools);
+			}
+			if (ignore != null)
+			{
+				ProcessorException
+					.builder()
+					.context(element)
+					.build("A static field cannot have the IgnoreField annotations")
+					.log(this.tools);
+			}
+			return false;
+		}
+		
+		if (process != null && ignore != null)
+			throw ProcessorException.builder().context(element).build("A field cannot have both ProcessField and IgnoreField annotations");
+		
+		if (process != null)
+			return true;
+		
+		if (ignore != null)
+			return false;
+		
+		boolean keep;
+		switch (this.fieldSelectionMode)
+		{
+		case ALL:
+			keep = true;
+			break;
+		case NONE:
+			keep = false;
+			break;
+		default:
+		case PUBLIC:
+			keep = this.serializableClass.getKind() == ElementKind.RECORD || element.getModifiers().contains(Modifier.PUBLIC);
+			break;
+		}
+		
+		return keep;
 	}
 	
 	private static class Data
@@ -157,21 +225,39 @@ public class SerializationProcessingUnit
 		private final String baseName;
 		private final Element accessElement;
 		
-		public Data(Element originElement, String baseName, Element accessElement)
+		public Data(ProcessingTools tools, Element originElement, String baseName, Element accessElement)
 		{
+			ProcessField process = originElement.getAnnotation(ProcessField.class);
 			this.originElement = originElement;
 			this.baseName = baseName;
-			this.accessElement = accessElement;
+			if (process == null || process.getter().isEmpty())
+			{
+				this.accessElement = accessElement;
+			}
+			else
+			{
+				ExecutableElement getter = ElementFilter.methodsIn(originElement.getEnclosingElement().getEnclosedElements())
+										.stream()
+										.filter(elem -> elem.getSimpleName().contentEquals(process.getter()))
+										.filter(elem -> elem.getParameters().isEmpty())
+										.reduce((a, b) -> { throw ProcessorException.builder().context(originElement).build("Found multiple matching getter methods with name '" + process.getter() + "' in class '" + originElement.getEnclosingElement() + "'"); })
+										.orElseThrow(() -> ProcessorException.builder().context(originElement).build("Cannot find the getter method '" + process.getter() + "' in class '" + originElement.getEnclosingElement() + "'"));
+				
+				this.accessElement = getter;
+				
+				if (!tools.types.isSameType(getter.getReturnType(), originElement.asType()))
+					ProcessorException.builder().context(originElement).build("The getter method '" + process.getter() + "' has a wrong type: expected " + originElement.asType() + ", but got " + getter.getReturnType());
+			}
 		}
 		
-		public static Data fromField(VariableElement field)
+		public static Data fromField(ProcessingTools tools, VariableElement field)
 		{
-			return new Data(field, field.getSimpleName().toString(), field);
+			return new Data(tools, field, field.getSimpleName().toString(), field);
 		}
 		
-		public static Data fromRecordComp(RecordComponentElement comp)
+		public static Data fromRecordComp(ProcessingTools tools, RecordComponentElement comp)
 		{
-			return new Data(comp, comp.getSimpleName().toString(), comp.getAccessor());
+			return new Data(tools, comp, comp.getSimpleName().toString(), comp.getAccessor());
 		}
 	}
 }

@@ -15,4 +15,9 @@ public @interface NetworkSerializable
 	 * @return the name of the serializer class to generate or an empty string
 	 */
 	String serializerClassName() default "";
+
+	/**
+	 * The way the serialized field are selected
+	 */
+	SelectionMode fieldSelectionMode() default SelectionMode.PUBLIC;
 }

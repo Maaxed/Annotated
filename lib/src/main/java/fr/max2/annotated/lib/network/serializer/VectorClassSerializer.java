@@ -16,7 +16,7 @@ public final class VectorClassSerializer
 	private VectorClassSerializer()
 	{ }
 	
-	public static final NetworkSerializer<AABB> AABBSerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<AABB> AABB = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, AABB value)
@@ -39,7 +39,7 @@ public final class VectorClassSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<BoundingBox> StructureBBSerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<BoundingBox> STRUCTURE_BB = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, BoundingBox value)
@@ -62,7 +62,7 @@ public final class VectorClassSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<Vec3i> Vec3ISerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<Vec3i> VEC3I = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, Vec3i value)
@@ -79,7 +79,7 @@ public final class VectorClassSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<Vec3> Vec3Serializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<Vec3> VEC3 = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, Vec3 value)
@@ -96,7 +96,7 @@ public final class VectorClassSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<Vec2> Vec2Serializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<Vec2> VEC2 = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, Vec2 value)
@@ -112,7 +112,7 @@ public final class VectorClassSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<Vector3d> Vector3DSerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<Vector3d> VECTOR3D = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, Vector3d value)
@@ -129,7 +129,7 @@ public final class VectorClassSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<Vector3f> Vector3FSerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<Vector3f> VECTOR3F = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, Vector3f value)
@@ -146,7 +146,7 @@ public final class VectorClassSerializer
 		}
 	};
 	
-	public static final NetworkSerializer<Vector4f> Vector4FSerializer = new NetworkSerializer<>()
+	public static final NetworkSerializer<Vector4f> VECTOR4F = new NetworkSerializer<>()
 	{
 		@Override
 		public void encode(FriendlyByteBuf buf, Vector4f value)

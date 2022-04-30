@@ -43,7 +43,6 @@ public class SerializerCoderFinder
 		scanClass(tools, "fr.max2.annotated.lib.network.serializer.VectorClassSerializer");
 
 		scanClass(tools, "fr.max2.annotated.lib.network.serializer.TagSerializer");
-		//this.handlers.add(NBTCoder.abstractHandler(tools));
 		this.handlers.add(NBTCoder.concreteHandler(tools));
 		
 		//this.handlers.add(EntityCoder.ENTITY_ID.createHandler(tools));
@@ -76,7 +75,11 @@ public class SerializerCoderFinder
 
 	protected void scanClass(ProcessingTools tools, CharSequence classFullName)
 	{
-		this.scanClass(tools, tools.elements.getTypeElement(classFullName));
+		TypeElement elem = tools.elements.getTypeElement(classFullName);
+		if (elem == null)
+			throw new RuntimeException("Cannot find serializer class '" + classFullName + "'");
+
+		this.scanClass(tools, elem);
 	}
 
 	private void scanClass(ProcessingTools tools, TypeElement elem)

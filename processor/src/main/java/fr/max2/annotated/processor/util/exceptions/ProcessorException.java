@@ -9,7 +9,7 @@ import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.processor.util.ProcessingTools;
 
-public class ProcessorException extends Exception
+public class ProcessorException extends RuntimeException
 {
 	private final @Nullable Element ctxElement;
 	private final Optional<? extends AnnotationMirror> ctxAnnotation;
