@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -104,7 +105,10 @@ public record ComplexData
 	
 	// Maps
 	Map<Integer, Float> myIntToFloatMap,
-	LinkedHashMap<Integer, Float> myIntToFloatLinkedHashMap
+	LinkedHashMap<Integer, Float> myIntToFloatLinkedHashMap,
+
+	// Optional
+	Optional<Integer> myOptionalInt
 )
 {
 	

@@ -56,6 +56,7 @@ public class SerializerCoderFinder
 		this.handlers.add(ArrayCoder.handler(tools));
 		this.handlers.add(CollectionCoder.handler(tools));
 		this.handlers.add(MapCoder.handler(tools));
+		this.handlers.add(GenericCoder.handler(tools, Optional.class.getCanonicalName(), "fr.max2.annotated.lib.network.serializer.OptionalSerializer", (fieldType, builder) -> { builder.addCoders(1, fieldType); }));
 		
 		
 		this.spacialHandlers.add(SpecialCoder.wildcard(tools));
