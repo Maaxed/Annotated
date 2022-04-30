@@ -18,7 +18,7 @@ import javax.annotation.processing.Filer;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
-import fr.max2.annotated.processor.network.PacketProcessor;
+import fr.max2.annotated.processor.network.AnnotatedProcessor;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.IOConsumer;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
@@ -76,7 +76,7 @@ public class TemplateHelper
 	
 	public void readTemplate(String templateFile, Map<String, String> replacements, IOConsumer<String> lines) throws IOException
 	{
-		try (InputStream fileStream = PacketProcessor.class.getClassLoader().getResourceAsStream(templateFile);
+		try (InputStream fileStream = AnnotatedProcessor.class.getClassLoader().getResourceAsStream(templateFile);
 			 Reader streamReader = new InputStreamReader(fileStream);
 			 BufferedReader reader = new BufferedReader(streamReader))
 		{

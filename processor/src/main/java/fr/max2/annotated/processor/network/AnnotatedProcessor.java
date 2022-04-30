@@ -1,10 +1,5 @@
 package fr.max2.annotated.processor.network;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,32 +9,23 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.ElementFilter;
-import javax.tools.Diagnostic.Kind;
 
 import fr.max2.annotated.api.network.ClientPacket;
 import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.api.network.ServerPacket;
-import fr.max2.annotated.processor.network.serializer.SerializationProcessingUnit;
-import fr.max2.annotated.processor.util.ClassName;
+import fr.max2.annotated.processor.network.serializer.SerializationProcessor;
 import fr.max2.annotated.processor.util.ProcessingTools;
-import fr.max2.annotated.processor.util.Visibility;
-import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
-public class PacketProcessor extends AbstractProcessor
+public class AnnotatedProcessor extends AbstractProcessor
 {
 	private static final Set<String> SUPPORTED_ANNOTATIONS = Stream.of(
 			ClientPacket.class, ServerPacket.class, NetworkSerializable.class
 		).map(Class::getCanonicalName).collect(Collectors.toUnmodifiableSet());
 	
 	private ProcessingTools tools;
-	private Set<ClassName> processedClasses = new HashSet<>();
+	private SerializationProcessor serialization;
 	
 	@Override
 	public Set<String> getSupportedAnnotationTypes()
@@ -52,7 +38,7 @@ public class PacketProcessor extends AbstractProcessor
 	{
 		super.init(processingEnv);
 		this.tools = new ProcessingTools(this.processingEnv);
-		this.processedClasses.clear();
+		this.serialization = new SerializationProcessor(this.tools);
 	}
 	
 	@Override
@@ -84,27 +70,7 @@ public class PacketProcessor extends AbstractProcessor
 				this.processedClasses.add(context.enclosingClassName);
 		}*/
 		
-		Collection<SerializationProcessingUnit> contexts;
-		try
-		{
-			contexts = buildSerializationProcessingUnits(roundEnv);
-		}
-		catch (Exception e)
-		{
-			this.processingEnv.getMessager().printMessage(Kind.ERROR, "Unexpected exception while building of the processing units : " + e.getClass().getCanonicalName() + ": " + e.getMessage());
-			return true;
-		}
-		
-		for (SerializationProcessingUnit context : contexts)
-		{
-			if (this.processedClasses.contains(context.serializableClassName))
-				continue; // Skip the class if it has already been processed in a previous round
-			
-			context.process();
-			
-			if (!context.hasErrors())
-				this.processedClasses.add(context.serializableClassName);
-		}
+		this.serialization.process(roundEnv);
 		
 		return true;
 	}
@@ -137,60 +103,5 @@ public class PacketProcessor extends AbstractProcessor
 		
 		return contexts.values();
 	}*/
-	
-	private Collection<SerializationProcessingUnit> buildSerializationProcessingUnits(RoundEnvironment roundEnv)
-	{
-		List<SerializationProcessingUnit> contexts = new ArrayList<>();
-		
-		for (TypeElement type : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(NetworkSerializable.class)))
-		{
-			Optional<? extends AnnotationMirror> annotation = this.tools.elements.getAnnotationMirror(type, NetworkSerializable.class.getCanonicalName());
-			switch (type.getNestingKind())
-			{
-			default:
-			case ANONYMOUS:
-			case LOCAL:
-				ProcessorException.builder()
-					.context(type, annotation)
-					.build("Anonymous and local classes are not supported !")
-					.log(this.tools);
-				continue; // Skip this packet
-			case MEMBER:
-				TypeElement elem = type;
-				while (elem != null && elem.getNestingKind() != NestingKind.TOP_LEVEL)
-				{
-					Element enclosing = elem.getEnclosingElement();
-					if (enclosing != null && !enclosing.getKind().isInterface())
-					{
-						if (!type.getModifiers().contains(Modifier.STATIC))
-						{
-							ProcessorException.builder()
-								.context(type, annotation)
-								.build("Non-static nested classes are not supported !")
-								.log(this.tools);
-							continue; // Skip this packet
-						}
-					}
-					elem = this.tools.elements.asTypeElement(enclosing);
-				}
-				break;
-			case TOP_LEVEL:
-				break;
-			}
-
-			if (Visibility.getTopLevelVisibility(type) != Visibility.PUBLIC)
-			{
-				ProcessorException.builder()
-					.context(type, annotation)
-					.build("Non-public classes are not supported !")
-					.log(this.tools);
-				continue; // Skip this packet
-			}
-			
-			contexts.add(new SerializationProcessingUnit(this.tools, type, annotation, type.getAnnotation(NetworkSerializable.class)));
-		}
-		
-		return contexts;
-	}
 	//TODO [v2.1] Add code completion
 }
