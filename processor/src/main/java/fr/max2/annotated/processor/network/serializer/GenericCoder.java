@@ -47,10 +47,10 @@ public class GenericCoder extends SerializationCoder
 	
 	public static ICoderHandler<SerializationCoder> handler(ProcessingTools tools, String typeName, String serializer, BiConsumer<TypeMirror, Builder> parameterProvider)
 	{
-		DeclaredType collectionType = tools.types.asDeclared(tools.types.erasure(tools.elements.getTypeElement(typeName).asType()));
-		return new TypedDataHandler<>(tools, collectionType, true, fieldType ->
+		DeclaredType interfaceType = tools.types.asDeclared(tools.types.erasure(tools.elements.getTypeElement(typeName).asType()));
+		return new TypedDataHandler<>(tools, interfaceType, true, fieldType ->
 		{
-			Builder builder = builder(tools, collectionType, fieldType);
+			Builder builder = builder(tools, interfaceType, fieldType);
 			parameterProvider.accept(fieldType, builder);
 			return builder.build(serializer);
 		});
@@ -92,41 +92,24 @@ public class GenericCoder extends SerializationCoder
 			this.argCoders.add(coder);
 		}
 		
-		public void addCoders(int expectedTypeArgCount, TypeMirror impl)
+		public void addCoders(int expectedTypeArgCount, TypeMirror rawImplType)
 		{
 			DeclaredType refinedType = this.tools.types.refineTo(this.fieldType, this.baseType);
 			if (refinedType == null)
 				throw new IncompatibleTypeException("The type '" + this.fieldType + "' is not a sub type of " + this.baseType);
+
+			this.tools.types.requireTypeArguments(refinedType, expectedTypeArgCount);
 			
 			for (TypeMirror arg : refinedType.getTypeArguments())
 			{
 				if (arg.getKind() == TypeKind.WILDCARD)
 					throw new IncompatibleTypeException("Wildcards are not supported in type arguments: '" + refinedType + "'");
 				
-				this.argCoders.add(this.tools.coders.getCoder(arg));
+				this.argCoders.add(this.tools.serializerCoders.getCoder(arg));
 			}
 			
-			TypeMirror rawImplType = impl;
-
-			DeclaredType refinedImplType = this.tools.types.refineTo(rawImplType, this.baseType);
-			if (refinedImplType == null)
-				throw new IncompatibleTypeException("The implementation type '" + rawImplType + "' is not a sub type of " + this.baseType);
-			
-			DeclaredType implType = this.tools.types.asDeclared(rawImplType);
-			if (refinedImplType.getTypeArguments().size() != expectedTypeArgCount)
-				throw new IncompatibleTypeException("The implementation type '" + implType + "' has the wrong number of arguments: expected " + refinedImplType + ", but got " + refinedImplType.getTypeArguments().size());
-
-			for (int argIndex = 0; argIndex < expectedTypeArgCount; argIndex++)
-			{
-				TypeMirror arg = refinedImplType.getTypeArguments().get(argIndex);
-				if (arg.getKind() == TypeKind.WILDCARD)
-					throw new IncompatibleTypeException("Wildcards are not supported in type arguments: '" + refinedType + "'");
-				
-				implType = this.tools.types.replaceTypeArgument(implType, arg, refinedType.getTypeArguments().get(argIndex));
-			}
-			
-			if (!this.tools.types.isAssignable(implType, this.fieldType))
-				throw new IncompatibleTypeException("The implementation type '" + implType + "' is not a sub-type of '" + this.fieldType + "'");
+			DeclaredType implType = this.tools.types.replaceTypeArguments(rawImplType, this.baseType, refinedType);
+			this.tools.types.requireAssignable(implType, this.fieldType);
 		}
 		
 		public GenericCoder build(String serializer)

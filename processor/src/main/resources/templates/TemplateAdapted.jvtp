@@ -1,0 +1,9 @@
+package ${package};
+
+${annotations}
+@javax.annotation.processing.Generated("fr.max2.annotated.processor.network.AnnotatedProcessor")
+public record ${adaptedName}
+(
+	${fieldDeclaration}
+)
+{ }

@@ -35,6 +35,13 @@ public class SimpleParameterListBuilder implements IParameterConsumer, IParamete
 		}
 	}
 	
+	public String buildMultiLines()
+	{
+		SimpleCodeBuilder code = new SimpleCodeBuilder();
+		this.build(code);
+		return code.build();
+	}
+	
 	public String buildSingleLine()
 	{
 		return String.join(", ", this.params);

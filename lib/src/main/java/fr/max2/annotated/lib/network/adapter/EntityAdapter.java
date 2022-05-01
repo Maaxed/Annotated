@@ -8,13 +8,13 @@ import net.minecraft.world.entity.player.Player;
 
 public class EntityAdapter
 {
-	public static final NetworkAdapter<Entity, Integer> EntityAdapter = new DelegatedAdapter<>(Entity::getId,
+	public static final NetworkAdapter<Entity, Integer> ENTITY = new DelegatedAdapter<>(Entity::getId,
 		(id, ctx) ->
 		{
 			return CommonUtils.getLevel(ctx).getEntity(id);
 		});
 	
-	public static final NetworkAdapter<Player, UUID> PlayerAdapter = new DelegatedAdapter<>(Player::getUUID,
+	public static final NetworkAdapter<Player, UUID> PLAYER = new DelegatedAdapter<>(Player::getUUID,
 		(uuid, ctx) ->
 		{
 			return CommonUtils.getLevel(ctx).getPlayerByUUID(uuid);

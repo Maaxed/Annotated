@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.network.serializer;
+package fr.max2.annotated.processor.network.adapter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,54 +23,53 @@ import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 
-public class SerializationProcessor
+public class AdapterProcessor
 {
 	private ProcessingTools tools;
-	private Set<ClassName> processedClasses = new HashSet<>();
-	private final Collection<SerializationProcessingUnit> deferredUnits = new ArrayList<>();
+	private final Set<ClassName> processedClasses = new HashSet<>();
+	private final Collection<AdapterProcessingUnit> deferredUnits = new ArrayList<>();
 
-	public SerializationProcessor(ProcessingTools tools)
+	public AdapterProcessor(ProcessingTools tools)
 	{
 		this.tools = tools;
 	}
-	
+
 	public void process(RoundEnvironment roundEnv)
 	{
 		if (roundEnv.processingOver())
 		{
-			for (SerializationProcessingUnit unit : this.deferredUnits)
+			for (AdapterProcessingUnit unit : this.deferredUnits)
 			{
 				ProcessorException.builder()
-					.context(unit.serializableClass, unit.annotation)
-					.build("Could not process serializable type !")
+					.context(unit.adaptableClass, unit.annotation)
+					.build("Could not process adaptable type !")
 					.log(this.tools);
 			}
 			return;
 		}
 
-		Collection<SerializationProcessingUnit> units;
+		Collection<AdapterProcessingUnit> units;
 		try
 		{
-			units = buildProcessingUnits(roundEnv);
+			units = this.buildProcessingUnits(roundEnv);
 		}
 		catch (Exception e)
 		{
 			this.tools.log(Kind.ERROR, "Unexpected exception while building of the processing units : " + e.getClass().getCanonicalName() + ": " + e.getMessage());
 			return;
 		}
-		
-		for (SerializationProcessingUnit unit : units)
-		{
-			if (this.processedClasses.contains(unit.serializableClassName))
-				continue; // Skip the class if it has already been processed in a previous round
-			
-			unit.process();
 
+		for (AdapterProcessingUnit unit : units)
+		{
+			if (this.processedClasses.contains(unit.adaptableClassName))
+				continue; // Skip the class if it has already been processed in a previous round
+
+			unit.process();
 
 			switch (unit.getStatus())
 			{
 			case SUCESSS:
-				this.processedClasses.add(unit.serializableClassName);
+				this.processedClasses.add(unit.adaptableClassName);
 				break;
 			case DEFERRED:
 				this.deferredUnits.add(unit);
@@ -81,18 +80,24 @@ public class SerializationProcessor
 			}
 		}
 	}
-	
-	private Collection<SerializationProcessingUnit> buildProcessingUnits(RoundEnvironment roundEnv)
+
+	private Collection<AdapterProcessingUnit> buildProcessingUnits(RoundEnvironment roundEnv)
 	{
-		List<SerializationProcessingUnit> units = new ArrayList<>(this.deferredUnits);
+		List<AdapterProcessingUnit> units = new ArrayList<>(this.deferredUnits);
 		this.deferredUnits.clear();
-		
-		for (TypeElement type : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(NetworkSerializable.class)))
+
+		for (TypeElement type : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(NetworkAdaptable.class)))
 		{
-			Optional<? extends AnnotationMirror> annotation = this.tools.elements.getAnnotationMirror(type, NetworkSerializable.class.getCanonicalName());
-			Optional<? extends AnnotationMirror> adaptableAnno = this.tools.elements.getAnnotationMirror(type, NetworkAdaptable.class.getCanonicalName());
-			if (adaptableAnno.isPresent())
+			Optional<? extends AnnotationMirror> annotation = this.tools.elements.getAnnotationMirror(type, NetworkAdaptable.class.getCanonicalName());
+			Optional<? extends AnnotationMirror> serailizableAnno = this.tools.elements.getAnnotationMirror(type, NetworkSerializable.class.getCanonicalName());
+			if (serailizableAnno.isEmpty())
+			{
+				ProcessorException.builder()
+					.context(type, annotation)
+					.build("Classes annotated with the " + NetworkAdaptable.class.getName() + " annotaiton should also have the " + NetworkSerializable.class.getName() + " annotaiton !")
+					.log(this.tools);
 				continue; // Skip this class
+			}
 
 			switch (type.getNestingKind())
 			{
@@ -103,7 +108,7 @@ public class SerializationProcessor
 					.context(type, annotation)
 					.build("Anonymous and local classes are not supported !")
 					.log(this.tools);
-				continue; // Skip this packet
+				continue; // Skip this class
 			case MEMBER:
 				TypeElement elem = type;
 				while (elem != null && elem.getNestingKind() != NestingKind.TOP_LEVEL)
@@ -117,7 +122,7 @@ public class SerializationProcessor
 								.context(type, annotation)
 								.build("Non-static nested classes are not supported !")
 								.log(this.tools);
-							continue; // Skip this packet
+							continue; // Skip this class
 						}
 					}
 					elem = this.tools.elements.asTypeElement(enclosing);
@@ -133,12 +138,12 @@ public class SerializationProcessor
 					.context(type, annotation)
 					.build("Non-public classes are not supported !")
 					.log(this.tools);
-				continue; // Skip this packet
+				continue; // Skip this class
 			}
-			
-			units.add(new SerializationProcessingUnit(this.tools, type, annotation, type.getAnnotation(NetworkSerializable.class)));
+
+			units.add(new AdapterProcessingUnit(this.tools, type, annotation, type.getAnnotation(NetworkAdaptable.class), serailizableAnno, type.getAnnotation(NetworkSerializable.class)));
 		}
-		
+
 		return units;
 	}
 }

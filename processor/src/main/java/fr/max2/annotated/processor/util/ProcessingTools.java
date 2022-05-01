@@ -10,6 +10,7 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
+import fr.max2.annotated.processor.network.adapter.AdapterCoderFinder;
 import fr.max2.annotated.processor.network.serializer.SerializerCoderFinder;
 import fr.max2.annotated.processor.util.template.TemplateHelper;
 
@@ -21,7 +22,8 @@ public class ProcessingTools
 	public final ExtendedTypes types;
 	public final Filer filer;
 	public final NamingUtils naming;
-	public final SerializerCoderFinder coders;
+	public final SerializerCoderFinder serializerCoders;
+	public final AdapterCoderFinder adapterCoders;
 	public final TemplateHelper templates;
 	
 	public ProcessingTools(ProcessingEnvironment env)
@@ -31,7 +33,8 @@ public class ProcessingTools
 		this.elements = new ExtendedElements(this, env.getElementUtils());
 		this.types = new ExtendedTypes(this, env.getTypeUtils());
 		this.naming = new NamingUtils(this);
-		this.coders = new SerializerCoderFinder(this);
+		this.serializerCoders = new SerializerCoderFinder(this);
+		this.adapterCoders = new AdapterCoderFinder(this);
 		this.templates = new TemplateHelper(this);
 	}
 	

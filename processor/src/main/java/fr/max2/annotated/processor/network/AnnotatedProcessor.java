@@ -12,8 +12,10 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 
 import fr.max2.annotated.api.network.ClientPacket;
+import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.api.network.ServerPacket;
+import fr.max2.annotated.processor.network.adapter.AdapterProcessor;
 import fr.max2.annotated.processor.network.serializer.SerializationProcessor;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
@@ -21,87 +23,35 @@ import fr.max2.annotated.processor.util.ProcessingTools;
 public class AnnotatedProcessor extends AbstractProcessor
 {
 	private static final Set<String> SUPPORTED_ANNOTATIONS = Stream.of(
-			ClientPacket.class, ServerPacket.class, NetworkSerializable.class
+			ClientPacket.class, ServerPacket.class, NetworkSerializable.class, NetworkAdaptable.class
 		).map(Class::getCanonicalName).collect(Collectors.toUnmodifiableSet());
-	
+
 	private ProcessingTools tools;
+	private AdapterProcessor adapter;
 	private SerializationProcessor serialization;
-	
+
 	@Override
 	public Set<String> getSupportedAnnotationTypes()
 	{
         return SUPPORTED_ANNOTATIONS;
 	}
-	
+
 	@Override
 	public synchronized void init(ProcessingEnvironment processingEnv)
 	{
 		super.init(processingEnv);
 		this.tools = new ProcessingTools(this.processingEnv);
+		this.adapter = new AdapterProcessor(this.tools);
 		this.serialization = new SerializationProcessor(this.tools);
 	}
-	
+
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
 	{
-		if (roundEnv.processingOver())
-			return false;
-		
-		
-		/*Collection<PacketProcessingContext> contexts;
-		try
-		{
-			contexts = buildProcessingUnits(roundEnv);
-		}
-		catch (Exception e)
-		{
-			this.processingEnv.getMessager().printMessage(Kind.ERROR, "Unexpected exception while building of the processing units : " + e.getClass().getCanonicalName() + ": " + e.getMessage());
-			return true;
-		}
-		
-		for (PacketProcessingContext context : contexts)
-		{
-			if (this.processedClasses.contains(context.enclosingClassName))
-				continue; // Skip the class if it has already been processed in a previous round
-			
-			context.processPackets();
-			
-			if (!context.hasErrors())
-				this.processedClasses.add(context.enclosingClassName);
-		}*/
-		
+		this.adapter.process(roundEnv);
 		this.serialization.process(roundEnv);
-		
+
 		return true;
 	}
-	
-	/*private Collection<PacketProcessingContext> buildProcessingUnits(RoundEnvironment roundEnv)
-	{
-		Map<TypeElement, PacketProcessingContext> contexts = new HashMap<>();
-		
-		for (PacketDirection dir : PacketDirection.values())
-		{
-			for (ExecutableElement method : ElementFilter.methodsIn(roundEnv.getElementsAnnotatedWith(dir.getAnnotationClass())))
-			{
-				TypeElement enclosingClass = this.tools.elements.asTypeElement(method.getEnclosingElement());
-				if (enclosingClass.getNestingKind().isNested())
-				{
-					this.tools.log(Kind.ERROR, "Nested / anonymous classes are not supported !", method, this.tools.elements.getAnnotationMirror(method, dir.getAnnotationClass().getCanonicalName()));
-					continue; // Skip this packet
-				}
-				
-				if (method.getAnnotation(dir.opposite().getAnnotationClass()) != null)
-				{
-					this.tools.log(Kind.ERROR, "A packet cannot be used in both directions !", method, this.tools.elements.getAnnotationMirror(method, dir.getAnnotationClass().getCanonicalName()));
-					continue; // Skip this packet
-				}
-				
-				PacketProcessingContext networkUnit = contexts.computeIfAbsent(enclosingClass, clazz -> new PacketProcessingContext(this.tools, clazz));
-				networkUnit.addPacket(method, dir);
-			}
-		}
-		
-		return contexts.values();
-	}*/
 	//TODO [v2.1] Add code completion
 }

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.Element;
@@ -313,29 +314,6 @@ public class ExtendedTypes implements Types
 			return null;
 		}
 	}
-
-	/**
-	 * <code>T&lt;From&gt;</code> => <code>T&lt;To&gt;</code>
-	 */
-	public DeclaredType replaceTypeArgument(DeclaredType type, TypeMirror fromArg, TypeMirror toArg)
-	{
-		if (type == null)
-			return null;
-		
-		if (this.isSameType(fromArg, toArg))
-			return type; // No replacement needed
-		
-		List<? extends TypeMirror> prevArgs = type.getTypeArguments();
-		
-		TypeMirror[] newArgs = new TypeMirror[prevArgs.size()];
-		
-		for (int i = 0; i < prevArgs.size(); i++)
-		{
-			newArgs[i] = prevArgs.get(i).equals(fromArg) ? toArg : prevArgs.get(i);
-		}
-		
-		return this.getDeclaredType(this.tools.elements.asTypeElement(this.asElement(type)), newArgs);
-	}
 	
 	/**
 	 * <code>? extends T</code> => <code>T</code>
@@ -372,6 +350,72 @@ public class ExtendedTypes implements Types
 		}
 	};
 
+	/**
+	 * <code>(T&lt;From&gt;, From, To)</code> => <code>T&lt;To&gt;</code>
+	 */
+	public DeclaredType replaceTypeArgument(DeclaredType type, TypeMirror fromArg, TypeMirror toArg)
+	{
+		if (type == null)
+			return null;
+		
+		if (this.isSameType(fromArg, toArg))
+			return type; // No replacement needed
+		
+		if (fromArg.getKind() != TypeKind.TYPEVAR)
+			return type; // Only replace type arguments
+		
+		List<? extends TypeMirror> prevArgs = type.getTypeArguments();
+		
+		TypeMirror[] newArgs = new TypeMirror[prevArgs.size()];
+		
+		for (int i = 0; i < prevArgs.size(); i++)
+		{
+			newArgs[i] = prevArgs.get(i).equals(fromArg) ? toArg : prevArgs.get(i);
+		}
+		
+		return this.getDeclaredType(this.tools.elements.asTypeElement(this.asElement(type)), newArgs);
+	}
+
+	/**
+	 * <code>(A&lt;T&gt;, B, B&lt;U&gt;)</code> where <code>A&lt;T&gt; extends B&lt;T&gt;</code> => <code>A&lt;U&gt;</code>
+	 */
+	public DeclaredType replaceTypeArguments(TypeMirror type, DeclaredType baseType, DeclaredType targetRefinedType)
+	{
+		int expectedTypeArgCount = this.tools.elements.asTypeElement(baseType.asElement()).getTypeParameters().size();
+		this.tools.types.requireTypeArguments(targetRefinedType, expectedTypeArgCount);
+
+		return replaceTypeArguments(type, baseType, i -> targetRefinedType.getTypeArguments().get(i));
+	}
+
+	/**
+	 * <code>(A&lt;T, U, V&gt;, B, f(int)->TypeMirror)</code> where <code>A&lt;T, U, V&gt; extends B&lt;T, U, V&gt;</code> => <code>A&lt;f(0), f(1), f(2)&gt;</code>
+	 */
+	public DeclaredType replaceTypeArguments(TypeMirror type, DeclaredType baseType, IntFunction<? extends TypeMirror> argProvider)
+	{
+		int expectedTypeArgCount = this.tools.elements.asTypeElement(baseType.asElement()).getTypeParameters().size();
+
+		DeclaredType refinedType = this.tools.types.refineTo(type, baseType);
+		if (refinedType == null)
+			throw new IncompatibleTypeException("The implementation type '" + type + "' is not a sub type of " + baseType);
+
+		this.tools.types.requireTypeArguments(refinedType, expectedTypeArgCount);
+
+		DeclaredType resultType = this.tools.types.asDeclared(type);
+		for (int argIndex = 0; argIndex < expectedTypeArgCount; argIndex++)
+		{
+			TypeMirror arg = refinedType.getTypeArguments().get(argIndex);
+			resultType = this.tools.types.replaceTypeArgument(resultType, arg, argProvider.apply(argIndex));
+		}
+
+		return resultType;
+	}
+
+
+	public void requireAssignable(TypeMirror type, TypeMirror expectedSubType) throws IncompatibleTypeException
+	{
+		if (!this.tools.types.isAssignable(type, expectedSubType))
+			throw new IncompatibleTypeException("The type '" + type + "' is not a sub-type of '" + expectedSubType + "'");
+	}
 
 	public void requireConcreteType(TypeMirror type) throws IncompatibleTypeException
 	{
@@ -437,6 +481,12 @@ public class ExtendedTypes implements Types
 
 			return true;
 		};
+	}
+
+	public void requireTypeArguments(DeclaredType type, int expectedCount) throws IncompatibleTypeException
+	{
+		if (type.getTypeArguments().size() != expectedCount)
+			throw new IncompatibleTypeException("The type '" + type + "' has the wrong number of arguments: expected " + expectedCount + ", but has " + type.getTypeArguments().size());
 	}
 
 

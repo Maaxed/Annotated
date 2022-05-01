@@ -30,7 +30,7 @@ public final class SpecialCoder
 			
 			if (extendsBound == null) throw new IncompatibleTypeException("The wildcard type '" + paramType + "' has no extends bound so it cannot be handled");
 			
-			return tools.coders.getCoder(extendsBound);
+			return tools.serializerCoders.getCoder(extendsBound);
 		});
 	}
 	
@@ -41,7 +41,7 @@ public final class SpecialCoder
 			TypeVariable varType = tools.types.asVariableType(paramType);
 			if (varType == null) throw incompatibleType("variable", paramType);
 			
-			return tools.coders.getCoder(varType.getUpperBound());
+			return tools.serializerCoders.getCoder(varType.getUpperBound());
 		});
 	}
 	
@@ -59,7 +59,7 @@ public final class SpecialCoder
 				SerializationCoder newCoder;
 				try
 				{
-					newCoder = tools.coders.getCoderOrNull(type);
+					newCoder = tools.serializerCoders.getCoderOrNull(type);
 				}
 				catch (CoderException e)
 				{

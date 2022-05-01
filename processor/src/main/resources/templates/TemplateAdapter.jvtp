@@ -1,0 +1,30 @@
+package ${package};
+
+@javax.annotation.processing.Generated("fr.max2.annotated.processor.network.AnnotatedProcessor")
+public class ${adapterName} implements fr.max2.annotated.lib.network.adapter.NetworkAdapter<${targetFromName}, ${targetToName}>
+{
+${fieldDeclaration}
+
+	private ${adapterName}(${constructorParams})
+	{
+${fieldInitialization}
+	}
+
+	@java.lang.Override
+	public ${targetToName} toNetwork(${targetFromName} value)
+	{
+		return new ${targetToName}
+		(
+${adaptToNetwork}
+		);
+	}
+
+	@java.lang.Override
+	public ${targetFromName} fromNetwork(${targetToName} value, net.minecraftforge.network.NetworkEvent.Context ctx)
+	{
+		return new ${targetFromName}
+		(
+${adaptFromNetwork}
+		);
+	}
+}

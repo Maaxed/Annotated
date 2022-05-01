@@ -30,8 +30,6 @@ public abstract class SerializationCoder
 	
 	public OutputExpressions code(String fieldName, String valueAccess)
 	{
-		SimpleCodeBuilder fieldCode = new SimpleCodeBuilder();
-		this.codeSerializerInstance(fieldCode);
 		return new OutputExpressions(
 			"this." + fieldName + ".encode(buf, " + valueAccess + ")",
 			"this." + fieldName + ".decode(buf)",
