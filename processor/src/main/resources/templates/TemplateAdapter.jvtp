@@ -3,9 +3,11 @@ package ${package};
 @javax.annotation.processing.Generated("fr.max2.annotated.processor.AnnotatedProcessor")
 public class ${adapterName} implements fr.max2.annotated.lib.network.adapter.NetworkAdapter<${targetFromName}, ${targetToName}>
 {
+	public static final fr.max2.annotated.lib.network.adapter.NetworkAdapter<${targetFromName}, ${targetToName}> INSTANCE = new ${adapterName}();
+
 ${fieldDeclaration}
 
-	private ${adapterName}(${constructorParams})
+	private ${adapterName}()
 	{
 ${fieldInitialization}
 	}

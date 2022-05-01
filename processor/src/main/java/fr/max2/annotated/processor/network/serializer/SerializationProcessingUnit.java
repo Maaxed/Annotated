@@ -47,18 +47,18 @@ public class SerializationProcessingUnit
 		this.annotation = annotation;
 		this.fieldSelectionMode = annotationData.fieldSelectionMode();
 		this.serializableClassName = tools.naming.buildClassName(serializableClass);
-		
+
 		this.serializerClassName = getSerializerName(this.serializableClassName, annotationData);
 	}
 
 	public static ClassName getSerializerName(ClassName serializableName, NetworkSerializable annotationData)
 	{
 		String className = annotationData.serializerClassName();
-		
+
 		int sep = className.lastIndexOf('.');
-		
+
 		String packageName = serializableName.packageName();
-		
+
 		if (sep != -1)
 		{
 			className = className.substring(sep + 1);
@@ -68,7 +68,7 @@ public class SerializationProcessingUnit
 		{
 			className = serializableName.shortName().replace('.', '_') + "_Serializer";
 		}
-		
+
 		return new ClassName(packageName, className);
 	}
 
@@ -82,6 +82,7 @@ public class SerializationProcessingUnit
 		try
         {
 			this.writeSerializer();
+			this.status = ProcessingStatus.SUCESSS;
 			return;
         }
 		catch (ProcessorException pe)
@@ -101,11 +102,11 @@ public class SerializationProcessingUnit
 		}
 		this.status = ProcessingStatus.FAIL;
 	}
-	
+
 	private void writeSerializer() throws ProcessorException
 	{
 		List<SerializationCoder> dataCoders = new ArrayList<>();
-		
+
 		List<SerializationCoder.Field> serializerFields = new ArrayList<>();
 		List<String> encodeCode = new ArrayList<>();
 		SimpleParameterListBuilder decodeCode = new SimpleParameterListBuilder();
@@ -129,12 +130,12 @@ public class SerializationProcessingUnit
 			{
 				throw ProcessorException.builder().context(data.originElement).build("Unable to create a coder: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 			}
-			
+
 			try
 			{
 				SerializationCoder.OutputExpressions output = coder.code(data.baseName, "value." + data.accessElement.getSimpleName() + (data.accessElement.getKind().isField() ? "" : "()"));
 				output.field.ifPresent(serializerFields::add);
-				
+
 				encodeCode.add(output.encodeCode + ";");
 				decodeCode.add(output.decodeCode);
 			}
@@ -147,12 +148,12 @@ public class SerializationProcessingUnit
 				throw ProcessorException.builder().context(data.originElement).build("Unable to produce code : " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 			}
 		}
-		
+
 		SimpleCodeBuilder decodeCodeBuilder = new SimpleCodeBuilder();
 		decodeCode.build(decodeCodeBuilder);
 
 		String ls = System.lineSeparator();
-		
+
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("package", this.serializerClassName.packageName());
 		replacements.put("serializerName", this.serializerClassName.shortName());
@@ -161,10 +162,10 @@ public class SerializationProcessingUnit
 		replacements.put("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";").collect(Collectors.joining(ls)));
 		replacements.put("encode", encodeCode.stream().collect(Collectors.joining(ls)));
 		replacements.put("decode", decodeCodeBuilder.build());
-		
+
 		this.tools.templates.writeFileWithLog(this.serializerClassName.qualifiedName(), "templates/TemplateSerializer.jvtp", replacements, this.serializableClass, this.annotation, this.serializableClass);
 	}
-	
+
 	private List<Data> getDataToSerialize()
 	{
 		if (this.serializableClass.getKind() == ElementKind.RECORD)
@@ -184,12 +185,12 @@ public class SerializationProcessingUnit
 				.toList();
 		}
 	}
-	
+
 	public boolean shouldSerializeElement(Element element)
 	{
 		IncludeField include = element.getAnnotation(IncludeField.class);
 		IgnoreField ignore = element.getAnnotation(IgnoreField.class);
-		
+
 		if (element.getModifiers().contains(Modifier.STATIC))
 		{
 			if (include != null)
@@ -209,16 +210,16 @@ public class SerializationProcessingUnit
 			}
 			return false;
 		}
-		
+
 		if (include != null && ignore != null)
 			throw ProcessorException.builder().context(element).build("A field cannot have both ProcessField and IgnoreField annotations");
-		
+
 		if (include != null)
 			return true;
-		
+
 		if (ignore != null)
 			return false;
-		
+
 		boolean keep;
 		switch (this.fieldSelectionMode)
 		{
@@ -233,16 +234,16 @@ public class SerializationProcessingUnit
 			keep = this.serializableClass.getKind() == ElementKind.RECORD || element.getModifiers().contains(Modifier.PUBLIC);
 			break;
 		}
-		
+
 		return keep;
 	}
-	
+
 	private static class Data
 	{
 		private final Element originElement;
 		private final String baseName;
 		private final Element accessElement;
-		
+
 		public Data(ProcessingTools tools, Element originElement, String baseName, Element accessElement)
 		{
 			IncludeField include = originElement.getAnnotation(IncludeField.class);
@@ -260,21 +261,21 @@ public class SerializationProcessingUnit
 										.filter(elem -> elem.getParameters().isEmpty())
 										.reduce((a, b) -> { throw ProcessorException.builder().context(originElement).build("Found multiple matching getter methods with name '" + include.getter() + "' in class '" + originElement.getEnclosingElement() + "'"); })
 										.orElseThrow(() -> ProcessorException.builder().context(originElement).build("Cannot find the getter method '" + include.getter() + "' in class '" + originElement.getEnclosingElement() + "'"));
-				
+
 				this.accessElement = getter;
-				
+
 				if (!tools.types.isSameType(getter.getReturnType(), originElement.asType()))
 					ProcessorException.builder().context(originElement).build("The getter method '" + include.getter() + "' has a wrong type: expected " + originElement.asType() + ", but got " + getter.getReturnType());
 			}
 			if (!this.accessElement.getModifiers().contains(Modifier.PUBLIC))
 				ProcessorException.builder().context(originElement).build("The element '" + this.accessElement + "' is not public");
 		}
-		
+
 		public static Data fromField(ProcessingTools tools, VariableElement field)
 		{
 			return new Data(tools, field, field.getSimpleName().toString(), field);
 		}
-		
+
 		public static Data fromRecordComp(ProcessingTools tools, RecordComponentElement comp)
 		{
 			return new Data(tools, comp, comp.getSimpleName().toString(), comp.getAccessor());

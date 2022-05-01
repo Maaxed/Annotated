@@ -110,6 +110,7 @@ public class AdapterProcessingUnit
 		try
 		{
 			this.writeAdapter();
+			this.status = ProcessingStatus.SUCESSS;
 			return;
 		}
 		catch (ProcessorException pe)
@@ -210,7 +211,6 @@ public class AdapterProcessingUnit
 		adapterRepl.put("targetFromName", this.adaptableClassName.qualifiedName());
 		adapterRepl.put("targetToName", this.adaptedClassName.qualifiedName());
 		adapterRepl.put("fieldDeclaration", serializerFields.stream().map(f -> "\tprivate " + f.type + " " + f.uniqueName + ";").collect(Collectors.joining(ls)));
-		adapterRepl.put("constructorParams", "");
 		adapterRepl.put("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";").collect(Collectors.joining(ls)));
 		adapterRepl.put("adaptToNetwork", toNetworkCode.buildMultiLines());
 		adapterRepl.put("adaptFromNetwork", fromNetworkCode.buildMultiLines());
