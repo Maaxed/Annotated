@@ -36,20 +36,20 @@ public class ExtendedTypes implements Types
 {
 	private final ProcessingTools tools;
 	private final Types base;
-	
+
 	ExtendedTypes(ProcessingTools tools, Types base)
 	{
 		this.tools = tools;
 		this.base = base;
 	}
-	
+
 	public PrimitiveType asPrimitive(TypeMirror type)
 	{
 		if (type == null)
 			return null;
 		return this.primitiveTypeCaster.visit(type);
 	}
-	
+
 	private final DefaultTypeVisitor<PrimitiveType, Void> primitiveTypeCaster = new DefaultTypeVisitor<>()
 	{
 		@Override
@@ -64,15 +64,15 @@ public class ExtendedTypes implements Types
 			return null;
 		}
 	};
-	
+
 	public ArrayType asArrayType(TypeMirror type)
 	{
 		if (type == null)
 			return null;
-		
+
 		return this.arrayTypeCaster.visit(type);
 	}
-	
+
 	private final DefaultTypeVisitor<ArrayType, Void> arrayTypeCaster = new DefaultTypeVisitor<>()
 	{
 		@Override
@@ -87,15 +87,15 @@ public class ExtendedTypes implements Types
 			return null;
 		}
 	};
-	
+
 	public WildcardType asWildcardType(TypeMirror type)
 	{
 		if (type == null)
 			return null;
-		
+
 		return this.wildcardTypeCaster.visit(type);
 	}
-	
+
 	private final DefaultTypeVisitor<WildcardType, Void> wildcardTypeCaster = new DefaultTypeVisitor<>()
 	{
 		@Override
@@ -110,15 +110,15 @@ public class ExtendedTypes implements Types
 			return null;
 		}
 	};
-	
+
 	public TypeVariable asVariableType(TypeMirror type)
 	{
 		if (type == null)
 			return null;
-		
+
 		return this.variableTypeCaster.visit(type);
 	}
-	
+
 	private final DefaultTypeVisitor<TypeVariable, Void> variableTypeCaster = new DefaultTypeVisitor<>()
 	{
 		@Override
@@ -133,15 +133,15 @@ public class ExtendedTypes implements Types
 			return null;
 		}
 	};
-	
+
 	public IntersectionType asIntersectionType(TypeMirror type)
 	{
 		if (type == null)
 			return null;
-		
+
 		return this.intersectionTypeCaster.visit(type);
 	}
-	
+
 	private final DefaultTypeVisitor<IntersectionType, Void> intersectionTypeCaster = new DefaultTypeVisitor<>()
 	{
 		@Override
@@ -156,15 +156,15 @@ public class ExtendedTypes implements Types
 			return null;
 		}
 	};
-	
+
 	public DeclaredType asDeclared(TypeMirror type)
 	{
 		if (type == null)
 			return null;
-		
+
 		return this.declaredTypeCaster.visit(type);
 	}
-	
+
 	private final DefaultTypeVisitor<DeclaredType, Void> declaredTypeCaster = new DefaultTypeVisitor<>()
 	{
 		public DeclaredType visitDeclared(DeclaredType t, Void p)
@@ -178,15 +178,15 @@ public class ExtendedTypes implements Types
 			return null;
 		}
 	};
-	
+
 	public DeclaredType refineTo(TypeMirror type, TypeMirror base)
 	{
 		if (type == null)
 			return null;
-		
+
 		return type.accept(this.declaredTypeRefiner, this.erasure(base));
 	}
-	
+
 	private final TypeVisitor<DeclaredType, TypeMirror> declaredTypeRefiner = new DefaultTypeVisitor<>()
 	{
 		@Override
@@ -196,13 +196,13 @@ public class ExtendedTypes implements Types
 			{
 				return t;
 			}
-			
+
 			List<? extends TypeMirror> superTypes = ExtendedTypes.this.directSupertypes(t);
-			
+
 			for (TypeMirror parent : superTypes)
 			{
 				DeclaredType result = this.visit(parent, p);
-				
+
 				if (result != null)
 				{
 					return result;
@@ -210,20 +210,20 @@ public class ExtendedTypes implements Types
 			}
 			return null;
 		}
-		
+
 		@Override
 		public DeclaredType visitTypeVariable(TypeVariable t, TypeMirror p)
 		{
 			return this.visit(t.getUpperBound(), p);
 		}
-		
+
 		@Override
 		public DeclaredType visitWildcard(WildcardType t, TypeMirror p)
 		{
 			TypeMirror extendsBound = t.getExtendsBound();
 			return extendsBound == null ? null : this.visit(extendsBound, p);
 		}
-		
+
 		@Override
 		public DeclaredType visitIntersection(IntersectionType t, TypeMirror p)
 		{
@@ -235,25 +235,25 @@ public class ExtendedTypes implements Types
 			}
 			return null;
 		}
-		
+
 		@Override
 		public DeclaredType visitDefault(TypeMirror t, TypeMirror p)
 		{
 			return null;
 		}
 	};
-	
+
 	public List<Element> getAllAccessibleMembers(TypeElement type, Visibility visibility)
 	{
-		return getAllMembers(type, visibility.filterAtLeast);
+		return this.getAllMembers(type, visibility.filterAtLeast);
 	}
-	
+
 	public List<Element> getAllMembers(TypeElement type, Predicate<Element> predicate)
 	{
 		List<Element> elems = new ArrayList<>();
 		Set<Name> usedNames = new HashSet<>(); // For optimization purposes
-		
-		visitAllMembers(type, elem -> {
+
+		this.visitAllMembers(type, elem -> {
 			if (predicate.test(elem))
 			{
 				Name name = elem.getSimpleName();
@@ -268,18 +268,18 @@ public class ExtendedTypes implements Types
 				usedNames.add(name);
 			}
 		});
-		
+
 		return elems;
 	}
-	
+
 	public void visitAllMembers(TypeElement type, Consumer<Element> memberConsumer)
 	{
 		if (type == null)
 			return;
-		
+
 		ElementMemberVisitor.INSTANCE.visit(type, memberConsumer);
 	}
-	
+
 	private enum ElementMemberVisitor implements DefaultElementVisitor<Void, Consumer<Element>>, DefaultTypeVisitor<Void, Consumer<Element>>
 	{
 		INSTANCE;
@@ -290,7 +290,7 @@ public class ExtendedTypes implements Types
 		{
 			this.visit(e.getSuperclass(), p);
 			e.getEnclosedElements().forEach(p);
-			
+
 			return null;
 		}
 
@@ -307,14 +307,14 @@ public class ExtendedTypes implements Types
 			this.visit(t.asElement(), p);
 			return null;
 		}
-		
+
 		@Override
 		public Void visitDefault(TypeMirror t, Consumer<Element> p)
 		{
 			return null;
 		}
 	}
-	
+
 	/**
 	 * <code>? extends T</code> => <code>T</code>
 	 * <br>
@@ -324,10 +324,10 @@ public class ExtendedTypes implements Types
 	{
 		if (type == null)
 			return null;
-		
+
 		return this.shallowEraser.visit(type);
 	}
-	
+
 	private final TypeVisitor<TypeMirror, Void> shallowEraser = new DefaultTypeVisitor<>()
 	{
 		@Override
@@ -335,7 +335,7 @@ public class ExtendedTypes implements Types
 		{
 			return this.visit(t.getUpperBound(), p);
 		}
-		
+
 		@Override
 		public TypeMirror visitWildcard(WildcardType t, Void p)
 		{
@@ -357,22 +357,22 @@ public class ExtendedTypes implements Types
 	{
 		if (type == null)
 			return null;
-		
+
 		if (this.isSameType(fromArg, toArg))
 			return type; // No replacement needed
-		
+
 		if (fromArg.getKind() != TypeKind.TYPEVAR)
 			return type; // Only replace type arguments
-		
+
 		List<? extends TypeMirror> prevArgs = type.getTypeArguments();
-		
+
 		TypeMirror[] newArgs = new TypeMirror[prevArgs.size()];
-		
+
 		for (int i = 0; i < prevArgs.size(); i++)
 		{
 			newArgs[i] = prevArgs.get(i).equals(fromArg) ? toArg : prevArgs.get(i);
 		}
-		
+
 		return this.getDeclaredType(this.tools.elements.asTypeElement(this.asElement(type)), newArgs);
 	}
 
@@ -384,7 +384,7 @@ public class ExtendedTypes implements Types
 		int expectedTypeArgCount = this.tools.elements.asTypeElement(baseType.asElement()).getTypeParameters().size();
 		this.tools.types.requireTypeArguments(targetRefinedType, expectedTypeArgCount);
 
-		return replaceTypeArguments(type, baseType, i -> targetRefinedType.getTypeArguments().get(i));
+		return this.replaceTypeArguments(type, baseType, i -> targetRefinedType.getTypeArguments().get(i));
 	}
 
 	/**
@@ -397,6 +397,12 @@ public class ExtendedTypes implements Types
 		DeclaredType refinedType = this.tools.types.refineTo(type, baseType);
 		if (refinedType == null)
 			throw new IncompatibleTypeException("The implementation type '" + type + "' is not a sub type of " + baseType);
+
+		if (refinedType.getTypeArguments().isEmpty())
+		{
+			type = this.tools.types.asElement(type).asType();
+			refinedType = this.tools.types.refineTo(type, baseType);
+		}
 
 		this.tools.types.requireTypeArguments(refinedType, expectedTypeArgCount);
 
@@ -422,35 +428,35 @@ public class ExtendedTypes implements Types
 		Element elem = this.tools.types.asElement(type);
 		if (elem == null)
 			return; // Unknown type, assume it is concrete
-		
+
 		if (elem.getKind() == ElementKind.INTERFACE || elem.getModifiers().contains(Modifier.ABSTRACT))
 			throw new IncompatibleTypeException("The type '" + type + "' is abstract and cannot be instantiated");
 	}
 
 	public void requireDefaultConstructor(TypeMirror type) throws IncompatibleTypeException
 	{
-		requireConstructor(type, cons -> cons.getParameters().isEmpty());
+		this.requireConstructor(type, cons -> cons.getParameters().isEmpty());
 	}
 
 	public void requireConstructor(TypeMirror type, List<TypeMirror> paramTypes) throws IncompatibleTypeException
 	{
-		requireConstructor(type, isConstructorCompatible(paramTypes));
+		this.requireConstructor(type, this.isConstructorCompatible(paramTypes));
 	}
 
 	public void requireConstructor(TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
 	{
-		if (findConstructor(type, constructorFilter) == null)
+		if (this.findConstructor(type, constructorFilter) == null)
 			throw new IncompatibleTypeException("The type '" + type + "' doesn't have the required constructor");
 	}
 
 	public ExecutableElement findConstructor(TypeMirror type) throws IncompatibleTypeException
 	{
-		return findConstructor(type, cons -> cons.getParameters().isEmpty());
+		return this.findConstructor(type, cons -> cons.getParameters().isEmpty());
 	}
 
 	public ExecutableElement findConstructor(TypeMirror type, List<TypeMirror> paramTypes) throws IncompatibleTypeException
 	{
-		return findConstructor(type, isConstructorCompatible(paramTypes));
+		return this.findConstructor(type, this.isConstructorCompatible(paramTypes));
 	}
 
 	public ExecutableElement findConstructor(TypeMirror type, Predicate<? super ExecutableElement> constructorFilter) throws IncompatibleTypeException
@@ -458,7 +464,7 @@ public class ExtendedTypes implements Types
 		Element elem = this.tools.types.asElement(type);
 		if (elem == null)
 			throw new IncompatibleTypeException("The type '" + type + "' is not a DeclaredType");
-		
+
 		return ElementFilter.constructorsIn(elem.getEnclosedElements()).stream()
 			.filter(constructorFilter)
 			.reduce((a, b) -> { throw new IncompatibleTypeException("The type '" + elem + "' have multiple matching constructors"); })
@@ -491,7 +497,7 @@ public class ExtendedTypes implements Types
 
 
 	// Delegate Types methods
-	
+
 	@Override
 	public Element asElement(TypeMirror t)
 	{

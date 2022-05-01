@@ -18,7 +18,7 @@ public class MapCoder
 
 	public static ICoderHandler<AdapterCoder> handler(ProcessingTools tools)
 	{
-		return GenericCoder.handler(tools, MAP_TYPE, MAP_TYPE, "fr.max2.annotated.lib.network.adapter.MapAdapterr",
+		return GenericCoder.handler(tools, MAP_TYPE, MAP_TYPE, "fr.max2.annotated.lib.network.adapter.MapAdapter",
 			(fieldType, builder) ->
 			{
 				TypeMirror impl = defaultImplementation(tools, fieldType);
@@ -42,7 +42,7 @@ public class MapCoder
 
 	private static TypeMirror defaultImplementation(ProcessingTools tools, TypeMirror fieldType) throws CoderException
 	{
-		TypeMirror implType = fieldType;
+		TypeMirror implType = tools.types.erasure(fieldType);
 
 		String implName = defaultImplementationName(tools.elements.asTypeElement(tools.types.asElement(fieldType)));
 

@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.network;
+package fr.max2.annotated.processor;
 
 import java.util.Set;
 import java.util.stream.Collectors;

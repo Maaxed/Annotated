@@ -19,7 +19,7 @@ public class AdapterCoderFinder extends CoderFinder<AdapterCoder>
 
 		this.scanClass("fr.max2.annotated.lib.network.adapter.EntityAdapter");
 
-		this.identityAdapter = GenericCoder.handler(tools, Object.class.getCanonicalName(), Object.class.getCanonicalName(), "fr.max2.annotated.lib.network.adapter.IdentityAdapter", (fieldType, builder) -> builder.setActualToType(fieldType));
+		this.identityAdapter = IdentityCoder.handler(tools);
 		this.handlers.add(ArrayCoder.handler(tools));
 		this.handlers.add(CollectionCoder.handler(tools));
 		this.handlers.add(MapCoder.handler(tools));

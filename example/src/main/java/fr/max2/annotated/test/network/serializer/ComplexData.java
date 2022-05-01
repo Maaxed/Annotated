@@ -1,4 +1,4 @@
-package fr.max2.annotated.test.network;
+package fr.max2.annotated.test.network.serializer;
 
 import java.util.Collection;
 import java.util.Date;
@@ -56,12 +56,12 @@ public record ComplexData
 	Boolean myBooleanObj,
 	char myChar,
 	Character myCharObj,
-	
+
 	// Simple types
 	String myString,
 	UUID myUUID,
 	Date myDate,
-	
+
 	BlockPos myBlockPos,
 	ResourceLocation myresLoc,
 	ItemStack myItemStack,
@@ -79,18 +79,18 @@ public record ComplexData
 	Vector3d myVector3d,
 	Vector3f myVector3f,
 	Vector4f myVector4f,
-	
+
 	// Complex types
 	Tag myTag,
 	CompoundTag myCompoundTag,
 	ListTag myListTag,
-	
+
 	Item myItem,
 	Block myBlock,
 	ItemStackHandler myNBTSerializable,
-	
+
 	EnumTest myEnum,
-	
+
 	// Arrays
 	int[] myIntArray,
 	Integer[] myIntObjArray,
@@ -102,7 +102,7 @@ public record ComplexData
 	TreeSet<Integer> myIntTreeSet,
 	Collection<EnumTest> myEnumCollection,
 	Collection<Collection<Integer>> myNestedIntCollection,
-	
+
 	// Maps
 	Map<Integer, Float> myIntToFloatMap,
 	LinkedHashMap<Integer, Float> myIntToFloatLinkedHashMap,
@@ -110,6 +110,4 @@ public record ComplexData
 	// Optional
 	Optional<Integer> myOptionalInt
 )
-{
-	
-}
+{ }

@@ -33,29 +33,29 @@ public class MapCoder
 					tools.types.requireDefaultConstructor(impl);
 					builder.add("size -> new " + tools.naming.erasedType.get(impl) + "()");
 				}
-				
+
 				builder.addCoders(2, impl);
 			});
 	}
-	
+
 	private static TypeMirror defaultImplementation(ProcessingTools tools, TypeMirror fieldType) throws CoderException
 	{
-		TypeMirror implType = fieldType;
-		
+		TypeMirror implType = tools.types.erasure(fieldType);
+
 		String implName = defaultImplementationName(tools.elements.asTypeElement(tools.types.asElement(fieldType)));
-		
+
 		if (!implName.isEmpty())
 		{
 			TypeElement elem = tools.elements.getTypeElement(implName);
 			if (elem == null)
 				throw new IncompatibleTypeException("Unknown type '" + implName + "' as implementation for " + MAP_TYPE);
-			
+
 			implType = elem.asType();
 		}
-		
+
 		return implType;
 	}
-	
+
 	private static String defaultImplementationName(TypeElement type)
 	{
 		switch (type.getQualifiedName().toString())

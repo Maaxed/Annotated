@@ -148,10 +148,12 @@ public class AdapterProcessingUnit
 				TypeMirror type = data.originElement.asType();
 
 				ICoderHandler<AdapterCoder> handler = this.tools.adapterCoders.getHandler(type).orElseThrow();
-				if (handler != this.tools.adapterCoders.getIdentityAdapter())
-					hasAnyConversion = true;
 
 				coder = handler.createCoder(type);
+
+				if (!(coder instanceof IdentityCoder))
+					hasAnyConversion = true;
+
 				dataCoders.add(coder);
 			}
 			catch (CoderException e)
@@ -167,9 +169,10 @@ public class AdapterProcessingUnit
 				throw ProcessorException.builder().context(data.originElement).build("Unable to create a coder: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 			}
 
+
 			try
 			{
-				AdapterCoder.OutputExpressions output = coder.code(data.baseName, "value." + data.accessElement.getSimpleName() + (data.accessElement.getKind().isField() ? "" : "()"), "ctx");
+				AdapterCoder.OutputExpressions output = coder.code(data.baseName, "value." + data.accessElement.getSimpleName() + (data.accessElement.getKind().isField() ? "" : "()"), "value." + data.baseName + "()", "ctx");
 				output.field.ifPresent(serializerFields::add);
 
 				toNetworkCode.add(output.toNetworkCode);

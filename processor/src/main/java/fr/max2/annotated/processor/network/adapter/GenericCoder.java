@@ -56,6 +56,16 @@ public class GenericCoder extends AdapterCoder
 		});
 	}
 
+	public static AdapterCoder build(ProcessingTools tools, TypeMirror fromType, TypeMirror toType, String serializer, IParameterSupplier parameterCoder, List<AdapterCoder> argCoders)
+	{
+		if (tools.types.isSameType(fromType, toType))
+		{
+			// No need to translate if both types are the same
+			return tools.adapterCoders.getIdentityAdapter().createCoder(fromType);
+		}
+		return new GenericCoder(tools, fromType, toType, serializer, parameterCoder, argCoders);
+	}
+
 	public static Builder builder(ProcessingTools tools, DeclaredType baseFromType, DeclaredType baseToType, TypeMirror fieldType)
 	{
 		return new Builder(tools, baseFromType, baseToType, fieldType);
@@ -127,12 +137,7 @@ public class GenericCoder extends AdapterCoder
 
 		public AdapterCoder build(String serializer)
 		{
-			if (this.tools.types.isSameType(this.actualFromType, this.actualToType))
-			{
-				// No need to translate if both types are the same
-				return this.tools.adapterCoders.getIdentityAdapter().createCoder(this.actualFromType);
-			}
-			return new GenericCoder(this.tools, this.actualFromType, this.actualToType, serializer, this.params, this.argCoders);
+			return GenericCoder.build(this.tools, this.actualFromType, this.actualToType, serializer, this.params, this.argCoders);
 		}
 	}
 

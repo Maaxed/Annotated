@@ -42,7 +42,7 @@ public class CollectionCoder
 
 	private static TypeMirror defaultImplementation(ProcessingTools tools, TypeMirror fieldType) throws CoderException
 	{
-		TypeMirror implType = fieldType;
+		TypeMirror implType = tools.types.erasure(fieldType);
 
 		String implName = defaultImplementationName(tools.elements.asTypeElement(tools.types.asElement(fieldType)));
 

@@ -1,6 +1,6 @@
 package ${package};
 
-@javax.annotation.processing.Generated("fr.max2.annotated.processor.network.AnnotatedProcessor")
+@javax.annotation.processing.Generated("fr.max2.annotated.processor.AnnotatedProcessor")
 public class ${className}
 {
 ${fieldsDeclaration}

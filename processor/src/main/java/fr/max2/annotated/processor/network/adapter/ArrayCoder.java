@@ -26,7 +26,7 @@ public class ArrayCoder
 			String fromConstructor = tools.naming.erasedType.get(fieldType) + "::new";
 			String toConstructor = tools.naming.erasedType.get(toType) + "::new";
 
-			return new GenericCoder(tools, fieldType, toType, "fr.max2.annotated.lib.network.adapter.ObjectArrayAdapter",
+			return GenericCoder.build(tools, fieldType, toType, "fr.max2.annotated.lib.network.adapter.ObjectArrayAdapter",
 				params -> params.addAll(fromConstructor, toConstructor), List.of(contentCoder));
 		});
 	}

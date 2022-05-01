@@ -24,12 +24,12 @@ public class SimpleCoder extends AdapterCoder
 	}
 
 	@Override
-	public OutputExpressions code(String fieldName, String valueAccess, String ctxAccess)
+	public OutputExpressions code(String fieldName, String valueFromAccess, String valueToAccess, String ctxAccess)
 	{
 		String serializer = this.serilizer;
 		return new OutputExpressions(
-			serializer + ".toNetwork(" + valueAccess + ")",
-			serializer + ".fromNetwork(" + valueAccess + ", " + ctxAccess + ")");
+			serializer + ".toNetwork(" + valueFromAccess + ")",
+			serializer + ".fromNetwork(" + valueToAccess + ", " + ctxAccess + ")");
 	}
 
 	public static ICoderHandler<AdapterCoder> handler(ProcessingTools tools, TypeMirror targetFromType, TypeMirror targetToType, VariableElement field)

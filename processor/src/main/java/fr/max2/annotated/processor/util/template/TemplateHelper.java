@@ -18,7 +18,7 @@ import javax.annotation.processing.Filer;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
-import fr.max2.annotated.processor.network.AnnotatedProcessor;
+import fr.max2.annotated.processor.AnnotatedProcessor;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.IOConsumer;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;

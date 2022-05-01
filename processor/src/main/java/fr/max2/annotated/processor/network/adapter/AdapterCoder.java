@@ -30,11 +30,11 @@ public abstract class AdapterCoder
 		return code.build();
 	}
 
-	public OutputExpressions code(String fieldName, String valueAccess, String ctxAccess)
+	public OutputExpressions code(String fieldName, String valueFromAccess, String valueToAccess, String ctxAccess)
 	{
 		return new OutputExpressions(
-			"this." + fieldName + ".toNetwork(" + valueAccess + ")",
-			"this." + fieldName + ".fromNetwork(" + valueAccess + ", " + ctxAccess + ")",
+			"this." + fieldName + ".toNetwork(" + valueFromAccess + ")",
+			"this." + fieldName + ".fromNetwork(" + valueToAccess + ", " + ctxAccess + ")",
 			Optional.of(new Field("fr.max2.annotated.lib.network.adapter.NetworkAdapter<" + this.typeFrom.toString() + ", " + this.typeTo.toString() + ">", fieldName, this.codeAdapterInstanceToString())));
 	}
 

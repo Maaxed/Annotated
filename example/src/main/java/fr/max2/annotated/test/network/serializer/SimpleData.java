@@ -1,4 +1,4 @@
-package fr.max2.annotated.test.network;
+package fr.max2.annotated.test.network.serializer;
 
 import fr.max2.annotated.api.network.NetworkSerializable;
 
