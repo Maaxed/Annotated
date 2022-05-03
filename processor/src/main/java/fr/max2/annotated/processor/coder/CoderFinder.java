@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.network.coder;
+package fr.max2.annotated.processor.coder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +15,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;

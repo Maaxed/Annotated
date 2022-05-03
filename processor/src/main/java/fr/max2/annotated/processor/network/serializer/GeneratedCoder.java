@@ -4,8 +4,8 @@ import javax.lang.model.element.TypeElement;
 
 import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
-import fr.max2.annotated.processor.network.coder.handler.GeneratedHandler;
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.GeneratedHandler;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
 

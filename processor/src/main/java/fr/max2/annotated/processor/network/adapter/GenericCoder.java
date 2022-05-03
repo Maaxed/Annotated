@@ -8,12 +8,12 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
-import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
-import fr.max2.annotated.processor.network.model.ICodeConsumer;
-import fr.max2.annotated.processor.network.model.IParameterConsumer;
-import fr.max2.annotated.processor.network.model.IParameterSupplier;
-import fr.max2.annotated.processor.network.model.SimpleParameterListBuilder;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.TypedDataHandler;
+import fr.max2.annotated.processor.model.ICodeConsumer;
+import fr.max2.annotated.processor.model.IParameterConsumer;
+import fr.max2.annotated.processor.model.IParameterSupplier;
+import fr.max2.annotated.processor.model.SimpleParameterListBuilder;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;

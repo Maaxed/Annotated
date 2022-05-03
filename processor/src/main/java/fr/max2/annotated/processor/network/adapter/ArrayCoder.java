@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.lang.model.type.ArrayType;
 
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
-import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
 

@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.network.model;
+package fr.max2.annotated.processor.model;
 
 
 public class SimpleCodeBuilder implements ICodeConsumer, ICodeSupplier

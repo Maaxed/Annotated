@@ -3,9 +3,9 @@ package fr.max2.annotated.processor.network.serializer;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.CoderCompatibility;
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
-import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
+import fr.max2.annotated.processor.coder.CoderCompatibility;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.network.serializer.GenericCoder.Builder;
 import fr.max2.annotated.processor.util.ClassRef;
 import fr.max2.annotated.processor.util.ProcessingTools;

@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.model.ICodeConsumer;
-import fr.max2.annotated.processor.network.model.SimpleCodeBuilder;
+import fr.max2.annotated.processor.model.ICodeConsumer;
+import fr.max2.annotated.processor.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
 public abstract class SerializationCoder

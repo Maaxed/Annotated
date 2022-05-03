@@ -7,8 +7,8 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.api.network.NetworkAdaptable;
-import fr.max2.annotated.processor.network.coder.CoderFinder;
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.CoderFinder;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.util.ClassRef;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;

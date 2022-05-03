@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.network.coder;
+package fr.max2.annotated.processor.coder;
 
 
 public enum CoderCompatibility

@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.network.coder.handler;
+package fr.max2.annotated.processor.coder.handler;
 
 import javax.lang.model.type.TypeMirror;
 

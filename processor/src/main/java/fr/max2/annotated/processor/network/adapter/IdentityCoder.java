@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
-import fr.max2.annotated.processor.network.coder.handler.TypedDataHandler;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.TypedDataHandler;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
 public class IdentityCoder extends GenericCoder

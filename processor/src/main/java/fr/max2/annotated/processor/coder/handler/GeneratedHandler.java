@@ -1,11 +1,11 @@
-package fr.max2.annotated.processor.network.coder.handler;
+package fr.max2.annotated.processor.coder.handler;
 
 import java.lang.annotation.Annotation;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
-import fr.max2.annotated.processor.network.coder.CoderCompatibility;
+import fr.max2.annotated.processor.coder.CoderCompatibility;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 

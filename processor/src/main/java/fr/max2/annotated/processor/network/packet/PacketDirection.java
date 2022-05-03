@@ -1,4 +1,4 @@
-package fr.max2.annotated.processor.network.model;
+package fr.max2.annotated.processor.network.packet;
 
 import java.lang.annotation.Annotation;
 

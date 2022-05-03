@@ -7,9 +7,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
 
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
-import fr.max2.annotated.processor.network.coder.handler.ICoderProvider;
-import fr.max2.annotated.processor.network.coder.handler.SpecialDataHandler;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.ICoderProvider;
+import fr.max2.annotated.processor.coder.handler.SpecialDataHandler;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;

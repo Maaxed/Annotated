@@ -3,8 +3,8 @@ package fr.max2.annotated.processor.network.adapter;
 import javax.lang.model.element.TypeElement;
 
 import fr.max2.annotated.api.network.NetworkAdaptable;
-import fr.max2.annotated.processor.network.coder.handler.GeneratedHandler;
-import fr.max2.annotated.processor.network.coder.handler.ICoderHandler;
+import fr.max2.annotated.processor.coder.handler.GeneratedHandler;
+import fr.max2.annotated.processor.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.exceptions.RoundException;
