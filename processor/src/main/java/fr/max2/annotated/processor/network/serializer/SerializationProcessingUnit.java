@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -51,9 +52,9 @@ public class SerializationProcessingUnit
 		this.serializerClassName = getSerializerName(this.serializableClassName, annotationData);
 	}
 
-	public static ClassName getSerializerName(ClassName serializableName, NetworkSerializable annotationData)
+	public static ClassName getSerializerName(ClassName serializableName, @Nullable NetworkSerializable annotationData)
 	{
-		String className = annotationData.serializerClassName();
+		String className = annotationData == null ? "" : annotationData.serializerClassName();
 
 		int sep = className.lastIndexOf('.');
 

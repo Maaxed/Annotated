@@ -9,9 +9,7 @@ import java.util.Set;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic.Kind;
@@ -88,8 +86,8 @@ public class AdapterProcessor
 
 		for (TypeElement type : ElementFilter.typesIn(roundEnv.getElementsAnnotatedWith(NetworkAdaptable.class)))
 		{
-			Optional<? extends AnnotationMirror> annotation = this.tools.elements.getAnnotationMirror(type, NetworkAdaptable.class.getCanonicalName());
-			Optional<? extends AnnotationMirror> serailizableAnno = this.tools.elements.getAnnotationMirror(type, NetworkSerializable.class.getCanonicalName());
+			Optional<? extends AnnotationMirror> annotation = this.tools.elements.getAnnotationMirror(type, NetworkAdaptable.class);
+			Optional<? extends AnnotationMirror> serailizableAnno = this.tools.elements.getAnnotationMirror(type, NetworkSerializable.class);
 			if (serailizableAnno.isEmpty())
 			{
 				ProcessorException.builder()
@@ -110,22 +108,13 @@ public class AdapterProcessor
 					.log(this.tools);
 				continue; // Skip this class
 			case MEMBER:
-				TypeElement elem = type;
-				while (elem != null && elem.getNestingKind() != NestingKind.TOP_LEVEL)
+				if (!type.getModifiers().contains(Modifier.STATIC))
 				{
-					Element enclosing = elem.getEnclosingElement();
-					if (enclosing != null && !enclosing.getKind().isInterface())
-					{
-						if (!type.getModifiers().contains(Modifier.STATIC))
-						{
-							ProcessorException.builder()
-								.context(type, annotation)
-								.build("Non-static nested classes are not supported !")
-								.log(this.tools);
-							continue; // Skip this class
-						}
-					}
-					elem = this.tools.elements.asTypeElement(enclosing);
+					ProcessorException.builder()
+						.context(type, annotation)
+						.build("Non-static nested classes are not supported !")
+						.log(this.tools);
+					continue; // Skip this class
 				}
 				break;
 			case TOP_LEVEL:

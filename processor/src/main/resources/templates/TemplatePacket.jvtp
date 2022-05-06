@@ -1,0 +1,32 @@
+package ${package};
+
+${annotations}
+@javax.annotation.processing.Generated("fr.max2.annotated.processor.AnnotatedProcessor")
+public record ${packetName}
+(
+	${fieldDeclaration}
+)
+{
+	private static void handle(${packetName} msg, java.util.function.Supplier<net.minecraftforge.network.NetworkEvent.Context> ctxSup)
+	{	
+		${targetName}.${function}(${parameters});
+	}
+
+	public static void registerTo(net.minecraftforge.network.simple.SimpleChannel channel, int index)
+	{
+		fr.max2.annotated.lib.network.packet.PacketSettings.forType(${dataClassName}.class, ${serializer})
+			${if serverPacket}
+			.setDestination(net.minecraftforge.fml.LogicalSide.SERVER)
+			${end}
+			${if clientPacket}
+			.setDestination(net.minecraftforge.fml.LogicalSide.CLIENT)
+			${end}
+			.setScheduled(${sheduled})
+			${if adapter}
+				.setConsumer(${adapter}, ${packetName}::handle)
+			${else}
+				.setConsumer(${packetName}::handle)
+			${end}
+			.register(channel, index);
+	}
+}

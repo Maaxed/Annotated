@@ -16,6 +16,7 @@ import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.api.network.ServerPacket;
 import fr.max2.annotated.processor.network.adapter.AdapterProcessor;
+import fr.max2.annotated.processor.network.packet.PacketProcessor;
 import fr.max2.annotated.processor.network.serializer.SerializationProcessor;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
@@ -29,6 +30,7 @@ public class AnnotatedProcessor extends AbstractProcessor
 	private ProcessingTools tools;
 	private AdapterProcessor adapter;
 	private SerializationProcessor serialization;
+	private PacketProcessor packet;
 
 	@Override
 	public Set<String> getSupportedAnnotationTypes()
@@ -43,6 +45,7 @@ public class AnnotatedProcessor extends AbstractProcessor
 		this.tools = new ProcessingTools(this.processingEnv);
 		this.adapter = new AdapterProcessor(this.tools);
 		this.serialization = new SerializationProcessor(this.tools);
+		this.packet = new PacketProcessor(this.tools);
 	}
 
 	@Override
@@ -50,6 +53,7 @@ public class AnnotatedProcessor extends AbstractProcessor
 	{
 		this.adapter.process(roundEnv);
 		this.serialization.process(roundEnv);
+		this.packet.process(roundEnv);
 
 		return true;
 	}

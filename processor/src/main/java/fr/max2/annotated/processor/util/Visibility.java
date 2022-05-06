@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 
 public enum Visibility
@@ -12,24 +13,24 @@ public enum Visibility
 	PROTECTED,
 	PACKAGE,
 	PRIVATE;
-	
+
 	public final Predicate<Element> filterAtLeast = elem -> Visibility.getElementVisibility(elem).isAtLeast(this);
 	public final Predicate<Element> filterAtMost = elem -> Visibility.getElementVisibility(elem).isAtMost(this);
-	
+
 	public boolean isAtLeast(Visibility other)
 	{
 		return this.ordinal() <= other.ordinal();
 	}
-	
+
 	public boolean isAtMost(Visibility other)
 	{
 		return this.ordinal() >= other.ordinal();
 	}
-	
+
 	public static Visibility getElementVisibility(Element elem)
 	{
 		Set<Modifier> modifiers = elem.getModifiers();
-		
+
 		if (modifiers.contains(Modifier.PUBLIC)) return PUBLIC;
 		if (modifiers.contains(Modifier.PROTECTED)) return Visibility.PROTECTED;
 		if (modifiers.contains(Modifier.PRIVATE)) return PRIVATE;
@@ -40,7 +41,7 @@ public enum Visibility
 	public static Visibility getTopLevelVisibility(Element elem)
 	{
 		Visibility v = PUBLIC;
-		while (elem != null && (elem.getKind().isClass() || elem.getKind().isInterface()))
+		while (elem != null && (elem.getKind().isClass() || elem.getKind().isInterface() || elem.getKind().isField() || elem.getKind() == ElementKind.METHOD || elem.getKind() == ElementKind.CONSTRUCTOR))
 		{
 			Visibility newV = getElementVisibility(elem);
 			if (newV.isAtMost(v))
@@ -54,5 +55,5 @@ public enum Visibility
 		}
 		return v;
 	}
-	
+
 }

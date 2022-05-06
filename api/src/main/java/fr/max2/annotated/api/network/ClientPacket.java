@@ -25,7 +25,7 @@ public @interface ClientPacket
 	 * @return the name of the packet class to generate or an empty string
 	 */
 	String className() default "";
-	
+
 	/**
 	 * Indicate if the execution of the packet on the client side should be performed in a scheduled task.
 	 * If set to false, the execution is performed in the netty Thread.

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -58,13 +59,13 @@ public class AdapterProcessingUnit
 		this.adaptedClassName = getAdaptedName(this.adaptableClassName, annotationData);
 	}
 
-	public static ClassName getAdapterName(ClassName serializableName, NetworkAdaptable annotationData)
+	public static ClassName getAdapterName(ClassName adaptableName, @Nullable NetworkAdaptable annotationData)
 	{
-		String className = annotationData.adapterClassName();
+		String className = annotationData == null ? "" : annotationData.adapterClassName();
 
 		int sep = className.lastIndexOf('.');
 
-		String packageName = serializableName.packageName();
+		String packageName = adaptableName.packageName();
 
 		if (sep != -1)
 		{
@@ -73,19 +74,19 @@ public class AdapterProcessingUnit
 		}
 		else if (className.isEmpty())
 		{
-			className = serializableName.shortName().replace('.', '_') + "_Adapter";
+			className = adaptableName.shortName().replace('.', '_') + "_Adapter";
 		}
 
 		return new ClassName(packageName, className);
 	}
 
-	public static ClassName getAdaptedName(ClassName serializableName, NetworkAdaptable annotationData)
+	public static ClassName getAdaptedName(ClassName adaptableName, @Nullable NetworkAdaptable annotationData)
 	{
-		String className = annotationData.adaptedClassName();
+		String className = annotationData == null ? "" : annotationData.adaptedClassName();
 
 		int sep = className.lastIndexOf('.');
 
-		String packageName = serializableName.packageName();
+		String packageName = adaptableName.packageName();
 
 		if (sep != -1)
 		{
@@ -94,10 +95,19 @@ public class AdapterProcessingUnit
 		}
 		else if (className.isEmpty())
 		{
-			className = serializableName.shortName().replace('.', '_') + "_Adapted";
+			className = adaptableName.shortName().replace('.', '_') + "_Adapted";
 		}
 
 		return new ClassName(packageName, className);
+	}
+
+	public static boolean needsAdapter(ProcessingTools tools, TypeMirror type)
+	{
+		ICoderHandler<AdapterCoder> handler = tools.adapterCoders.getHandler(type).orElseThrow();
+
+		AdapterCoder coder = handler.createCoder(type);
+
+		return !(coder instanceof IdentityCoder);
 	}
 
 	public ProcessingStatus getStatus()
@@ -199,7 +209,7 @@ public class AdapterProcessingUnit
 		Map<String, String> adaptedRepl = new HashMap<>();
 		adaptedRepl.put("package", this.adaptedClassName.packageName());
 		adaptedRepl.put("adaptedName", this.adaptedClassName.shortName());
-		adaptedRepl.put("annotations", this.serializableAnnotation.map(anno -> anno.toString()).orElse(""));
+		adaptedRepl.put("annotations", this.serializableAnnotation.map(Object::toString).orElse(""));
 		adaptedRepl.put("fieldDeclaration", adaptedCode.buildMultiLines());
 
 		this.tools.templates.writeFileWithLog(this.adaptedClassName.qualifiedName(), "templates/TemplateAdapted.jvtp", adaptedRepl, this.adaptableClass, this.annotation, this.adaptableClass);

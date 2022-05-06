@@ -1,6 +1,7 @@
 package fr.max2.annotated.processor.util;
 
 import java.io.Writer;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,21 +24,21 @@ public class ExtendedElements implements Elements
 {
 	private final Elements base;
 	public final TypeElement objectElement;
-	
+
 	ExtendedElements(ProcessingTools tools, Elements base)
 	{
 		this.base = base;
 		this.objectElement = this.getTypeElement(Object.class.getCanonicalName());
 	}
-	
+
 	public TypeElement asTypeElement(Element elem)
 	{
 		if (elem == null)
 			return null;
-		
+
 		return this.typeElementCaster.visit(elem);
 	}
-	
+
 	private final DefaultElementVisitor<TypeElement, Void> typeElementCaster = new DefaultElementVisitor<>()
 	{
 		@Override
@@ -45,22 +46,22 @@ public class ExtendedElements implements Elements
 		{
 			return e;
 		}
-		
+
 		@Override
 		public TypeElement visitDefault(Element e, Void p)
 		{
 			return null;
 		}
 	};
-	
+
 	public PackageElement asPackage(Element type)
 	{
 		if (type == null)
 			return null;
-		
+
 		return this.packageElementCaster.visit(type);
 	}
-	
+
 	private final DefaultElementVisitor<PackageElement, Void> packageElementCaster = new DefaultElementVisitor<>()
 	{
 		@Override
@@ -75,10 +76,10 @@ public class ExtendedElements implements Elements
 			return null;
 		}
 	};
-	
-	public Optional<? extends AnnotationMirror> getAnnotationMirror(Element elem, CharSequence annotationType)
+
+	public Optional<? extends AnnotationMirror> getAnnotationMirror(Element elem, Class<? extends Annotation> annotationType)
 	{
-		return elem.getAnnotationMirrors().stream().filter(a -> asTypeElement(a.getAnnotationType().asElement()).getQualifiedName().contentEquals(annotationType)).findAny();
+		return elem.getAnnotationMirrors().stream().filter(a -> this.asTypeElement(a.getAnnotationType().asElement()).getQualifiedName().contentEquals(annotationType.getCanonicalName())).findAny();
 	}
 	public Optional<? extends AnnotationValue> getAnnotationValue(Optional<? extends AnnotationMirror> annotation, CharSequence propertyName)
 	{
@@ -90,12 +91,12 @@ public class ExtendedElements implements Elements
 			).map(entry -> entry.getValue());
 	}
 
-	public Optional<? extends AnnotationValue> getAnnotationValue(Element elem, CharSequence annotationType, CharSequence propertyName)
+	public Optional<? extends AnnotationValue> getAnnotationValue(Element elem, Class<? extends Annotation> annotationType, CharSequence propertyName)
 	{
-		return getAnnotationValue(getAnnotationMirror(elem, annotationType), propertyName);
+		return this.getAnnotationValue(this.getAnnotationMirror(elem, annotationType), propertyName);
 	}
 
-	
+
 	// Delegate Types methods
 
 	@Override
@@ -103,13 +104,13 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.getPackageElement(name);
 	}
-	
+
 	@Override
 	public PackageElement getPackageElement(ModuleElement module, CharSequence name)
 	{
 		return this.base.getPackageElement(module, name);
 	}
-	
+
 	@Override
 	public Set<? extends PackageElement> getAllPackageElements(CharSequence name)
 	{
@@ -121,25 +122,25 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.getTypeElement(name);
 	}
-	
+
 	@Override
 	public TypeElement getTypeElement(ModuleElement module, CharSequence name)
 	{
 		return this.base.getTypeElement(module, name);
 	}
-	
+
 	@Override
 	public Set<? extends TypeElement> getAllTypeElements(CharSequence name)
 	{
 		return this.base.getAllTypeElements(name);
 	}
-	
+
 	@Override
 	public ModuleElement getModuleElement(CharSequence name)
 	{
 		return this.base.getModuleElement(name);
 	}
-	
+
 	@Override
 	public Set<? extends ModuleElement> getAllModuleElements()
 	{
@@ -163,25 +164,25 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.isDeprecated(e);
 	}
-	
+
 	@Override
 	public Origin getOrigin(Element e)
 	{
 		return this.base.getOrigin(e);
 	}
-	
+
 	@Override
 	public Origin getOrigin(AnnotatedConstruct c, AnnotationMirror a)
 	{
 		return this.base.getOrigin(c, a);
 	}
-	
+
 	@Override
 	public Origin getOrigin(ModuleElement m, Directive directive)
 	{
 		return this.base.getOrigin(m, directive);
 	}
-	
+
 	@Override
 	public boolean isBridge(ExecutableElement e)
 	{
@@ -199,7 +200,7 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.getPackageOf(type);
 	}
-	
+
 	@Override
 	public ModuleElement getModuleOf(Element e)
 	{
@@ -253,7 +254,7 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.isFunctionalInterface(type);
 	}
-	
+
 	@Override
 	public boolean isAutomaticModule(ModuleElement module)
 	{
@@ -264,6 +265,6 @@ public class ExtendedElements implements Elements
 	{
 		return this.base.recordComponentFor(accessor);
 	}
-	
-	
+
+
 }
