@@ -27,14 +27,16 @@ import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.api.network.SelectionMode;
 import fr.max2.annotated.processor.coder.handler.ICoderHandler;
 import fr.max2.annotated.processor.model.SimpleParameterListBuilder;
+import fr.max2.annotated.processor.model.processor.IProcessingUnit;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingStatus;
 import fr.max2.annotated.processor.util.ProcessingTools;
+import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.RoundException;
 
-public class AdapterProcessingUnit
+public class AdapterProcessingUnit implements IProcessingUnit
 {
 	private final ProcessingTools tools;
 	public final TypeElement adaptableClass;
@@ -44,7 +46,6 @@ public class AdapterProcessingUnit
 	public final ClassName adaptableClassName;
 	public final ClassName adapterClassName;
 	public final ClassName adaptedClassName;
-	private ProcessingStatus status = ProcessingStatus.SUCESSS;
 
 	public AdapterProcessingUnit(ProcessingTools tools, TypeElement serializableClass, Optional<? extends AnnotationMirror> annotation, NetworkAdaptable annotationData, Optional<? extends AnnotationMirror> serializableAnnotation, NetworkSerializable serializableData)
 	{
@@ -57,6 +58,47 @@ public class AdapterProcessingUnit
 
 		this.adapterClassName = getAdapterName(this.adaptableClassName, annotationData);
 		this.adaptedClassName = getAdaptedName(this.adaptableClassName, annotationData);
+	}
+
+	public static AdapterProcessingUnit create(ProcessingTools tools, TypeElement type) throws ProcessorException
+	{
+		Optional<? extends AnnotationMirror> annotation = tools.elements.getAnnotationMirror(type, NetworkAdaptable.class);
+		Optional<? extends AnnotationMirror> serailizableAnno = tools.elements.getAnnotationMirror(type, NetworkSerializable.class);
+		if (serailizableAnno.isEmpty())
+		{
+			throw ProcessorException.builder()
+				.context(type, annotation)
+				.build("Classes annotated with the " + NetworkAdaptable.class.getName() + " annotaiton should also have the " + NetworkSerializable.class.getName() + " annotaiton !");
+		}
+
+		switch (type.getNestingKind())
+		{
+		default:
+		case ANONYMOUS:
+		case LOCAL:
+			throw ProcessorException.builder()
+				.context(type, annotation)
+				.build("Anonymous and local classes are not supported !");
+		case MEMBER:
+			if (!type.getModifiers().contains(Modifier.STATIC))
+			{
+				throw ProcessorException.builder()
+					.context(type, annotation)
+					.build("Non-static nested classes are not supported !");
+			}
+			break;
+		case TOP_LEVEL:
+			break;
+		}
+
+		if (Visibility.getTopLevelVisibility(type) != Visibility.PUBLIC)
+		{
+			throw ProcessorException.builder()
+				.context(type, annotation)
+				.build("Non-public classes are not supported !");
+		}
+
+		return new AdapterProcessingUnit(tools, type, annotation, type.getAnnotation(NetworkAdaptable.class), serailizableAnno, type.getAnnotation(NetworkSerializable.class));
 	}
 
 	public static ClassName getAdapterName(ClassName adaptableName, @Nullable NetworkAdaptable annotationData)
@@ -110,18 +152,19 @@ public class AdapterProcessingUnit
 		return !(coder instanceof IdentityCoder);
 	}
 
-	public ProcessingStatus getStatus()
+	@Override
+	public ClassName getTargetClassName()
 	{
-		return this.status;
+		return this.adaptableClassName;
 	}
 
-	public void process()
+	@Override
+	public ProcessingStatus process()
 	{
 		try
 		{
 			this.writeAdapter();
-			this.status = ProcessingStatus.SUCESSS;
-			return;
+			return ProcessingStatus.SUCESSS;
 		}
 		catch (ProcessorException pe)
 		{
@@ -129,8 +172,7 @@ public class AdapterProcessingUnit
 		}
 		catch (RoundException re)
 		{
-			this.status = ProcessingStatus.DEFERRED;
-			return;
+			return ProcessingStatus.DEFERRED;
 		}
 		catch (Exception e)
 		{
@@ -139,7 +181,7 @@ public class AdapterProcessingUnit
 				.build("Unexpected exception generating the '" + this.adapterClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e)
 				.log(this.tools);
 		}
-		this.status = ProcessingStatus.FAIL;
+		return ProcessingStatus.FAIL;
 	}
 
 	private void writeAdapter() throws ProcessorException

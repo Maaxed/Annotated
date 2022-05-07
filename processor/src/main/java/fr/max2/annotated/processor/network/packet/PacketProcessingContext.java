@@ -8,11 +8,12 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
+import fr.max2.annotated.processor.model.processor.IProcessingUnit;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingStatus;
 import fr.max2.annotated.processor.util.ProcessingTools;
 
-public class PacketProcessingContext
+public class PacketProcessingContext implements IProcessingUnit
 {
 	private final ProcessingTools tools;
 	public final TypeElement enclosingClass;
@@ -39,7 +40,14 @@ public class PacketProcessingContext
 	    	this.tools.elements.getAnnotationMirror(method, NetworkSerializable.class), method.getAnnotation(NetworkSerializable.class)));
 	}
 
-	public void process()
+	@Override
+	public ClassName getTargetClassName()
+	{
+		return this.enclosingClassName;
+	}
+
+	@Override
+	public ProcessingStatus process()
 	{
 	    // Generate each packet class
 	    for (PacketProcessingUnit packet : this.packets)
@@ -47,12 +55,11 @@ public class PacketProcessingContext
 	        packet.process();
 	        if (packet.getStatus() != ProcessingStatus.SUCESSS)
 	        {
-	        	this.status = packet.getStatus();
-	        	return;
+	        	return packet.getStatus();
 	        }
 	    }
 
-	    this.status = ProcessingStatus.SUCESSS;
+	    return ProcessingStatus.SUCESSS;
 	}
 
 }

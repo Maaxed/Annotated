@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.api.network.NetworkAdaptable;
@@ -22,6 +25,7 @@ import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ClassRef;
 import fr.max2.annotated.processor.util.ProcessingStatus;
 import fr.max2.annotated.processor.util.ProcessingTools;
+import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.RoundException;
 
@@ -56,6 +60,56 @@ public class PacketProcessingUnit
 
 		this.adapterClassName = AdapterProcessingUnit.getAdapterName(this.packetClassName, adaptableData);
 		this.adaptedClassName = AdapterProcessingUnit.getAdaptedName(this.packetClassName, adaptableData);
+	}
+
+	public static void create(ProcessingTools tools, ExecutableElement method, PacketDirection dir, Function<TypeElement, PacketProcessingContext> contextProvider) throws ProcessorException
+	{
+		Optional<? extends AnnotationMirror> annotation = tools.elements.getAnnotationMirror(method, dir.getAnnotationClass());
+
+        if (method.getAnnotation(dir.opposite().getAnnotationClass()) != null)
+        {
+			throw ProcessorException.builder()
+				.context(method, annotation)
+				.build("A packet cannot be used in both directions !");
+        }
+
+        TypeElement enclosingClass = tools.elements.asTypeElement(method.getEnclosingElement());
+        switch (enclosingClass.getNestingKind())
+		{
+		default:
+		case ANONYMOUS:
+		case LOCAL:
+			throw ProcessorException.builder()
+				.context(method, annotation)
+				.build("Anonymous and local classes are not supported !");
+		case MEMBER:
+		case TOP_LEVEL:
+			break;
+		}
+
+		if (Visibility.getTopLevelVisibility(method) != Visibility.PUBLIC)
+		{
+			throw ProcessorException.builder()
+				.context(method, annotation)
+				.build("Non-public methods are not supported !");
+		}
+
+        if (!method.getModifiers().contains(Modifier.STATIC))
+        {
+        	throw ProcessorException.builder()
+				.context(method, annotation)
+	            .build("The packet method must be static");
+        }
+
+        if (method.getReturnType().getKind() != TypeKind.VOID)
+        {
+        	throw ProcessorException.builder()
+				.context(method, annotation)
+	            .build("The return type of the packet method must be void");
+        }
+
+        PacketProcessingContext context = contextProvider.apply(enclosingClass);
+        context.addPacket(method, dir, annotation);
 	}
 
 	public static ClassName getPacketName(ClassName enclosingClassName, String userDefinedName)

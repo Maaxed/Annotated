@@ -21,17 +21,20 @@ import javax.lang.model.util.ElementFilter;
 import fr.max2.annotated.api.network.IgnoreField;
 import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.api.network.IncludeField;
+import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.SelectionMode;
 import fr.max2.annotated.processor.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.model.SimpleParameterListBuilder;
+import fr.max2.annotated.processor.model.processor.IProcessingUnit;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingStatus;
 import fr.max2.annotated.processor.util.ProcessingTools;
+import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.RoundException;
 
-public class SerializationProcessingUnit
+public class SerializationProcessingUnit implements IProcessingUnit
 {
 	private final ProcessingTools tools;
 	public final TypeElement serializableClass;
@@ -39,9 +42,8 @@ public class SerializationProcessingUnit
 	private final SelectionMode fieldSelectionMode;
 	public final ClassName serializableClassName;
 	public final ClassName serializerClassName;
-	private ProcessingStatus status = ProcessingStatus.SUCESSS;
 
-	public SerializationProcessingUnit(ProcessingTools tools, TypeElement serializableClass, Optional<? extends AnnotationMirror> annotation, NetworkSerializable annotationData)
+	private SerializationProcessingUnit(ProcessingTools tools, TypeElement serializableClass, Optional<? extends AnnotationMirror> annotation, NetworkSerializable annotationData)
 	{
 		this.tools = tools;
 		this.serializableClass = serializableClass;
@@ -50,6 +52,43 @@ public class SerializationProcessingUnit
 		this.serializableClassName = tools.naming.buildClassName(serializableClass);
 
 		this.serializerClassName = getSerializerName(this.serializableClassName, annotationData);
+	}
+
+	public static SerializationProcessingUnit create(ProcessingTools tools, TypeElement type) throws ProcessorException
+	{
+		Optional<? extends AnnotationMirror> annotation = tools.elements.getAnnotationMirror(type, NetworkSerializable.class);
+		Optional<? extends AnnotationMirror> adaptableAnno = tools.elements.getAnnotationMirror(type, NetworkAdaptable.class);
+		if (adaptableAnno.isPresent())
+			return null; // Skip this class
+
+		switch (type.getNestingKind())
+		{
+		default:
+		case ANONYMOUS:
+		case LOCAL:
+			throw ProcessorException.builder()
+				.context(type, annotation)
+				.build("Anonymous and local classes are not supported !");
+		case MEMBER:
+			if (!type.getModifiers().contains(Modifier.STATIC))
+			{
+				throw ProcessorException.builder()
+					.context(type, annotation)
+					.build("Non-static nested classes are not supported !");
+			}
+			break;
+		case TOP_LEVEL:
+			break;
+		}
+
+		if (Visibility.getTopLevelVisibility(type) != Visibility.PUBLIC)
+		{
+			throw ProcessorException.builder()
+				.context(type, annotation)
+				.build("Non-public classes are not supported !");
+		}
+
+		return new SerializationProcessingUnit(tools, type, annotation, type.getAnnotation(NetworkSerializable.class));
 	}
 
 	public static ClassName getSerializerName(ClassName serializableName, @Nullable NetworkSerializable annotationData)
@@ -73,18 +112,19 @@ public class SerializationProcessingUnit
 		return new ClassName(packageName, className);
 	}
 
-	public ProcessingStatus getStatus()
+	@Override
+	public ClassName getTargetClassName()
 	{
-		return this.status;
+		return this.serializableClassName;
 	}
 
-	public void process()
+	@Override
+	public ProcessingStatus process()
 	{
 		try
         {
 			this.writeSerializer();
-			this.status = ProcessingStatus.SUCESSS;
-			return;
+			return ProcessingStatus.SUCESSS;
         }
 		catch (ProcessorException pe)
 		{
@@ -92,7 +132,7 @@ public class SerializationProcessingUnit
 		}
 		catch (RoundException re)
 		{
-			this.status = ProcessingStatus.DEFERRED;
+			return ProcessingStatus.DEFERRED;
 		}
 		catch (Exception e)
 		{
@@ -101,7 +141,7 @@ public class SerializationProcessingUnit
 				.build("Unexpected exception generating the '" + this.serializerClassName.qualifiedName() + "' class: " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e)
 				.log(this.tools);
 		}
-		this.status = ProcessingStatus.FAIL;
+		return ProcessingStatus.FAIL;
 	}
 
 	private void writeSerializer() throws ProcessorException
