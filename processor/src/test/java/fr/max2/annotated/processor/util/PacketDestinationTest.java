@@ -1,6 +1,6 @@
 package fr.max2.annotated.processor.util;
 
-import static fr.max2.annotated.processor.network.packet.PacketDirection.*;
+import static fr.max2.annotated.processor.network.packet.PacketDestination.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -10,7 +10,7 @@ import org.junit.Test;
 import fr.max2.annotated.api.network.ClientPacket;
 import fr.max2.annotated.api.network.ServerPacket;
 
-public class EnumSideTest
+public class PacketDestinationTest
 {
 	
 	@Test

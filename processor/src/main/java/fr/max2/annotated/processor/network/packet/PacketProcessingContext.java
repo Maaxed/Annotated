@@ -33,9 +33,9 @@ public class PacketProcessingContext implements IProcessingUnit
 		return this.status;
 	}
 
-	public void addPacket(ExecutableElement method, PacketDirection side, Optional<? extends AnnotationMirror> annotation)
+	public void addPacket(ExecutableElement method, PacketDestination dest, Optional<? extends AnnotationMirror> annotation)
 	{
-	    this.packets.add(new PacketProcessingUnit(this.tools, this, method, side, annotation,
+	    this.packets.add(new PacketProcessingUnit(this.tools, this, method, dest, annotation,
 	    	this.tools.elements.getAnnotationMirror(method, NetworkAdaptable.class), method.getAnnotation(NetworkAdaptable.class),
 	    	this.tools.elements.getAnnotationMirror(method, NetworkSerializable.class), method.getAnnotation(NetworkSerializable.class)));
 	}

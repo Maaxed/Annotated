@@ -34,7 +34,7 @@ public class PacketProcessingUnit
 	private final ProcessingTools tools;
     private final PacketProcessingContext context;
     public final ExecutableElement packetMethod;
-    private final PacketDirection side;
+    private final PacketDestination destination;
     public final Optional<? extends AnnotationMirror> annotation;
     private final Optional<? extends AnnotationMirror> adaptableAnnotation;
     private final Optional<? extends AnnotationMirror> serializableAnnotation;
@@ -43,7 +43,7 @@ public class PacketProcessingUnit
 	public final ClassName adaptedClassName;
 	private ProcessingStatus status = ProcessingStatus.SUCESSS;
 
-	public PacketProcessingUnit(ProcessingTools tools, PacketProcessingContext context, ExecutableElement packetMethod, PacketDirection side,
+	public PacketProcessingUnit(ProcessingTools tools, PacketProcessingContext context, ExecutableElement packetMethod, PacketDestination dest,
 		Optional<? extends AnnotationMirror> annotation,
 		Optional<? extends AnnotationMirror> adaptableAnnotation, NetworkAdaptable adaptableData,
 		Optional<? extends AnnotationMirror> serializableAnnotation, NetworkSerializable serializableData)
@@ -51,7 +51,7 @@ public class PacketProcessingUnit
 		this.tools = tools;
         this.context = context;
         this.packetMethod = packetMethod;
-        this.side = side;
+        this.destination = dest;
         this.annotation = annotation;
         this.adaptableAnnotation = adaptableAnnotation;
         this.serializableAnnotation = serializableAnnotation;
@@ -62,11 +62,11 @@ public class PacketProcessingUnit
 		this.adaptedClassName = AdapterProcessingUnit.getAdaptedName(this.packetClassName, adaptableData);
 	}
 
-	public static void create(ProcessingTools tools, ExecutableElement method, PacketDirection dir, Function<TypeElement, PacketProcessingContext> contextProvider) throws ProcessorException
+	public static void create(ProcessingTools tools, ExecutableElement method, PacketDestination dest, Function<TypeElement, PacketProcessingContext> contextProvider) throws ProcessorException
 	{
-		Optional<? extends AnnotationMirror> annotation = tools.elements.getAnnotationMirror(method, dir.getAnnotationClass());
+		Optional<? extends AnnotationMirror> annotation = tools.elements.getAnnotationMirror(method, dest.getAnnotationClass());
 
-        if (method.getAnnotation(dir.opposite().getAnnotationClass()) != null)
+        if (method.getAnnotation(dest.opposite().getAnnotationClass()) != null)
         {
 			throw ProcessorException.builder()
 				.context(method, annotation)
@@ -109,7 +109,7 @@ public class PacketProcessingUnit
         }
 
         PacketProcessingContext context = contextProvider.apply(enclosingClass);
-        context.addPacket(method, dir, annotation);
+        context.addPacket(method, dest, annotation);
 	}
 
 	public static ClassName getPacketName(ClassName enclosingClassName, String userDefinedName)
@@ -229,8 +229,8 @@ public class PacketProcessingUnit
 		replacements.put("adapter", needsAdapter ? this.adapterClassName.qualifiedName() + ".INSTANCE" : "");
 		replacements.put("dataClassName", needsAdapter ? this.adaptedClassName.qualifiedName() : this.packetClassName.shortName());
 		replacements.put("serializer", serializerClassName.qualifiedName() + ".INSTANCE");
-        replacements.put("serverPacket", Boolean.toString(this.side.isServer()));
-        replacements.put("clientPacket", Boolean.toString(this.side.isClient()));
+        replacements.put("serverPacket", Boolean.toString(this.destination.isServer()));
+        replacements.put("clientPacket", Boolean.toString(this.destination.isClient()));
 		replacements.put("sheduled", sheduled);
 		replacements.put("annotations", annotations.build());
 

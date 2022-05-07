@@ -30,13 +30,13 @@ public class PacketProcessor extends UnitProcessor<PacketProcessingContext>
 	    	contexts.put(context.enclosingClass, context);
 	    }
 
-	    for (PacketDirection dir : PacketDirection.values())
+	    for (PacketDestination dest : PacketDestination.values())
 	    {
-	        for (ExecutableElement method : ElementFilter.methodsIn(roundEnv.getElementsAnnotatedWith(dir.getAnnotationClass())))
+	        for (ExecutableElement method : ElementFilter.methodsIn(roundEnv.getElementsAnnotatedWith(dest.getAnnotationClass())))
 	        {
 				try
 				{
-					PacketProcessingUnit.create(this.tools, method, dir, type -> contexts.computeIfAbsent(type, clazz -> new PacketProcessingContext(this.tools, clazz)));
+					PacketProcessingUnit.create(this.tools, method, dest, type -> contexts.computeIfAbsent(type, clazz -> new PacketProcessingContext(this.tools, clazz)));
 				}
 				catch (ProcessorException e)
 				{
