@@ -16,6 +16,5 @@ public class ClassRef
 	public static final String
 		REGISTRY_ENTRY				= FORGE_PACKAGE + ".registries.IForgeRegistryEntry",
 		NBT_SERIALIZABLE_INTERFACE	= FORGE_PACKAGE + ".common.util.INBTSerializable",
-		FORGE_MOD_ANNOTATION		= FORGE_PACKAGE + ".fml.common.Mod",
 		FORGE_NETWORK_CONTEXT		= FORGE_PACKAGE + ".network.NetworkEvent$Context";
 }

@@ -27,12 +27,12 @@ import fr.max2.annotated.processor.util.exceptions.TemplateException;
 public class TemplateHelper
 {
 	private final ProcessingTools tools;
-	
+
 	public TemplateHelper(ProcessingTools tools) //TODO [v2.2] improve templates : method templates, for loop
 	{
 		this.tools = tools;
 	}
-	
+
 	public void writeFileWithLog(String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation, Element... originatingClasses) throws ProcessorException
 	{
 		try
@@ -46,7 +46,7 @@ public class TemplateHelper
 				.build("Unable to write the class file '" + className + "' from template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 		}
 	}
-	
+
 	public void readWithLog(String templateFile, Map<String, String> replacements, IOConsumer<String> lines, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws ProcessorException
 	{
 		try
@@ -62,18 +62,22 @@ public class TemplateHelper
 			throw ProcessorException.builder().context(originatingElement, annotation).build("An unexpected exception occured during the reading of the template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
 		}
 	}
-	
+
 	public void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingClasses) throws IOException
 	{
 		JavaFileObject file = filer.createSourceFile(className, originatingClasses);
 		try (Writer writer = file.openWriter())
 		{
 			this.readTemplate(templateFile, replacements, writer::write);
-			// TODO [v3.0] remove file if an error occurred
 		}
-		
+		catch (Exception e)
+		{
+			// Remove file if an error occurred
+			file.delete();
+			throw e;
+		}
 	}
-	
+
 	public void readTemplate(String templateFile, Map<String, String> replacements, IOConsumer<String> lines) throws IOException
 	{
 		try (InputStream fileStream = AnnotatedProcessor.class.getClassLoader().getResourceAsStream(templateFile);
@@ -86,20 +90,20 @@ public class TemplateHelper
 			while ((line = reader.readLine()) != null)
 			{
 				String newLine = this.mapKeys(controls, line + System.lineSeparator(), i, replacements);
-				
+
 				if (!newLine.isEmpty())
 					lines.accept(newLine);
 				i++;
 			}
-			
+
 			if (!controls.isEmpty())
 			{
 				throw new TemplateException("Unclosed control block");
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Search the pattern '${key}' in the content string and replace it with the corresponding replacement
 	 * @param content the content to search in
@@ -110,7 +114,7 @@ public class TemplateHelper
 	{
 		Pattern p = Pattern.compile("\\$\\{(.+?)\\}");
 		Matcher m = p.matcher(content);
-		
+
 		StringBuffer sb = new StringBuffer();
 		StringBuffer devNull = new StringBuffer();
 		boolean hasSpecialCode = false;
@@ -119,17 +123,17 @@ public class TemplateHelper
 			hasSpecialCode = true;
 			String key = m.group(1);
 			String[] parts = Stream.of(key.split(" ")).map(w -> w.trim()).filter(w -> w.length() > 0).toArray(String[]::new);
-			
+
 			if (parts.length == 0)
 			{
 				throw new TemplateException("Unrecognised empty control in line '" + content + "'");
 			}
-			
+
 			if (controls.isEmpty() || controls.peek().shouldPrint())
 				m.appendReplacement(sb, "");
 			else
 				m.appendReplacement(devNull, "");
-			
+
 			switch (parts[0])
 			{
 			case "if":
@@ -148,12 +152,12 @@ public class TemplateHelper
 			case "else":
 				if (parts.length != 1)
 					throw new TemplateException("Too many parameters for end control in '" + key + "' in line " + line + " '" + content + "'");
-				
+
 				if (controls.isEmpty())
 					throw new TemplateException("Invalid closing control in line " + line + " '" + content + "'");
-				
+
 				ITemplateControl prev = controls.pop();
-				
+
 				if (prev.shouldPrint() || (!controls.isEmpty() && !controls.peek().shouldPrint()))
 				{
 					controls.push(IfControl.FALSE);
@@ -162,29 +166,29 @@ public class TemplateHelper
 				{
 					controls.push(IfControl.TRUE);
 				}
-				
+
 				break;
 			case "end":
 				if (parts.length != 1)
 					throw new TemplateException("Too many parameters for end control in '" + key + "' in line " + line + " '" + content + "'");
-				
+
 				if (controls.isEmpty())
 					throw new TemplateException("Invalid closing control in line " + line + " '" + content + "'");
-				
+
 				controls.pop();
 				break;
 			default:
 				if (parts.length != 1)
 					throw new TemplateException("Unrecognised control '" + key + "' in line '" + content + "'");
-				
+
 				if (!controls.isEmpty() && !controls.peek().shouldPrint())
 					break;
-				
+
 				String rep = replacements.get(parts[0]);
-				
+
 				if (rep == null)
 					throw new TemplateException("Unable to find replacement for the key '" + key + "' in line '" + content + "'");
-				
+
 				sb.append(Matcher.quoteReplacement(rep));
 				break;
 			}
@@ -193,10 +197,10 @@ public class TemplateHelper
 		{
 			m.appendTail(sb);
 		}
-		
+
 		String res = sb.toString();
 		// Remove unnecessary empty lines
 		return hasSpecialCode && res.trim().equals("") ? "" : res;
 	}
-	
+
 }

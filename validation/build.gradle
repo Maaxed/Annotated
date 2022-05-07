@@ -14,5 +14,5 @@ dependencies {
 }
 
 application {
-    mainClassName = 'fr.max2.annotated.processor.validation.Validation'
+    mainClassName = 'fr.max2.annotated.validation.Validation'
 }
