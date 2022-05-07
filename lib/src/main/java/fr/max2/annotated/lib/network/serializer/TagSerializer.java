@@ -1,6 +1,8 @@
 package fr.max2.annotated.lib.network.serializer;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
@@ -17,20 +19,27 @@ public final class TagSerializer
 {
 	private TagSerializer()
 	{ }
-	
+
 	public static final class Concrete<T extends Tag> implements NetworkSerializer<T>
 	{
+		private static final Map<TagType<?>, NetworkSerializer<?>> CACHE = new HashMap<>();
 		private final TagType<T> tagType;
-		
+
 		private Concrete(TagType<T> tagType)
 		{
 			this.tagType = tagType;
 		}
-		
+
 		public static <T extends Tag> NetworkSerializer<T> of(TagType<T> tagType)
 		{
-			// TODO [v3.0] Cache instances
-			return new Concrete<>(tagType);
+			@SuppressWarnings("unchecked")
+			NetworkSerializer<T> serializer = (NetworkSerializer<T>)CACHE.get(tagType);
+			if (serializer == null)
+			{
+				serializer = new Concrete<>(tagType);
+				CACHE.put(tagType, serializer);
+			}
+			return serializer;
 		}
 
 		@Override
@@ -38,14 +47,14 @@ public final class TagSerializer
 		{
 			concreteEncode(buf, value);
 		}
-		
+
 		@Override
 		public T decode(FriendlyByteBuf buf)
 		{
 			return concreteDecode(buf, this.tagType);
 		}
-	};
-	
+	}
+
 	public static final NetworkSerializer<Tag> ABSTRACT = new NetworkSerializer<>()
 	{
 		@Override
@@ -54,7 +63,7 @@ public final class TagSerializer
         	buf.writeByte(value.getId());
 			concreteEncode(buf, value);
 		}
-		
+
 		@Override
 		public Tag decode(FriendlyByteBuf buf)
 		{
@@ -74,7 +83,7 @@ public final class TagSerializer
             throw new EncoderException(e);
 		}
 	}
-	
+
 	public static <T extends Tag> T concreteDecode(FriendlyByteBuf buf, TagType<T> tagType)
 	{
 		try
