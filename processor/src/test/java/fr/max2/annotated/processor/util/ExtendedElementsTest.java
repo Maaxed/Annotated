@@ -5,13 +5,10 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import fr.max2.annotated.processor.util.ExtendedElements;
-
-
 public class ExtendedElementsTest extends TestModelProvider
 {
 	private ExtendedElements helper = new ExtendedElements(null, null);
-	
+
 	@Test
 	public void testAsTypeElement()
 	{
@@ -20,7 +17,7 @@ public class ExtendedElementsTest extends TestModelProvider
 		assertEquals(this.intElement, this.helper.asTypeElement(this.intElement));
 		assertNull(this.helper.asTypeElement(this.packageType));
 	}
-	
+
 	@Test
 	public void testAsPackage()
 	{

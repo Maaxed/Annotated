@@ -28,7 +28,7 @@ public class ExtendedElements implements Elements
 	ExtendedElements(ProcessingTools tools, Elements base)
 	{
 		this.base = base;
-		this.objectElement = this.getTypeElement(Object.class.getCanonicalName());
+		this.objectElement = this.base == null ? null : this.getTypeElement(Object.class.getCanonicalName());
 	}
 
 	public TypeElement asTypeElement(Element elem)

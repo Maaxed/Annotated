@@ -1,19 +1,15 @@
 package fr.max2.annotated.processor.util;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
-
-import fr.max2.annotated.processor.util.model.type.TestingNullType;
 
 public class NamingUtilsTest extends TestModelProvider
 {
-	
+
 	@Test
 	public void testComputeSimplifiedName()
 	{
 		this.setUpModel();
-		
+
 		/*assertEquals("Integer", SIMPLIFIED.computeName(this.integer));
 		assertEquals("List<>", SIMPLIFIED.computeName(this.list));
 		assertEquals("Map<>", SIMPLIFIED.computeName(this.map));
@@ -27,12 +23,12 @@ public class NamingUtilsTest extends TestModelProvider
 		assertEquals("Integer & NamingUtils.TypeToString", SIMPLIFIED.computeName(this.intersaction));
 		assertEquals("Null", SIMPLIFIED.computeName(TestingNullType.INSTANCE));*/
 	}
-	
+
 	@Test
 	public void testComputeFullName()
 	{
 		this.setUpModel();
-		
+
 		/*assertEquals("Integer", FULL.computeName(this.integer));
 		assertEquals("List<Integer>", FULL.computeName(this.list));
 		assertEquals("Map<Integer, List<Integer>>", FULL.computeName(this.map));
@@ -46,5 +42,5 @@ public class NamingUtilsTest extends TestModelProvider
 		assertEquals("Integer & NamingUtils.TypeToString", FULL.computeName(this.intersaction));
 		assertEquals("Null", FULL.computeName(TestingNullType.INSTANCE));*/
 	}
-	
+
 }

@@ -9,17 +9,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 
 import org.junit.Test;
 
-import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.model.element.TestingAllElement;
 
 
 public class VisibilityTest
 {
-	
+
 	@Test
 	public void testIsAtLeast()
 	{
@@ -28,7 +29,7 @@ public class VisibilityTest
 		assertAtLeast(PACKAGE, PACKAGE, PRIVATE);
 		assertAtLeast(PRIVATE, PRIVATE);
 	}
-	
+
 	private static void assertAtLeast(Visibility tested, Visibility... expected)
 	{
 		List<Visibility> found = new ArrayList<>();
@@ -41,7 +42,7 @@ public class VisibilityTest
 		}
 		assertArrayEquals(expected, found.toArray());
 	}
-	
+
 	@Test
 	public void testIsAtMost()
 	{
@@ -50,7 +51,7 @@ public class VisibilityTest
 		assertAtMost(PACKAGE, PUBLIC, PROTECTED, PACKAGE);
 		assertAtMost(PRIVATE, PUBLIC, PROTECTED, PACKAGE, PRIVATE);
 	}
-	
+
 	private static void assertAtMost(Visibility tested, Visibility... expected)
 	{
 		List<Visibility> found = new ArrayList<>();
@@ -63,40 +64,64 @@ public class VisibilityTest
 		}
 		assertArrayEquals(expected, found.toArray());
 	}
-	
+
 	@Test
 	public void testGetElementVisibility()
 	{
-		assertElementVisibity(PUBLIC, Modifier.PUBLIC);
-		assertElementVisibity(PROTECTED, Modifier.PROTECTED);
-		assertElementVisibity(PACKAGE);
-		assertElementVisibity(PRIVATE, Modifier.PRIVATE);
+		assertElementVisibity(PUBLIC, false, Modifier.PUBLIC);
+		assertElementVisibity(PROTECTED, false, Modifier.PROTECTED);
+		assertElementVisibity(PACKAGE, false);
+		assertElementVisibity(PRIVATE, false, Modifier.PRIVATE);
 
-		assertElementVisibity(PUBLIC, Modifier.PUBLIC, Modifier.ABSTRACT);
-		assertElementVisibity(PROTECTED, Modifier.PROTECTED, Modifier.STATIC);
-		assertElementVisibity(PACKAGE, Modifier.FINAL);
-		assertElementVisibity(PRIVATE, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL, Modifier.ABSTRACT);
+		assertElementVisibity(PUBLIC, false, Modifier.PUBLIC, Modifier.ABSTRACT);
+		assertElementVisibity(PROTECTED, false, Modifier.PROTECTED, Modifier.STATIC);
+		assertElementVisibity(PACKAGE, false, Modifier.FINAL);
+		assertElementVisibity(PRIVATE, false, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL, Modifier.ABSTRACT);
 	}
-	
-	private static void assertElementVisibity(Visibility expected, Modifier... modifiers)
+
+	private static void assertElementVisibity(Visibility expected, boolean isParentInterface, Modifier... modifiers)
 	{
-		assertEquals(expected, getElementVisibility(new VisibilityTestingElement(modifiers)));
+		assertEquals(expected, getElementVisibility(new VisibilityTestingElement(new VisibilityParentTestingElement(isParentInterface), modifiers)));
 	}
-	
+
 	private static class VisibilityTestingElement extends TestingAllElement
 	{
+		private final Element enclosingElem;
 		private final Set<Modifier> modifiers;
 
-		public VisibilityTestingElement(Modifier... modifiers)
+		public VisibilityTestingElement(Element enclosingElem, Modifier... modifiers)
 		{
+			this.enclosingElem = enclosingElem;
 			this.modifiers = new HashSet<>(Arrays.asList(modifiers));
 		}
-		
+
 		@Override
 		public Set<Modifier> getModifiers()
 		{
 			return this.modifiers;
 		}
+
+		@Override
+		public Element getEnclosingElement()
+		{
+			return this.enclosingElem;
+		}
 	}
-	
+
+	private static class VisibilityParentTestingElement extends TestingAllElement
+	{
+		private final boolean isInterface;
+
+		public VisibilityParentTestingElement(boolean isInterface)
+		{
+			this.isInterface = isInterface;
+		}
+
+		@Override
+		public ElementKind getKind()
+		{
+			return this.isInterface ? ElementKind.INTERFACE : ElementKind.CLASS;
+		}
+	}
+
 }

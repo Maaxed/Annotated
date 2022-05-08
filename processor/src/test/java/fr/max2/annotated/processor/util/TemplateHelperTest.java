@@ -34,25 +34,25 @@ import fr.max2.annotated.processor.util.template.TemplateHelper;
 public class TemplateHelperTest
 {
 	private TemplateHelper helper = new TemplateHelper(null);
-	
+
 	@Test
 	public void testWriteFileFromTemplate()
 	{
 		FakeFiler filer1 = new FakeFiler("Output");
 		Map<String, String> replacements = new HashMap<>();
-		
+
 		assertThrows(TemplateException.class, () ->
 			this.helper.writeFile(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer2 = new FakeFiler("Output2");
 		replacements.put("blue", "violets");
-		
+
 		assertThrows(TemplateException.class, () ->
 			this.helper.writeFile(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
 
 		FakeFiler filer3 = new FakeFiler("Output3");
 		replacements.put("red", "roses");
-		
+
 		try
 		{
 			this.helper.writeFile(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
@@ -67,21 +67,21 @@ public class TemplateHelperTest
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void testMapKeys()
 	{
 		Map<String, String> replacements = new HashMap<>();
-		
+
 		ArrayDeque<ITemplateControl> controls = new ArrayDeque<>();
-		
+
 		assertEquals("test", this.helper.mapKeys(controls, "test", 0, replacements));
 		assertEquals("$test", this.helper.mapKeys(controls, "$test", 0, replacements));
 		assertEquals("$}test{", this.helper.mapKeys(controls, "$}test{", 0, replacements));
 		assertThrows(TemplateException.class, () -> this.helper.mapKeys(controls, "${test}", 0, replacements));
 		//assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${${test}}", 0, replacements));
 		assertThrows(TemplateException.class, () -> this.helper.mapKeys(controls, "${test1}a${test2}", 0, replacements));
-		
+
 		replacements.put("test", "value");
 
 		assertEquals("test", this.helper.mapKeys(controls, "test", 0, replacements));
@@ -91,7 +91,7 @@ public class TemplateHelperTest
 		assertEquals("value", this.helper.mapKeys(controls, "${  test	}", 0, replacements));
 		//assertEquals("${test}", mapKeys("${${test}}", 0, replacements));
 		assertEquals("valueavalue", this.helper.mapKeys(controls, "${test}a${test}", 0, replacements));
-		
+
 		replacements.put("test1", "VALUE");
 
 		assertEquals("value", this.helper.mapKeys(controls, "${test}", 0, replacements));
@@ -99,12 +99,12 @@ public class TemplateHelperTest
 		assertEquals("VALUEavalue", this.helper.mapKeys(controls, "${test1}a${test}", 0, replacements));
 		assertEquals("valueaVALUE", this.helper.mapKeys(controls, "${test}a${test1}", 0, replacements));
 	}
-	
+
 	private static class FakeFiler implements Filer
 	{
 		private final String validName;
 		private FakeFileObject file;
-		
+
 		public FakeFiler(String validName)
 		{
 			this.validName = validName;
@@ -146,15 +146,15 @@ public class TemplateHelperTest
 			Assert.fail("Illegal method call");
 			return null;
 		}
-		
+
 	}
-	
+
 	private static class FakeFileObject implements JavaFileObject
 	{
 		private final String name;
 		private StringWriter writer;
 		private ByteArrayOutputStream outputStream;
-		
+
 		public FakeFileObject(String name)
 		{
 			this.name = name;
@@ -163,7 +163,7 @@ public class TemplateHelperTest
 		private String getOutput()
 		{
 			assertTrue(this.writer != null ^ this.outputStream != null);
-			
+
 			if (this.outputStream != null)
 			{
 				byte[] data = this.outputStream.toByteArray();
@@ -183,7 +183,7 @@ public class TemplateHelperTest
 				return this.writer.toString();
 			}
 		}
-		
+
 		@Override
 		public URI toUri()
 		{
@@ -246,8 +246,7 @@ public class TemplateHelperTest
 		@Override
 		public boolean delete()
 		{
-			Assert.fail("Illegal method call");
-			return false;
+			return true;
 		}
 
 		@Override
@@ -277,7 +276,7 @@ public class TemplateHelperTest
 			Assert.fail("Illegal method call");
 			return null;
 		}
-		
+
 	}
-	
+
 }
