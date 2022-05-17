@@ -19,7 +19,7 @@ ext {
 	libVersion = "$apiVersion-1.0"
 	processorVersion = "$apiVersion-1.0"
 	group = 'fr.max2.annotated'
-	archivesBaseName = 'Annotated'
+	baseProjectName = 'Annotated'
 	javaVersion = 17
 }
 

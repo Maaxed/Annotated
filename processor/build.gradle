@@ -2,13 +2,14 @@ plugins {
 	id 'java'
 }
 
+ext {
+	projectName = "$rootProject.baseProjectName-Processor"
+	version = rootProject.processorVersion
+}
+apply from: rootProject.file('/configure_java.gradle')
 
-version = rootProject.processorVersion
+
 group = "${rootProject.group}.processor"
-archivesBaseName = "$rootProject.archivesBaseName-Processor"
-eclipse.project.name = 'Annotated-Processor'
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaVersion)
 
 repositories {
 	mavenCentral()

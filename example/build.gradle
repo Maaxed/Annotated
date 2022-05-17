@@ -1,13 +1,17 @@
+plugins {
+	id 'com.diffplug.eclipse.apt' version '3.36.2'
+}
+
+ext {
+	projectName = "$rootProject.baseProjectName-Example"
+	version = rootProject.apiVersion
+}
 apply from: rootProject.file('/forge_dependency.gradle')
 
-
-version = rootProject.apiVersion
 group = "${rootProject.group}.example"
-archivesBaseName = "$rootProject.archivesBaseName-Example"
-eclipse.project.name = 'Annotated-Example'
 
 dependencies {
-	implementation project(':api')
+	compileOnly project(':api')
 	implementation project(':lib')
 	annotationProcessor project(':processor')
 }
@@ -44,24 +48,14 @@ minecraft {
 		}
 	}
 }
-/*
+
 eclipse {
-	jdt.apt.genSrcDir = file('src/generated/java')
+	// Set the location of the generated source files
+	jdt.apt.genSrcDir = file('src-gen/main/java')
+	jdt.apt.genTestSrcDir = file('src-gen/test/java')
+
+	// Set the output of the generated classes
 	classpath.file.whenMerged {
 		entries.findAll { it.kind == 'output' } *.path = 'bin/main'
-	}	
-}*/
-
-jar {
-	manifest {
-		attributes([
-			'Specification-Title': 'Annotated-Example',
-			'Specification-Vendor': 'LeBossMax2',
-			'Specification-Version': '1',
-			'Implementation-Title': project.name,
-			'Implementation-Version': "${version}",
-			'Implementation-Vendor' :'LeBossMax2',
-			'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-		])
 	}
 }

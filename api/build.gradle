@@ -2,10 +2,11 @@ plugins {
 	id 'java'
 }
 
+ext {
+	projectName = "$rootProject.baseProjectName-API"
+	version = rootProject.apiVersion
+}
+apply from: rootProject.file('/configure_java.gradle')
 
-version = rootProject.apiVersion
+
 group = "${rootProject.group}.api"
-archivesBaseName = "$rootProject.archivesBaseName-API"
-eclipse.project.name = 'Annotated-API'
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaVersion)

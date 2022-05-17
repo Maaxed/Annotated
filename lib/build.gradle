@@ -1,11 +1,11 @@
+ext {
+	projectName = "$rootProject.baseProjectName-Lib"
+	version = rootProject.libVersion
+}
 apply from: rootProject.file('/forge_dependency.gradle')
 
-
-version = rootProject.libVersion
 group = "${rootProject.group}.lib"
-archivesBaseName = "$rootProject.archivesBaseName-Lib"
-eclipse.project.name = 'Annotated-Lib'
 
 dependencies {
-	implementation project(':api')
+	testImplementation 'junit:junit:4.13'
 }

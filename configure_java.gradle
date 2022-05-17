@@ -1,0 +1,19 @@
+version = project.ext.version
+archivesBaseName = project.ext.projectName
+eclipse.project.name = project.ext.projectName
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(rootProject.javaVersion)
+
+jar {
+	manifest {
+		attributes([
+			'Specification-Title': project.ext.projectName,
+			'Specification-Vendor': 'LeBossMax2',
+			'Specification-Version': '1',
+			'Implementation-Title': project.ext.projectName,
+			'Implementation-Version': project.ext.version,
+			'Implementation-Vendor' :'LeBossMax2',
+			'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+}
