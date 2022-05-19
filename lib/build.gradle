@@ -9,3 +9,11 @@ group = "${rootProject.group}.lib"
 dependencies {
 	testImplementation 'junit:junit:4.13'
 }
+
+jar {
+	manifest {
+		attributes([
+			"FMLModType": "GAMELIBRARY"
+		])
+	}
+}

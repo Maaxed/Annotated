@@ -48,11 +48,11 @@ annotationProcessor 'com.github.LeBossMax2:Annotated:MC1.16.4-v2.0'
 
 ### With Eclipse
 
-Eclipse requires addition configuration. Using the ``net.ltgt.apt-eclipse`` plugin is recommended to configure it more easily:
+Eclipse requires addition configuration. Using the ``com.diffplug.eclipse.apt`` plugin is recommended to configure it more easily:
 
 ```groovy
 plugins {
-    id 'net.ltgt.apt-eclipse' version '0.21'
+    id 'com.diffplug.eclipse.apt' version '3.36.2'
 }
 ```
 
@@ -60,9 +60,13 @@ The output path of the annotation processor must be configured like so:
 
 ```groovy
 eclipse {
-	jdt.apt.genSrcDir = file('src/generated/java') // Set the path for the generated source code (optional)
+	// Set the location of the generated source files
+	jdt.apt.genSrcDir = file('src-gen/main/java')
+	jdt.apt.genTestSrcDir = file('src-gen/test/java')
+
+	// Set the output of the generated classes
 	classpath.file.whenMerged {
-		entries.findAll { it.kind == 'output' } *.path = 'bin/main' // Set the path for the generated classes to be accessible by Forge
+		entries.findAll { it.kind == 'output' } *.path = 'bin/main'
 	}
 }
 ```
@@ -75,4 +79,4 @@ configurations {
 }
 ```
 
-Finally running ``./gradlew eclipseJdtApt eclipseFactorypath`` will configure eclipse to use the annotation processor.
+Finally running ``./gradlew eclipseJdtApt eclipseJdt eclipseFactorypath`` will configure eclipse to use the annotation processor.
