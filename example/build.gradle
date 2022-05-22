@@ -10,10 +10,16 @@ apply from: rootProject.file('/forge_dependency.gradle')
 
 group = "${rootProject.group}.example"
 
+repositories {
+	flatDir {
+		dirs 'libs'
+	}
+}
+
 dependencies {
-	compileOnly project(':api')
-	implementation project(':lib')
-	annotationProcessor project(':processor')
+	compileOnly "fr.max2.annotated:Annotated-API:${rootProject.apiVersion}"
+	implementation "fr.max2.annotated:Annotated-Lib:${rootProject.libVersion}"
+	annotationProcessor "fr.max2.annotated:Annotated-Processor:${rootProject.processorVersion}"
 }
 
 
@@ -49,6 +55,8 @@ minecraft {
 	}
 }
 
+eclipseFactorypath.mustRunAfter(cleanEclipseFactorypath)
+
 eclipse {
 	// Set the location of the generated source files
 	jdt.apt.genSrcDir = file('src-gen/main/java')
@@ -58,4 +66,6 @@ eclipse {
 	classpath.file.whenMerged {
 		entries.findAll { it.kind == 'output' } *.path = 'bin/main'
 	}
+
+	synchronizationTasks eclipseJdtApt, eclipseJdt, cleanEclipseFactorypath, eclipseFactorypath
 }

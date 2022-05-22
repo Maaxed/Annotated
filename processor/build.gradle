@@ -15,10 +15,20 @@ repositories {
 	mavenCentral()
 }
 
-dependencies {
-	testImplementation 'junit:junit:4.13'
-	implementation 'com.google.code.findbugs:jsr305:3.0.2'
-	implementation project(':api')
+configurations {
+	embed
+	implementation.extendsFrom(embed)
 }
 
-tasks.named('test') { dependsOn(project(':validation').tasks.named('run')) }
+dependencies {
+	compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+	embed project(':api')
+
+	testImplementation 'junit:junit:4.13'
+}
+
+// Execute validation code when running tests
+test.dependsOn(':validation:run')
+
+// Include the API inside tha JAR
+jar.from configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
