@@ -1,5 +1,6 @@
 plugins {
 	id 'com.diffplug.eclipse.apt' version '3.36.2'
+	id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 ext {
@@ -9,19 +10,6 @@ ext {
 apply from: rootProject.file('/forge_dependency.gradle')
 
 group = "${rootProject.group}.example"
-
-repositories {
-	flatDir {
-		dirs 'libs'
-	}
-}
-
-dependencies {
-	compileOnly "fr.max2.annotated:Annotated-API:${rootProject.apiVersion}"
-	implementation "fr.max2.annotated:Annotated-Lib:${rootProject.libVersion}"
-	annotationProcessor "fr.max2.annotated:Annotated-Processor:${rootProject.processorVersion}"
-}
-
 
 minecraft {
 	runs {
@@ -53,6 +41,35 @@ minecraft {
 			}
 		}
 	}
+}
+
+repositories {
+	flatDir {
+		dirs 'libs'
+	}
+}
+
+configurations {
+    shade
+    implementation.extendsFrom(shade)
+}
+
+dependencies {
+	compileOnly "fr.max2.annotated:Annotated-API:${rootProject.apiVersion}"
+	shade "fr.max2.annotated:Annotated-Lib:${rootProject.libVersion}"
+	annotationProcessor "fr.max2.annotated:Annotated-Processor:${rootProject.processorVersion}"
+}
+
+shadowJar {
+    configurations = [project.configurations.shade]
+}
+
+reobf {
+	shadowJar {}
+}
+
+artifacts {
+    archives tasks.shadowJar
 }
 
 eclipseFactorypath.mustRunAfter(cleanEclipseFactorypath)

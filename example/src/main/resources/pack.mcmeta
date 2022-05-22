@@ -1,6 +1,6 @@
 {
     "pack": {
-        "description": "packeta test resources",
-        "pack_format": 4
+        "description": "Annotated Example resources",
+        "pack_format": 9
     }
 }
