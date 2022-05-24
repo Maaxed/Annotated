@@ -1,4 +1,4 @@
-package fr.max2.annotated.test.network.adapter;
+package fr.max2.annotated.example.network.adapter;
 
 import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;

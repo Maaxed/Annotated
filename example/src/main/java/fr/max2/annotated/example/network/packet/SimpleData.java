@@ -1,4 +1,4 @@
-package fr.max2.annotated.test.network.packet;
+package fr.max2.annotated.example.network.packet;
 
 import fr.max2.annotated.api.network.ServerPacket;
 import net.minecraft.Util;

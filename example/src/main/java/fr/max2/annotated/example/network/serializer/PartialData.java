@@ -1,4 +1,4 @@
-package fr.max2.annotated.test.network.serializer;
+package fr.max2.annotated.example.network.serializer;
 
 import fr.max2.annotated.api.network.IgnoreField;
 import fr.max2.annotated.api.network.NetworkSerializable;

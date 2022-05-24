@@ -1,4 +1,4 @@
-package fr.max2.annotated.test.util;
+package fr.max2.annotated.example.util;
 
 
 public enum EnumTest

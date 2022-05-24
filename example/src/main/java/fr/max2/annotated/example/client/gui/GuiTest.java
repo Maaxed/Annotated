@@ -1,7 +1,7 @@
-package fr.max2.annotated.test.client.gui;
+package fr.max2.annotated.example.client.gui;
 
-import fr.max2.annotated.test.ModTestAnnotated;
-import fr.max2.annotated.test.network.packet.SimpleData_Packets;
+import fr.max2.annotated.example.ModTestAnnotated;
+import fr.max2.annotated.example.network.packet.SimpleData_Packets;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;

@@ -1,11 +1,12 @@
-package fr.max2.annotated.test.init;
+package fr.max2.annotated.example.init;
 
 import org.lwjgl.glfw.GLFW;
 
+import fr.max2.annotated.example.ModTestAnnotated;
+import fr.max2.annotated.example.client.gui.GuiTest;
+
 import com.mojang.blaze3d.platform.InputConstants;
 
-import fr.max2.annotated.test.ModTestAnnotated;
-import fr.max2.annotated.test.client.gui.GuiTest;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;

@@ -1,9 +1,7 @@
-package fr.max2.annotated.test;
+package fr.max2.annotated.example;
 
-import static fr.max2.annotated.test.ModTestAnnotated.*;
-
-import fr.max2.annotated.test.init.ModKeyBindings;
-import fr.max2.annotated.test.network.packet.SimpleData_Packets;
+import fr.max2.annotated.example.init.ModKeyBindings;
+import fr.max2.annotated.example.network.packet.SimpleData_Packets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -15,7 +13,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-@Mod(MOD_ID)
+@Mod(ModTestAnnotated.MOD_ID)
 public class ModTestAnnotated
 {
 	public static final String MOD_ID = "annotatedexample";

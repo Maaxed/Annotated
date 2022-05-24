@@ -12,6 +12,7 @@ loaderVersion="[40,)" #mandatory This is typically bumped every Minecraft versio
 license="All rights reserved"
 # A URL to refer people to when problems occur with this mod
 # issueTrackerURL="http://my.issue.tracker/" #optional
+
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
@@ -34,6 +35,17 @@ authors="LeBossMax2" #optional
 description='''
 A mod to test the Annotated tool
 '''
+
+[[mods]]
+modId="annotatedminimalexample"
+version="${file.jarVersion}"
+displayName="Annotated Minimal Example Mod"
+displayURL="https://github.com/LeBossMax2/Annotated/"
+authors="LeBossMax2"
+description='''
+A minimal mod to showcase the Annotated tool
+'''
+
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.annotatedexample]] #optional
     # the modid of the dependency
@@ -48,6 +60,19 @@ A mod to test the Annotated tool
     side="BOTH"
 # Here's another dependency
 [[dependencies.annotatedexample]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.18.2,1.19)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.annotatedminimalexample]]
+    modId="forge"
+    mandatory=true
+    versionRange="[40,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.annotatedminimalexample]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.18.2,1.19)"

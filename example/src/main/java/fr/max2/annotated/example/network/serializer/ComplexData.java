@@ -1,4 +1,4 @@
-package fr.max2.annotated.test.network.serializer;
+package fr.max2.annotated.example.network.serializer;
 
 import java.util.Collection;
 import java.util.Date;
@@ -15,7 +15,7 @@ import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 
 import fr.max2.annotated.api.network.NetworkSerializable;
-import fr.max2.annotated.test.util.EnumTest;
+import fr.max2.annotated.example.util.EnumTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
