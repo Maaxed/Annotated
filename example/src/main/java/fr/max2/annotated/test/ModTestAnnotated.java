@@ -3,7 +3,7 @@ package fr.max2.annotated.test;
 import static fr.max2.annotated.test.ModTestAnnotated.*;
 
 import fr.max2.annotated.test.init.ModKeyBindings;
-import fr.max2.annotated.test.network.packet.SimpleData_simpleIntData;
+import fr.max2.annotated.test.network.packet.SimpleData_Packets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -37,7 +37,7 @@ public class ModTestAnnotated
 
 	public static void preCommonInit(FMLCommonSetupEvent event)
 	{
-	    SimpleData_simpleIntData.registerTo(CHANNEL, 0);
+	    SimpleData_Packets.sendInt.registerTo(CHANNEL, 0);
 	}
 
 	public static void preInit(FMLClientSetupEvent event)

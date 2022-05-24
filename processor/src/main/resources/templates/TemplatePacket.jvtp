@@ -1,15 +1,19 @@
-package ${package};
 
 ${annotations}
-@javax.annotation.processing.Generated("fr.max2.annotated.processor.AnnotatedProcessor")
-public record ${packetName}
+public static record ${packetName}
 (
-	${fieldDeclaration}
+	${packetParameters}
 )
 {
+	${if adapter}
+		private static final fr.max2.annotated.lib.network.adapter.NetworkAdapter<${packetName}, ${dataClassName}> ADAPTER = ${adapter};
+	${end}
+
 	private static void handle(${packetName} msg, java.util.function.Supplier<net.minecraftforge.network.NetworkEvent.Context> ctxSup)
 	{	
-		${targetName}.${function}(${parameters});
+		${targetName}.${function}(
+			${parameters}
+		);
 	}
 
 	public static void registerTo(net.minecraftforge.network.simple.SimpleChannel channel, int index)
@@ -23,10 +27,23 @@ public record ${packetName}
 			${end}
 			.setScheduled(${sheduled})
 			${if adapter}
-				.setConsumer(${adapter}, ${packetName}::handle)
+				.setConsumer(ADAPTER, ${packetName}::handle)
 			${else}
 				.setConsumer(${packetName}::handle)
 			${end}
 			.register(channel, index);
 	}
+}
+
+public static ${dataClassName} ${function}(${packetParameters})
+{
+	var packet = new ${packetName}(
+		${packetParameterNames}
+	);
+
+	${if adapter}
+		return ${packetName}.ADAPTER.toNetwork(packet);
+	${else}
+		return packet;
+	${end}
 }

@@ -41,6 +41,7 @@ public final class SimpleClassSerializer
 	// TODO [v3.1] allow serializing specific implementations
 	public static final NetworkSerializer<Component> TEXT_COMPONENT = new DelegatedSerializer<>(FriendlyByteBuf::writeComponent, FriendlyByteBuf::readComponent);
 
+	// TODO [v3.1] Add support for miss and other types of HitResult
 	public static final NetworkSerializer<BlockHitResult> BLOCK_HIT_RESULT = new DelegatedSerializer<>(FriendlyByteBuf::writeBlockHitResult, FriendlyByteBuf::readBlockHitResult);
 
 	public static final NetworkSerializer<BitSet> BITSET = new DelegatedSerializer<>(FriendlyByteBuf::writeBitSet, FriendlyByteBuf::readBitSet);

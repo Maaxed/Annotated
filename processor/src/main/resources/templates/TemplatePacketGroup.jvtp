@@ -1,0 +1,10 @@
+package ${package};
+
+@javax.annotation.processing.Generated("fr.max2.annotated.processor.AnnotatedProcessor")
+public final class ${className}
+{
+	private ${className}()
+	{ }
+
+	${packets}
+}

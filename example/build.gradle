@@ -62,6 +62,8 @@ dependencies {
 
 shadowJar {
     configurations = [project.configurations.shade]
+
+	relocate 'fr.max2.annotated.lib', 'fr.max2.annotated.test.repack.fr.max2.annotated.lib'
 }
 
 reobf {

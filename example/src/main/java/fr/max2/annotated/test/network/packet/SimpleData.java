@@ -9,14 +9,14 @@ import net.minecraft.world.entity.Entity;
 public class SimpleData
 {
 	@ServerPacket
-	public static void simpleIntData(ServerPlayer sender, int myInt)
+	public static void sendInt(ServerPlayer sender, int myInt)
 	{
 		sender.sendMessage(new TextComponent("MyInt  is " + myInt), Util.NIL_UUID);
 		System.out.println("MyInt is " + myInt);
 	}
 
 	@ServerPacket
-	public static void simpleEntityData(Entity myEntity)
+	public static void sendEntity(Entity myEntity)
 	{
 		System.out.println("MyEntity !");
 	}

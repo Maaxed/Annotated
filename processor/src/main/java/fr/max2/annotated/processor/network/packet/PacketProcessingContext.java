@@ -1,8 +1,12 @@
 package fr.max2.annotated.processor.network.packet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -19,6 +23,7 @@ public class PacketProcessingContext implements IProcessingUnit
 	public final TypeElement enclosingClass;
 	private final List<PacketProcessingUnit> packets = new ArrayList<>();
 	public final ClassName enclosingClassName;
+	public final ClassName packetGroupClassName;
 	private ProcessingStatus status = ProcessingStatus.SUCESSS;
 
 	public PacketProcessingContext(ProcessingTools tools, TypeElement enclosingClass)
@@ -26,6 +31,28 @@ public class PacketProcessingContext implements IProcessingUnit
 	    this.tools = tools;
 	    this.enclosingClass = enclosingClass;
 	    this.enclosingClassName = tools.naming.buildClassName(enclosingClass);
+		this.packetGroupClassName = getPacketGroupName(this.enclosingClassName, "");
+	}
+
+	public static ClassName getPacketGroupName(ClassName enclosingClassName, String userDefinedName)
+	{
+		String className = userDefinedName;
+
+		int sep = className.lastIndexOf('.');
+
+		String packageName = enclosingClassName.packageName();
+
+		if (sep != -1)
+		{
+			className = className.substring(sep + 1);
+			packageName = className.substring(0, sep);
+		}
+		else if (className.isEmpty())
+		{
+			className = enclosingClassName.shortName().replace('.', '_') + "_Packets";
+		}
+
+		return new ClassName(packageName, className);
 	}
 
 	public ProcessingStatus getStatus()
@@ -49,15 +76,23 @@ public class PacketProcessingContext implements IProcessingUnit
 	@Override
 	public ProcessingStatus process()
 	{
+		List<String> lines = new ArrayList<>();
 	    // Generate each packet class
 	    for (PacketProcessingUnit packet : this.packets)
 	    {
-	        packet.process();
-	        if (packet.getStatus() != ProcessingStatus.SUCESSS)
+	        ProcessingStatus status = packet.process(lines::add);
+	        if (status != ProcessingStatus.SUCESSS)
 	        {
-	        	return packet.getStatus();
+	        	return status;
 	        }
 	    }
+
+		Map<String, String> replacements = new HashMap<>();
+		replacements.put("package", this.packetGroupClassName.packageName());
+		replacements.put("className", this.packetGroupClassName.shortName());
+		replacements.put("packets", lines.stream().map(line -> line + System.lineSeparator()).collect(Collectors.joining()));
+
+		this.tools.templates.writeFileWithLog(this.packetGroupClassName.qualifiedName(), "templates/TemplatePacketGroup.jvtp", replacements, this.enclosingClass, Optional.empty(), this.enclosingClass);
 
 	    return ProcessingStatus.SUCESSS;
 	}
