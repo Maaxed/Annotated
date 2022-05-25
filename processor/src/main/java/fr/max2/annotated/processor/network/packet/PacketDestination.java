@@ -1,25 +1,22 @@
 package fr.max2.annotated.processor.network.packet;
 
-import java.lang.annotation.Annotation;
-
-import fr.max2.annotated.api.network.ClientPacket;
-import fr.max2.annotated.api.network.ServerPacket;
+import fr.max2.annotated.api.network.Packet;
 
 /**
  * Represents the logical sides a packet can be sent to
  */
 public enum PacketDestination
 {
-	CLIENT("Client", ClientPacket.class),
-	SERVER("Server", ServerPacket.class);
+	CLIENT("Client", Packet.Destination.CLIENT),
+	SERVER("Server", Packet.Destination.SERVER);
 
 	private final String name;
-	private final Class<? extends Annotation> annotation;
+	private final Packet.Destination annotationValue;
 
-	private PacketDestination(String name, Class<? extends Annotation> annotation)
+	private PacketDestination(String name, Packet.Destination annotationValue)
 	{
 		this.name = name;
-		this.annotation = annotation;
+		this.annotationValue = annotationValue;
 	}
 
 	public PacketDestination opposite()
@@ -31,13 +28,13 @@ public enum PacketDestination
 		case SERVER:
 			return CLIENT;
 		default:
-			throw new IllegalStateException("Unknown packet direction '" + this.toString() + "'");
+			throw new IllegalStateException("Unknown packet destination '" + this.toString() + "'");
 		}
 	}
 
-	public Class<? extends Annotation> getAnnotationClass()
+	public Packet.Destination getAnnotationValue()
 	{
-		return this.annotation;
+		return annotationValue;
 	}
 
 	public boolean isClient()
@@ -55,4 +52,13 @@ public enum PacketDestination
 		return this.name;
 	}
 
+	public static PacketDestination fromAnnotationValue(Packet.Destination annotationValue)
+	{
+		return switch (annotationValue)
+		{
+			case CLIENT -> CLIENT;
+			case SERVER -> SERVER;
+			default -> null;
+		};
+	}
 }

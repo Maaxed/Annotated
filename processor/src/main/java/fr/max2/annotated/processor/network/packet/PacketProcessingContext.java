@@ -12,6 +12,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
+import fr.max2.annotated.api.network.Packet;
 import fr.max2.annotated.processor.model.processor.IProcessingUnit;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingStatus;
@@ -60,9 +61,9 @@ public class PacketProcessingContext implements IProcessingUnit
 		return this.status;
 	}
 
-	public void addPacket(ExecutableElement method, PacketDestination dest, Optional<? extends AnnotationMirror> annotation)
+	public void addPacket(ExecutableElement method, Optional<? extends AnnotationMirror> annotation, Packet annotationData)
 	{
-	    this.packets.add(new PacketProcessingUnit(this.tools, this, method, dest, annotation,
+	    this.packets.add(new PacketProcessingUnit(this.tools, this, method, annotation, annotationData,
 	    	this.tools.elements.getAnnotationMirror(method, NetworkAdaptable.class), method.getAnnotation(NetworkAdaptable.class),
 	    	this.tools.elements.getAnnotationMirror(method, NetworkSerializable.class), method.getAnnotation(NetworkSerializable.class)));
 	}

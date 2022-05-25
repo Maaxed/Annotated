@@ -17,6 +17,7 @@ import javax.lang.model.type.TypeMirror;
 
 import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
+import fr.max2.annotated.api.network.Packet;
 import fr.max2.annotated.processor.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.model.SimpleParameterListBuilder;
 import fr.max2.annotated.processor.network.adapter.AdapterProcessingUnit;
@@ -43,15 +44,15 @@ public class PacketProcessingUnit
 	public final ClassName adapterClassName;
 	public final ClassName adaptedClassName;
 
-	public PacketProcessingUnit(ProcessingTools tools, PacketProcessingContext context, ExecutableElement packetMethod, PacketDestination dest,
-		Optional<? extends AnnotationMirror> annotation,
+	public PacketProcessingUnit(ProcessingTools tools, PacketProcessingContext context, ExecutableElement packetMethod,
+		Optional<? extends AnnotationMirror> annotation, Packet annotationData,
 		Optional<? extends AnnotationMirror> adaptableAnnotation, NetworkAdaptable adaptableData,
 		Optional<? extends AnnotationMirror> serializableAnnotation, NetworkSerializable serializableData)
 	{
 		this.tools = tools;
         this.context = context;
         this.packetMethod = packetMethod;
-        this.destination = dest;
+        this.destination = PacketDestination.fromAnnotationValue(annotationData.value());
         this.annotation = annotation;
         this.adaptableAnnotation = adaptableAnnotation;
         this.serializableAnnotation = serializableAnnotation;
@@ -62,16 +63,10 @@ public class PacketProcessingUnit
 		this.adaptedClassName = AdapterProcessingUnit.getAdaptedName(this.packetClassName, adaptableData);
 	}
 
-	public static void create(ProcessingTools tools, ExecutableElement method, PacketDestination dest, Function<TypeElement, PacketProcessingContext> contextProvider) throws ProcessorException
+	public static void create(ProcessingTools tools, ExecutableElement method, Function<TypeElement, PacketProcessingContext> contextProvider) throws ProcessorException
 	{
-		Optional<? extends AnnotationMirror> annotation = tools.elements.getAnnotationMirror(method, dest.getAnnotationClass());
-
-        if (method.getAnnotation(dest.opposite().getAnnotationClass()) != null)
-        {
-			throw ProcessorException.builder()
-				.context(method, annotation)
-				.build("A packet cannot be used in both directions !");
-        }
+		Optional<? extends AnnotationMirror> annotation = tools.elements.getAnnotationMirror(method, Packet.class);
+		Packet annotationData = method.getAnnotation(Packet.class);
 
         TypeElement enclosingClass = tools.elements.asTypeElement(method.getEnclosingElement());
         switch (enclosingClass.getNestingKind())
@@ -109,7 +104,7 @@ public class PacketProcessingUnit
         }
 
         PacketProcessingContext context = contextProvider.apply(enclosingClass);
-        context.addPacket(method, dest, annotation);
+        context.addPacket(method, annotation, annotationData);
 	}
 
 	public ProcessingStatus process(IOConsumer<String> lines)

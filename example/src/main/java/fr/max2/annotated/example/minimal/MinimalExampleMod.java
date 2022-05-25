@@ -4,7 +4,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 
 import org.lwjgl.glfw.GLFW;
 
-import fr.max2.annotated.api.network.ServerPacket;
+import fr.max2.annotated.api.network.Packet;
+import fr.max2.annotated.api.network.Packet.Destination;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,7 +51,7 @@ public class MinimalExampleMod
 		}
 	}
 
-	@ServerPacket
+	@Packet(Destination.SERVER)
 	public static void sendInt(ServerPlayer sender, int myInt)
 	{
 		System.out.println("Function called on " + (sender.level.isClientSide ? "CLIENT" : "SERVER"));

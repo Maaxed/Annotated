@@ -7,8 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import fr.max2.annotated.api.network.ClientPacket;
-import fr.max2.annotated.api.network.ServerPacket;
+import fr.max2.annotated.api.network.Packet;
 
 public class PacketDestinationTest
 {
@@ -23,8 +22,8 @@ public class PacketDestinationTest
 	@Test
 	public void testAnnotationClass()
 	{
-		assertEquals(ClientPacket.class, CLIENT.getAnnotationClass());
-		assertEquals(ServerPacket.class, SERVER.getAnnotationClass());
+		assertEquals(Packet.Destination.CLIENT, CLIENT.getAnnotationValue());
+		assertEquals(Packet.Destination.SERVER, SERVER.getAnnotationValue());
 	}
 	
 	@Test
