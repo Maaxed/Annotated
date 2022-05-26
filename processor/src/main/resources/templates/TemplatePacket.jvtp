@@ -35,7 +35,9 @@ public static record ${packetName}
 	}
 }
 
-public static ${dataClassName} ${function}(${packetParameters})
+public static ${dataClassName} ${function}(
+	${packetParameters}
+)
 {
 	var packet = new ${packetName}(
 		${packetParameterNames}

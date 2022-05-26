@@ -30,7 +30,7 @@ public class FileCodeConsumer implements ICodeConsumer, Closeable
 			file = tools.filer.createSourceFile(className, originatingClasses);
 			try (FileCodeConsumer codeConsumer = new FileCodeConsumer(file.openWriter()))
 			{
-				code.pipe(codeConsumer);
+				code.pipe(new CodeFormatter(codeConsumer));
 			}
 		}
 		catch (Exception e)
