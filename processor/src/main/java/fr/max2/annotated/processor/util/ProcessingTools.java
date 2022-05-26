@@ -33,8 +33,8 @@ public class ProcessingTools
 		this.elements = new ExtendedElements(this, env.getElementUtils());
 		this.types = new ExtendedTypes(this, env.getTypeUtils());
 		this.naming = new NamingUtils(this);
-		this.serializerCoders = new SerializerCoderFinder(this);
-		this.adapterCoders = new AdapterCoderFinder(this);
+		this.serializerCoders = env.getElementUtils() == null ? null : new SerializerCoderFinder(this);
+		this.adapterCoders = env.getElementUtils() == null ? null : new AdapterCoderFinder(this);
 		this.templates = new TemplateHelper(this);
 	}
 	

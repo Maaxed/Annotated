@@ -1,5 +1,6 @@
 package fr.max2.annotated.processor.network.serializer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -34,14 +35,14 @@ public class GenericCoder extends SerializationCoder
 	}
 
 	@Override
-	public void codeSerializerInstance(ICodeConsumer output)
+	public void codeSerializerInstance(ICodeConsumer output) throws IOException
 	{
 		SimpleParameterListBuilder builder = new SimpleParameterListBuilder();
 		this.parameterCoder.pipe(builder);
 		this.argCoders.stream().map(SerializationCoder::codeSerializerInstanceToString).forEach(builder::add);
 		output.write(this.serializer);
 		output.writeLine(".of(");
-		builder.build(output);
+		builder.pipe(output);
 		output.write(")");
 	}
 	

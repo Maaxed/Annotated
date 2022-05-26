@@ -1,11 +1,8 @@
 package fr.max2.annotated.processor.network.adapter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
@@ -35,6 +32,7 @@ import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.RoundException;
+import fr.max2.annotated.processor.util.template.TemplateHelper.ReplacementMap;
 
 public class AdapterProcessingUnit implements IProcessingUnit
 {
@@ -245,27 +243,25 @@ public class AdapterProcessingUnit implements IProcessingUnit
 		if (!hasAnyConversion)
 			this.tools.log(Kind.WARNING, "The type '" + this.adaptableClass + "' has no data to convert ! Please remove the " + NetworkAdaptable.class.getName() + " annotation", this.adaptableClass, this.annotation);
 
-		String ls = System.lineSeparator();
-
 		// Write adapted
-		Map<String, String> adaptedRepl = new HashMap<>();
-		adaptedRepl.put("package", this.adaptedClassName.packageName());
-		adaptedRepl.put("adaptedName", this.adaptedClassName.shortName());
-		adaptedRepl.put("annotations", this.serializableAnnotation.map(Object::toString).orElse(""));
-		adaptedRepl.put("fieldDeclaration", adaptedCode.buildMultiLines());
+		ReplacementMap adaptedRepl = new ReplacementMap();
+		adaptedRepl.putString("package", this.adaptedClassName.packageName());
+		adaptedRepl.putString("adaptedName", this.adaptedClassName.shortName());
+		adaptedRepl.putString("annotations", this.serializableAnnotation.map(Object::toString).orElse(""));
+		adaptedRepl.putCode("fieldDeclaration", adaptedCode);
 
 		this.tools.templates.writeFileWithLog(this.adaptedClassName.qualifiedName(), "templates/TemplateAdapted.jvtp", adaptedRepl, this.adaptableClass, this.annotation, this.adaptableClass);
 
 		// Write adapter
-		Map<String, String> adapterRepl = new HashMap<>();
-		adapterRepl.put("package", this.adapterClassName.packageName());
-		adapterRepl.put("adapterName", this.adapterClassName.shortName());
-		adapterRepl.put("targetFromName", this.adaptableClassName.qualifiedName());
-		adapterRepl.put("targetToName", this.adaptedClassName.qualifiedName());
-		adapterRepl.put("fieldDeclaration", serializerFields.stream().map(f -> "\tprivate " + f.type + " " + f.uniqueName + ";").collect(Collectors.joining(ls)));
-		adapterRepl.put("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";").collect(Collectors.joining(ls)));
-		adapterRepl.put("adaptToNetwork", toNetworkCode.buildMultiLines());
-		adapterRepl.put("adaptFromNetwork", fromNetworkCode.buildMultiLines());
+		ReplacementMap adapterRepl = new ReplacementMap();
+		adapterRepl.putString("package", this.adapterClassName.packageName());
+		adapterRepl.putString("adapterName", this.adapterClassName.shortName());
+		adapterRepl.putString("targetFromName", this.adaptableClassName.qualifiedName());
+		adapterRepl.putString("targetToName", this.adaptedClassName.qualifiedName());
+		adapterRepl.putLines("fieldDeclaration", serializerFields.stream().map(f -> "\tprivate " + f.type + " " + f.uniqueName + ";"));
+		adapterRepl.putLines("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";"));
+		adapterRepl.putCode("adaptToNetwork", toNetworkCode);
+		adapterRepl.putCode("adaptFromNetwork", fromNetworkCode);
 
 		this.tools.templates.writeFileWithLog(this.adapterClassName.qualifiedName(), "templates/TemplateAdapter.jvtp", adapterRepl, this.adaptableClass, this.annotation, this.adaptableClass);
 	}

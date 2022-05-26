@@ -12,8 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
@@ -26,42 +25,51 @@ import javax.tools.JavaFileObject;
 import org.junit.Assert;
 import org.junit.Test;
 
+import fr.max2.annotated.processor.model.SimpleCodeBuilder;
+import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.TemplateException;
+import fr.max2.annotated.processor.util.model.FakeProcessingEnvironment;
 import fr.max2.annotated.processor.util.template.ITemplateControl;
-import fr.max2.annotated.processor.util.template.TemplateHelper;
+import fr.max2.annotated.processor.util.template.TemplateHelper.ReplacementMap;
 
 
 public class TemplateHelperTest
 {
-	private TemplateHelper helper = new TemplateHelper(null);
-
 	@Test
 	public void testWriteFileFromTemplate()
 	{
-		FakeFiler filer1 = new FakeFiler("Output");
-		Map<String, String> replacements = new HashMap<>();
+		FakeProcessingEnvironment processingEnv = new FakeProcessingEnvironment();
+		processingEnv.filer = new FakeFiler("Output");
+		ProcessingTools tools = new ProcessingTools(processingEnv);
 
-		assertThrows(TemplateException.class, () ->
-			this.helper.writeFile(filer1, "Output", "templates/TemplateTest.jvtp", replacements));
+		ReplacementMap replacements = new ReplacementMap();
 
-		FakeFiler filer2 = new FakeFiler("Output2");
-		replacements.put("blue", "violets");
+		ProcessingTools tools1 = tools;
+		assertThrows(ProcessorException.class, () ->
+			tools1.templates.writeFileWithLog("Output", "templates/TemplateTest.jvtp", replacements, null, Optional.empty()));
 
-		assertThrows(TemplateException.class, () ->
-			this.helper.writeFile(filer2, "Output2", "templates/TemplateTest.jvtp", replacements));
+		processingEnv.filer = new FakeFiler("Output2");
+		tools = new ProcessingTools(processingEnv);
+		replacements.putString("blue", "violets");
 
-		FakeFiler filer3 = new FakeFiler("Output3");
-		replacements.put("red", "roses");
+		ProcessingTools tools2 = tools;
+		assertThrows(ProcessorException.class, () ->
+			tools2.templates.writeFileWithLog("Output2", "templates/TemplateTest.jvtp", replacements, null, Optional.empty()));
+
+		FakeFiler filer = new FakeFiler("Output3");
+		processingEnv.filer = filer;
+		tools = new ProcessingTools(processingEnv);
+		replacements.putString("red", "roses");
 
 		try
 		{
-			this.helper.writeFile(filer3, "Output3", "templates/TemplateTest.jvtp", replacements);
+			tools.templates.writeFileWithLog("Output3", "templates/TemplateTest.jvtp", replacements, null, Optional.empty());
 			assertArrayEquals(new Object[] {"This is a test template.",
 											"The value of \"red\" is roses.",
 											"The value of \"blue\" is violets."},
-							  filer3.getOutput().split("\\R"));
+							  filer.getOutput().split("\\R"));
 		}
-		catch (IOException e)
+		catch (ProcessorException e)
 		{
 			e.printStackTrace();
 			fail();
@@ -69,35 +77,64 @@ public class TemplateHelperTest
 	}
 
 	@Test
-	public void testMapKeys()
+	public void testMapKeys() throws IOException
 	{
-		Map<String, String> replacements = new HashMap<>();
+		ProcessingTools tools = new ProcessingTools(new FakeProcessingEnvironment());
+		ReplacementMap replacements = new ReplacementMap();
 
 		ArrayDeque<ITemplateControl> controls = new ArrayDeque<>();
 
-		assertEquals("test", this.helper.mapKeys(controls, "test", 0, replacements));
-		assertEquals("$test", this.helper.mapKeys(controls, "$test", 0, replacements));
-		assertEquals("$}test{", this.helper.mapKeys(controls, "$}test{", 0, replacements));
-		assertThrows(TemplateException.class, () -> this.helper.mapKeys(controls, "${test}", 0, replacements));
+		SimpleCodeBuilder code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "test", 0, replacements);
+		assertEquals("test", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "$test", 0, replacements);
+		assertEquals("$test", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "$}test{", 0, replacements);
+		assertEquals("$}test{", code.build());
+		SimpleCodeBuilder code1 = new SimpleCodeBuilder();
+		assertThrows(TemplateException.class, () -> tools.templates.mapKeys(code1, controls, "${test}", 0, replacements));
 		//assertThrows(TemplateException.class, () -> helper.mapKeys(controls, "${${test}}", 0, replacements));
-		assertThrows(TemplateException.class, () -> this.helper.mapKeys(controls, "${test1}a${test2}", 0, replacements));
+		SimpleCodeBuilder code2 = new SimpleCodeBuilder();
+		assertThrows(TemplateException.class, () -> tools.templates.mapKeys(code2, controls, "${test1}a${test2}", 0, replacements));
 
-		replacements.put("test", "value");
+		replacements.putString("test", "value");
 
-		assertEquals("test", this.helper.mapKeys(controls, "test", 0, replacements));
-		assertEquals("$test", this.helper.mapKeys(controls, "$test", 0, replacements));
-		assertEquals("$}test{", this.helper.mapKeys(controls, "$}test{", 0, replacements));
-		assertEquals("value", this.helper.mapKeys(controls, "${test}", 0, replacements));
-		assertEquals("value", this.helper.mapKeys(controls, "${  test	}", 0, replacements));
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "test", 0, replacements);
+		assertEquals("test", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "$test", 0, replacements);
+		assertEquals("$test", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "$}test{", 0, replacements);
+		assertEquals("$}test{", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "${test}", 0, replacements);
+		assertEquals("value", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "${  test	}", 0, replacements);
+		assertEquals("value", code.build());
 		//assertEquals("${test}", mapKeys("${${test}}", 0, replacements));
-		assertEquals("valueavalue", this.helper.mapKeys(controls, "${test}a${test}", 0, replacements));
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "${test}a${test}", 0, replacements);
+		assertEquals("valueavalue", code.build());
 
-		replacements.put("test1", "VALUE");
+		replacements.putString("test1", "VALUE");
 
-		assertEquals("value", this.helper.mapKeys(controls, "${test}", 0, replacements));
-		assertEquals("VALUE", this.helper.mapKeys(controls, "${test1}", 0, replacements));
-		assertEquals("VALUEavalue", this.helper.mapKeys(controls, "${test1}a${test}", 0, replacements));
-		assertEquals("valueaVALUE", this.helper.mapKeys(controls, "${test}a${test1}", 0, replacements));
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "${test}", 0, replacements);
+		assertEquals("value", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "${test1}", 0, replacements);
+		assertEquals("VALUE", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "${test1}a${test}", 0, replacements);
+		assertEquals("VALUEavalue", code.build());
+		code = new SimpleCodeBuilder();
+		tools.templates.mapKeys(code, controls, "${test}a${test1}", 0, replacements);
+		assertEquals("valueaVALUE", code.build());
 	}
 
 	private static class FakeFiler implements Filer

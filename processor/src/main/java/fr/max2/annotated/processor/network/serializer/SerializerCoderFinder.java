@@ -16,7 +16,7 @@ import fr.max2.annotated.processor.util.exceptions.IncompatibleTypeException;
 
 public class SerializerCoderFinder extends CoderFinder<SerializationCoder>
 {
-	// TODO find available serializers using Filer.getResource / classloader / JavaFileManager.getFileForInput / ServiceLoader (see ToolProvider)
+	// TODO [v3.1] Find available serializers using Filer.getResource / classloader / JavaFileManager.getFileForInput / ServiceLoader (see ToolProvider)
 	public SerializerCoderFinder(ProcessingTools tools)
 	{
 		super(tools, "fr.max2.annotated.lib.network.serializer.NetworkSerializer");

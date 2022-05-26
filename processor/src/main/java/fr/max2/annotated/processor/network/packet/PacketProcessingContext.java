@@ -1,11 +1,8 @@
 package fr.max2.annotated.processor.network.packet;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
@@ -13,10 +10,12 @@ import javax.lang.model.element.TypeElement;
 import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.api.network.Packet;
+import fr.max2.annotated.processor.model.ICodeSupplier;
 import fr.max2.annotated.processor.model.processor.IProcessingUnit;
 import fr.max2.annotated.processor.util.ClassName;
 import fr.max2.annotated.processor.util.ProcessingStatus;
 import fr.max2.annotated.processor.util.ProcessingTools;
+import fr.max2.annotated.processor.util.template.TemplateHelper.ReplacementMap;
 
 public class PacketProcessingContext implements IProcessingUnit
 {
@@ -77,21 +76,23 @@ public class PacketProcessingContext implements IProcessingUnit
 	@Override
 	public ProcessingStatus process()
 	{
-		List<String> lines = new ArrayList<>();
 	    // Generate each packet class
-	    for (PacketProcessingUnit packet : this.packets)
-	    {
-	        ProcessingStatus status = packet.process(lines::add);
-	        if (status != ProcessingStatus.SUCESSS)
-	        {
-	        	return status;
-	        }
-	    }
+		List<ICodeSupplier> packets = new ArrayList<>();
+		for (var packet : this.packets)
+		{
+			ProcessingStatus status = packet.process(packets::add);
+			if (status != ProcessingStatus.SUCESSS)
+				return status;
+		}
 
-		Map<String, String> replacements = new HashMap<>();
-		replacements.put("package", this.packetGroupClassName.packageName());
-		replacements.put("className", this.packetGroupClassName.shortName());
-		replacements.put("packets", lines.stream().map(line -> line + System.lineSeparator()).collect(Collectors.joining()));
+		ReplacementMap replacements = new ReplacementMap();
+		replacements.putString("package", this.packetGroupClassName.packageName());
+		replacements.putString("className", this.packetGroupClassName.shortName());
+		replacements.putCode("packets", output ->
+		{
+			for (var packet : packets)
+				packet.pipe(output);
+		});
 
 		this.tools.templates.writeFileWithLog(this.packetGroupClassName.qualifiedName(), "templates/TemplatePacketGroup.jvtp", replacements, this.enclosingClass, Optional.empty(), this.enclosingClass);
 

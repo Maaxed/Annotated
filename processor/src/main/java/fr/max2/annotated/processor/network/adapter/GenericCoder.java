@@ -1,5 +1,6 @@
 package fr.max2.annotated.processor.network.adapter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -33,14 +34,14 @@ public class GenericCoder extends AdapterCoder
 	}
 
 	@Override
-	public void codeAdapterInstance(ICodeConsumer output)
+	public void codeAdapterInstance(ICodeConsumer output) throws IOException
 	{
 		SimpleParameterListBuilder builder = new SimpleParameterListBuilder();
 		this.parameterCoder.pipe(builder);
 		this.argCoders.stream().map(AdapterCoder::codeAdapterInstanceToString).forEach(builder::add);
 		output.write(this.serializer);
 		output.writeLine(".of(");
-		builder.build(output);
+		builder.pipe(output);
 		output.write(")");
 	}
 

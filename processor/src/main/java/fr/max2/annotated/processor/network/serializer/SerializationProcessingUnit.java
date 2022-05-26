@@ -1,11 +1,10 @@
 package fr.max2.annotated.processor.network.serializer;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
@@ -33,6 +32,7 @@ import fr.max2.annotated.processor.util.Visibility;
 import fr.max2.annotated.processor.util.exceptions.CoderException;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.RoundException;
+import fr.max2.annotated.processor.util.template.TemplateHelper.ReplacementMap;
 
 public class SerializationProcessingUnit implements IProcessingUnit
 {
@@ -191,18 +191,23 @@ public class SerializationProcessingUnit implements IProcessingUnit
 		}
 
 		SimpleCodeBuilder decodeCodeBuilder = new SimpleCodeBuilder();
-		decodeCode.build(decodeCodeBuilder);
+		try
+		{
+			decodeCode.pipe(decodeCodeBuilder);
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
+		}
 
-		String ls = System.lineSeparator();
-
-		Map<String, String> replacements = new HashMap<>();
-		replacements.put("package", this.serializerClassName.packageName());
-		replacements.put("serializerName", this.serializerClassName.shortName());
-		replacements.put("targetName", this.serializableClassName.qualifiedName());
-		replacements.put("fieldDeclaration", serializerFields.stream().map(f -> "\tprivate " + f.type + " " + f.uniqueName + ";").collect(Collectors.joining(ls)));
-		replacements.put("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";").collect(Collectors.joining(ls)));
-		replacements.put("encode", encodeCode.stream().collect(Collectors.joining(ls)));
-		replacements.put("decode", decodeCodeBuilder.build());
+		ReplacementMap replacements = new ReplacementMap();
+		replacements.putString("package", this.serializerClassName.packageName());
+		replacements.putString("serializerName", this.serializerClassName.shortName());
+		replacements.putString("targetName", this.serializableClassName.qualifiedName());
+		replacements.putLines("fieldDeclaration", serializerFields.stream().map(f -> "\tprivate " + f.type + " " + f.uniqueName + ";"));
+		replacements.putLines("fieldInitialization", serializerFields.stream().map(f -> "this." + f.uniqueName + " = " + f.initializationCode + ";"));
+		replacements.putLines("encode", encodeCode.stream());
+		replacements.putCode("decode", decodeCodeBuilder);
 
 		this.tools.templates.writeFileWithLog(this.serializerClassName.qualifiedName(), "templates/TemplateSerializer.jvtp", replacements, this.serializableClass, this.annotation, this.serializableClass);
 	}

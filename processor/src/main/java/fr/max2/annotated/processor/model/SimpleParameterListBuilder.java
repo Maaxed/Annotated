@@ -1,9 +1,11 @@
 package fr.max2.annotated.processor.model;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleParameterListBuilder implements IParameterConsumer, IParameterSupplier
+public class SimpleParameterListBuilder implements IParameterConsumer, IParameterSupplier, ICodeSupplier
 {
 	List<String> params = new ArrayList<>();
 
@@ -18,8 +20,9 @@ public class SimpleParameterListBuilder implements IParameterConsumer, IParamete
 	{
 		output.addAll(this.params);
 	}
-	
-	public void build(ICodeConsumer output)
+
+	@Override
+	public void pipe(ICodeConsumer output) throws IOException
 	{
 		for (int i = 0; i < this.params.size(); i++)
 		{
@@ -34,17 +37,23 @@ public class SimpleParameterListBuilder implements IParameterConsumer, IParamete
 			}
 		}
 	}
-	
+
 	public String buildMultiLines()
 	{
 		SimpleCodeBuilder code = new SimpleCodeBuilder();
-		this.build(code);
+		try
+		{
+			this.pipe(code);
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
+		}
 		return code.build();
 	}
-	
+
 	public String buildSingleLine()
 	{
 		return String.join(", ", this.params);
 	}
-	
 }

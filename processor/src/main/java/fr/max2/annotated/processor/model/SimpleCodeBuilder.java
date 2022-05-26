@@ -1,5 +1,6 @@
 package fr.max2.annotated.processor.model;
 
+import java.io.IOException;
 
 public class SimpleCodeBuilder implements ICodeConsumer, ICodeSupplier
 {
@@ -11,13 +12,13 @@ public class SimpleCodeBuilder implements ICodeConsumer, ICodeSupplier
 	}
 
 	@Override
-	public void write(String code)
+	public void write(CharSequence code)
 	{
 		this.code.append(code);
 	}
 
 	@Override
-	public void pipe(ICodeConsumer output)
+	public void pipe(ICodeConsumer output) throws IOException
 	{
 		output.write(this.build());
 	}

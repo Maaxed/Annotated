@@ -1,9 +1,8 @@
 package fr.max2.annotated.processor.network.packet;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,6 +17,7 @@ import javax.lang.model.type.TypeMirror;
 import fr.max2.annotated.api.network.NetworkAdaptable;
 import fr.max2.annotated.api.network.NetworkSerializable;
 import fr.max2.annotated.api.network.Packet;
+import fr.max2.annotated.processor.model.ICodeSupplier;
 import fr.max2.annotated.processor.model.SimpleCodeBuilder;
 import fr.max2.annotated.processor.model.SimpleParameterListBuilder;
 import fr.max2.annotated.processor.network.adapter.AdapterProcessingUnit;
@@ -27,9 +27,9 @@ import fr.max2.annotated.processor.util.ClassRef;
 import fr.max2.annotated.processor.util.ProcessingStatus;
 import fr.max2.annotated.processor.util.ProcessingTools;
 import fr.max2.annotated.processor.util.Visibility;
-import fr.max2.annotated.processor.util.exceptions.IOConsumer;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.RoundException;
+import fr.max2.annotated.processor.util.template.TemplateHelper.ReplacementMap;
 
 public class PacketProcessingUnit
 {
@@ -107,13 +107,13 @@ public class PacketProcessingUnit
         context.addPacket(method, annotation, annotationData);
 	}
 
-	public ProcessingStatus process(IOConsumer<String> lines)
+	public ProcessingStatus process(Consumer<ICodeSupplier> output)
 	{
 		try
-        {
-			this.writePacket(lines);
+		{
+			output.accept(this.writePacket());
 			return ProcessingStatus.SUCESSS;
-        }
+		}
 		catch (ProcessorException pe)
 		{
 			pe.log(this.tools);
@@ -132,7 +132,7 @@ public class PacketProcessingUnit
 		return ProcessingStatus.FAIL;
 	}
 
-	private void writePacket(IOConsumer<String> lines) throws ProcessorException
+	public ICodeSupplier writePacket() throws ProcessorException
 	{
         List<? extends VariableElement> parameters = this.packetMethod.getParameters();
         List<? extends VariableElement> messageData = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
@@ -189,22 +189,22 @@ public class PacketProcessingUnit
 
         String sheduled = this.tools.elements.getAnnotationValue(this.annotation, "runInMainThread").map(anno -> anno.getValue().toString()).orElse("true");
 
-		Map<String, String> replacements = new HashMap<>();
-		replacements.put("packetName", this.packetMethod.getSimpleName().toString());
-		replacements.put("targetName", this.context.enclosingClassName.qualifiedName());
-		replacements.put("function", this.packetMethod.getSimpleName().toString());
-		replacements.put("parameters", methodParams.buildMultiLines());
-		replacements.put("packetParameters", fields.buildMultiLines());
-		replacements.put("packetParameterNames", fieldNames.buildMultiLines());
-		replacements.put("adapter", needsAdapter ? this.adapterClassName.qualifiedName() + ".INSTANCE" : "");
-		replacements.put("dataClassName", needsAdapter ? this.adaptedClassName.qualifiedName() : this.packetMethod.getSimpleName().toString());
-		replacements.put("serializer", serializerClassName.qualifiedName() + ".INSTANCE");
-        replacements.put("serverPacket", Boolean.toString(this.destination.isServer()));
-        replacements.put("clientPacket", Boolean.toString(this.destination.isClient()));
-		replacements.put("sheduled", sheduled);
-		replacements.put("annotations", annotations.build());
+		ReplacementMap replacements = new ReplacementMap();
+		replacements.putString("packetName", this.packetMethod.getSimpleName());
+		replacements.putString("targetName", this.context.enclosingClassName.qualifiedName());
+		replacements.putString("function", this.packetMethod.getSimpleName());
+		replacements.putCode("parameters", methodParams);
+		replacements.putCode("packetParameters", fields);
+		replacements.putCode("packetParameterNames", fieldNames);
+		replacements.putString("adapter", needsAdapter ? this.adapterClassName.qualifiedName() + ".INSTANCE" : "");
+		replacements.putString("dataClassName", needsAdapter ? this.adaptedClassName.qualifiedName() : this.packetMethod.getSimpleName());
+		replacements.putString("serializer", serializerClassName.qualifiedName() + ".INSTANCE");
+        replacements.putBoolean("serverPacket", this.destination.isServer());
+        replacements.putBoolean("clientPacket", this.destination.isClient());
+		replacements.putString("sheduled", sheduled);
+		replacements.putCode("annotations", annotations);
 
-		this.tools.templates.readWithLog("templates/TemplatePacket.jvtp", replacements, lines, this.packetMethod, this.annotation);
+		return this.tools.templates.readWithLog("templates/TemplatePacket.jvtp", replacements, this.packetMethod, this.annotation);
 	}
 
     private Optional<String> specialValue(TypeMirror type)

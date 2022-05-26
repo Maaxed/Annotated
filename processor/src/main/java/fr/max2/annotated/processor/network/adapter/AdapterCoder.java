@@ -1,5 +1,7 @@
 package fr.max2.annotated.processor.network.adapter;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Optional;
 
 import javax.lang.model.type.TypeMirror;
@@ -21,12 +23,19 @@ public abstract class AdapterCoder
 		this.typeTo = typeTo;
 	}
 
-	public abstract void codeAdapterInstance(ICodeConsumer output);
+	public abstract void codeAdapterInstance(ICodeConsumer output) throws IOException;
 
 	public final String codeAdapterInstanceToString()
 	{
 		SimpleCodeBuilder code = new SimpleCodeBuilder();
-		this.codeAdapterInstance(code);
+		try
+		{
+			this.codeAdapterInstance(code);
+		}
+		catch (IOException e)
+		{
+			throw new UncheckedIOException(e);
+		}
 		return code.build();
 	}
 

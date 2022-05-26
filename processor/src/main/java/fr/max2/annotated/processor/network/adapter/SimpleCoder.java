@@ -1,5 +1,7 @@
 package fr.max2.annotated.processor.network.adapter;
 
+import java.io.IOException;
+
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 
@@ -18,7 +20,7 @@ public class SimpleCoder extends AdapterCoder
 	}
 
 	@Override
-	public void codeAdapterInstance(ICodeConsumer output)
+	public void codeAdapterInstance(ICodeConsumer output) throws IOException
 	{
 		output.write(this.serilizer);
 	}

@@ -5,22 +5,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Writer;
+import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import javax.tools.JavaFileObject;
-import javax.annotation.processing.Filer;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 
 import fr.max2.annotated.processor.AnnotatedProcessor;
+import fr.max2.annotated.processor.model.ICodeConsumer;
+import fr.max2.annotated.processor.model.ICodeSupplier;
+import fr.max2.annotated.processor.util.FileCodeConsumer;
 import fr.max2.annotated.processor.util.ProcessingTools;
-import fr.max2.annotated.processor.util.exceptions.IOConsumer;
 import fr.max2.annotated.processor.util.exceptions.ProcessorException;
 import fr.max2.annotated.processor.util.exceptions.TemplateException;
 
@@ -33,11 +34,11 @@ public class TemplateHelper
 		this.tools = tools;
 	}
 
-	public void writeFileWithLog(String className, String templateFile, Map<String, String> replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation, Element... originatingClasses) throws ProcessorException
+	public void writeFileWithLog(String className, String templateFile, ReplacementMap replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation, Element... originatingClasses) throws ProcessorException
 	{
 		try
 		{
-			this.writeFile(this.tools.filer, className, templateFile, replacements, originatingClasses);
+			FileCodeConsumer.writeFile(tools, className, this.readTemplate(templateFile, replacements), originatingElement, annotation, originatingClasses);
 		}
 		catch (Exception e)
 		{
@@ -47,61 +48,54 @@ public class TemplateHelper
 		}
 	}
 
-	public void readWithLog(String templateFile, Map<String, String> replacements, IOConsumer<String> lines, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws ProcessorException
+	public ICodeSupplier readWithLog(String templateFile, ReplacementMap replacements, Element originatingElement, Optional<? extends AnnotationMirror> annotation) throws ProcessorException
 	{
-		try
+		ICodeSupplier supplier = this.readTemplate(templateFile, replacements);
+		return output ->
 		{
-			this.readTemplate(templateFile, replacements, lines);
-		}
-		catch (IOException e)
-		{
-			throw ProcessorException.builder().context(originatingElement, annotation).build("An IOException occured during the reading of the template '" + templateFile + "': " + e.getMessage(), e);
-		}
-		catch (Exception e)
-		{
-			throw ProcessorException.builder().context(originatingElement, annotation).build("An unexpected exception occured during the reading of the template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
-		}
+			try
+			{
+				supplier.pipe(output);
+			}
+			catch (IOException e)
+			{
+				throw ProcessorException.builder()
+					.context(originatingElement, annotation)
+					.build("An IOException occured during the reading of the template '" + templateFile + "': " + e.getMessage(), e);
+			}
+			catch (Exception e)
+			{
+				throw ProcessorException.builder()
+					.context(originatingElement, annotation)
+					.build("An unexpected exception occured during the reading of the template '" + templateFile + "': " + e.getClass().getCanonicalName() + ": " + e.getMessage(), e);
+			}
+		};
 	}
 
-	public void writeFile(Filer filer, String className, String templateFile, Map<String, String> replacements, Element... originatingClasses) throws IOException
+	public ICodeSupplier readTemplate(String templateFile, ReplacementMap replacements)
 	{
-		JavaFileObject file = filer.createSourceFile(className, originatingClasses);
-		try (Writer writer = file.openWriter())
+		return output ->
 		{
-			this.readTemplate(templateFile, replacements, writer::write);
-		}
-		catch (Exception e)
-		{
-			// Remove file if an error occurred
-			file.delete();
-			throw e;
-		}
-	}
-
-	public void readTemplate(String templateFile, Map<String, String> replacements, IOConsumer<String> lines) throws IOException
-	{
-		try (InputStream fileStream = AnnotatedProcessor.class.getClassLoader().getResourceAsStream(templateFile);
-			 Reader streamReader = new InputStreamReader(fileStream);
-			 BufferedReader reader = new BufferedReader(streamReader))
-		{
-			ArrayDeque<ITemplateControl> controls = new ArrayDeque<>();
-			String line;
-			int i = 0;
-			while ((line = reader.readLine()) != null)
+			try (InputStream fileStream = AnnotatedProcessor.class.getClassLoader().getResourceAsStream(templateFile);
+				 Reader streamReader = new InputStreamReader(fileStream);
+				 BufferedReader reader = new BufferedReader(streamReader))
 			{
-				String newLine = this.mapKeys(controls, line + System.lineSeparator(), i, replacements);
-
-				if (!newLine.isEmpty())
-					lines.accept(newLine);
-				i++;
+				ArrayDeque<ITemplateControl> controls = new ArrayDeque<>();
+				String line;
+				int i = 0;
+				while ((line = reader.readLine()) != null)
+				{
+					this.mapKeys(output, controls, line, i, replacements);
+					output.writeLine();
+					i++;
+				}
+		
+				if (!controls.isEmpty())
+				{
+					throw new TemplateException("Unclosed control block");
+				}
 			}
-
-			if (!controls.isEmpty())
-			{
-				throw new TemplateException("Unclosed control block");
-			}
-		}
-
+		};
 	}
 
 	/**
@@ -110,17 +104,14 @@ public class TemplateHelper
 	 * @param replacements the map used to find the replacements
 	 * @return the generated string
 	 */
-	public String mapKeys(ArrayDeque<ITemplateControl> controls, String content, int line, Map<String, String> replacements)
+	public void mapKeys(ICodeConsumer output, ArrayDeque<ITemplateControl> controls, String content, int line, ReplacementMap replacements) throws IOException
 	{
 		Pattern p = Pattern.compile("\\$\\{(.+?)\\}");
 		Matcher m = p.matcher(content);
 
-		StringBuffer sb = new StringBuffer();
 		StringBuffer devNull = new StringBuffer();
-		boolean hasSpecialCode = false;
 		while (m.find())
 		{
-			hasSpecialCode = true;
 			String key = m.group(1);
 			String[] parts = Stream.of(key.split(" ")).map(w -> w.trim()).filter(w -> w.length() > 0).toArray(String[]::new);
 
@@ -130,9 +121,15 @@ public class TemplateHelper
 			}
 
 			if (controls.isEmpty() || controls.peek().shouldPrint())
+			{
+				StringBuilder sb = new StringBuilder();
 				m.appendReplacement(sb, "");
+				output.write(sb);
+			}
 			else
+			{
 				m.appendReplacement(devNull, "");
+			}
 
 			switch (parts[0])
 			{
@@ -140,7 +137,7 @@ public class TemplateHelper
 				if (parts.length != 2)
 					throw new TemplateException("Too many parameters for if control in '" + key + "' in line " + line + " '" + content + "'");
 
-				if ((controls.isEmpty() || controls.peek().shouldPrint()) && replacements.containsKey(parts[1]) && !replacements.get(parts[1]).equals("false") && !replacements.get(parts[1]).isEmpty())
+				if ((controls.isEmpty() || controls.peek().shouldPrint()) && replacements.map.containsKey(parts[1]) && replacements.map.get(parts[1]).booleanValue())
 				{
 					controls.push(IfControl.TRUE);
 				}
@@ -184,23 +181,128 @@ public class TemplateHelper
 				if (!controls.isEmpty() && !controls.peek().shouldPrint())
 					break;
 
-				String rep = replacements.get(parts[0]);
+				ICodeSupplier rep = replacements.map.get(parts[0]);
 
 				if (rep == null)
 					throw new TemplateException("Unable to find replacement for the key '" + key + "' in line '" + content + "'");
 
-				sb.append(Matcher.quoteReplacement(rep));
+				rep.pipe(output);
 				break;
 			}
 		}
 		if (controls.isEmpty() || controls.peek().shouldPrint())
 		{
+			StringBuilder sb = new StringBuilder();
 			m.appendTail(sb);
+			output.write(sb);
 		}
-
-		String res = sb.toString();
-		// Remove unnecessary empty lines
-		return hasSpecialCode && res.trim().equals("") ? "" : res;
 	}
 
+	public static interface ITemplateReplacement extends ICodeSupplier
+	{
+		boolean booleanValue();
+	}
+
+	public static class ReplacementMap
+	{
+		private final Map<String, ITemplateReplacement> map = new HashMap<>();
+
+		public void putString(String identifier, CharSequence code)
+		{
+			map.put(identifier, new ITemplateReplacement()
+			{
+				@Override
+				public void pipe(ICodeConsumer output) throws IOException
+				{
+					if (this.booleanValue())
+					{
+						output.write(code);
+					}
+				}
+
+				@Override
+				public boolean booleanValue()
+				{
+					return code != null && !code.isEmpty();
+				}
+			});
+		}
+
+		public void putLines(String identifier, Stream<? extends CharSequence> codeLines)
+		{
+			map.put(identifier, new ITemplateReplacement()
+			{
+				@Override
+				public void pipe(ICodeConsumer output) throws IOException
+				{
+					if (this.booleanValue())
+					{
+						try
+						{
+							codeLines.forEach(line ->
+							{
+								try
+								{
+									output.writeLine(line);
+								}
+								catch (IOException e)
+								{
+									throw new UncheckedIOException(e); // Wrap IOException
+								}
+							});
+						}
+						catch (UncheckedIOException e)
+						{
+							throw e.getCause(); // Unwrap IOException
+						}
+					}
+				}
+
+				@Override
+				public boolean booleanValue()
+				{
+					return codeLines != null;
+				}
+			});
+		}
+
+		public void putBoolean(String identifier, boolean bool)
+		{
+			map.put(identifier, new ITemplateReplacement()
+			{
+				@Override
+				public void pipe(ICodeConsumer output) throws IOException
+				{
+					output.write(Boolean.toString(bool));
+				}
+
+				@Override
+				public boolean booleanValue()
+				{
+					return bool;
+				}
+			});
+		}
+		
+		public void putCode(String identifier, ICodeSupplier code)
+		{
+			map.put(identifier, new ITemplateReplacement()
+			{
+				@Override
+				public void pipe(ICodeConsumer output) throws IOException
+				{
+					if (this.booleanValue())
+					{
+						code.pipe(output);
+					}
+				}
+
+				@Override
+				public boolean booleanValue()
+				{
+					return code != null;
+				}
+			});
+		}
+	}
 }
