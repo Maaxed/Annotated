@@ -29,6 +29,16 @@ public @interface Packet
 	 */
 	boolean runInMainThread() default true;
 
+	@Retention(RetentionPolicy.SOURCE)
+	@Target(ElementType.PARAMETER)
+	public @interface Sender
+	{ }
+
+	@Retention(RetentionPolicy.SOURCE)
+	@Target(ElementType.PARAMETER)
+	public @interface Context
+	{ }
+
 	public static enum Destination
 	{
 		CLIENT,

@@ -135,7 +135,7 @@ public class PacketProcessingUnit
 	public ICodeSupplier writePacket() throws ProcessorException
 	{
         List<? extends VariableElement> parameters = this.packetMethod.getParameters();
-        List<? extends VariableElement> messageData = parameters.stream().filter(p -> !this.specialValue(p.asType()).isPresent()).collect(Collectors.toList());
+        List<? extends VariableElement> messageData = parameters.stream().filter(p -> !this.specialValue(p).isPresent()).collect(Collectors.toList());
 
 		SimpleParameterListBuilder fields = new SimpleParameterListBuilder();
 		SimpleParameterListBuilder fieldNames = new SimpleParameterListBuilder();
@@ -154,7 +154,7 @@ public class PacketProcessingUnit
 
 		for  (VariableElement param : parameters)
 		{
-			methodParams.add(this.specialValue(param.asType()).orElse("msg." + param.getSimpleName().toString() + "()"));
+			methodParams.add(this.specialValue(param).orElse("msg." + param.getSimpleName().toString() + "()"));
 		}
 
 		SimpleCodeBuilder annotations = new SimpleCodeBuilder();
@@ -207,17 +207,30 @@ public class PacketProcessingUnit
 		return this.tools.templates.readWithLog("templates/TemplatePacket.jvtp", replacements, this.packetMethod, this.annotation);
 	}
 
-    private Optional<String> specialValue(TypeMirror type)
+    private Optional<String> specialValue(VariableElement variable)
     {
-        TypeElement elem = this.tools.elements.asTypeElement(this.tools.types.asElement(type));
-        if (elem != null)
-        {
-            if (elem.getQualifiedName().contentEquals(ClassRef.FORGE_NETWORK_CONTEXT))
-                return Optional.of("ctxSup.get()");
+		Packet.Sender senderAnnotation = variable.getAnnotation(Packet.Sender.class);
+		if (senderAnnotation != null)
+		{
+			TypeElement playerElem = this.tools.elements.getTypeElement(ClassRef.SERVER_PLAYER);
+			this.tools.types.requireAssignable(playerElem.asType(), variable.asType());
+			return Optional.of("ctxSup.get().getSender()");
+		}
 
-            if (elem.getQualifiedName().contentEquals(ClassRef.SERVER_PLAYER))
-                return Optional.of("ctxSup.get().getSender()");
-        }
+		Packet.Context contextAnnotation = variable.getAnnotation(Packet.Context.class);
+		if (contextAnnotation != null)
+		{
+			// Expect 'NetworkEvent.Context' or 'Supplier<NetworkEvent.Context>'
+			TypeElement contextElem = this.tools.elements.getTypeElement(ClassRef.FORGE_NETWORK_CONTEXT);
+			if (!this.tools.types.isAssignable(contextElem.asType(), variable.asType()))
+			{
+				TypeElement supplierElem = this.tools.elements.getTypeElement("java.util.function.Supplier");
+				TypeMirror supplierType = this.tools.types.getDeclaredType(supplierElem, contextElem.asType());
+				this.tools.types.requireAssignable(supplierType, variable.asType());
+				return Optional.of("ctxSup");
+			}
+			return Optional.of("ctxSup.get()");
+		}
 
         return Optional.empty();
     }

@@ -19,8 +19,6 @@ import fr.max2.annotated.processor.util.ProcessingTools;
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class AnnotatedProcessor extends AbstractProcessor
 {
-	// TODO [v3.0] Add SenderPlayer annotation
-
 	private final List<IProcessor> processors = List.of(new AdapterProcessor(), new SerializationProcessor(), new PacketProcessor());
 	private final Set<String> supportedAnnotations;
 

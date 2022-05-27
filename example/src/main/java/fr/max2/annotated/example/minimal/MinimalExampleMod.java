@@ -6,6 +6,7 @@ import org.lwjgl.glfw.GLFW;
 
 import fr.max2.annotated.api.network.Packet;
 import fr.max2.annotated.api.network.Packet.Destination;
+import fr.max2.annotated.api.network.Packet.Sender;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,7 +53,7 @@ public class MinimalExampleMod
 	}
 
 	@Packet(Destination.SERVER)
-	public static void sendInt(ServerPlayer sender, int myInt)
+	public static void sendInt(@Sender ServerPlayer sender, int myInt)
 	{
 		System.out.println("Function called on " + (sender.level.isClientSide ? "CLIENT" : "SERVER"));
 		System.out.println("My int value is " + myInt);
@@ -73,7 +74,7 @@ public class MinimalExampleMod
 		{
 			if (OPEN_GUI.consumeClick())
 			{
-            	CHANNEL.sendToServer(MinimalExampleMod_Packets.sendInt(5));
+				CHANNEL.sendToServer(MinimalExampleMod_Packets.sendInt(5));
 			}
 		}
 	}
