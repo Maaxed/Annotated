@@ -64,9 +64,9 @@ public class TemplateHelperTest
 		try
 		{
 			tools.templates.writeFileWithLog("Output3", "templates/TemplateTest.jvtp", replacements, null, Optional.empty());
-			assertArrayEquals(new Object[] {"This is a test template.",
-											"The value of \"red\" is roses.",
-											"The value of \"blue\" is violets."},
+			assertArrayEquals(new Object[] {"This is a test template",
+											"The value of \"red\" is roses",
+											"The value of \"blue\" is violets"},
 							  filer.getOutput().split("\\R"));
 		}
 		catch (ProcessorException e)

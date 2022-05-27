@@ -89,7 +89,7 @@ public class TemplateHelper
 					output.writeLine();
 					i++;
 				}
-		
+
 				if (!controls.isEmpty())
 				{
 					throw new TemplateException("Unclosed control block");
